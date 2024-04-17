@@ -1,0 +1,17 @@
+application:
+  port: 8000
+  host: 0.0.0.0
+database:
+  host: "127.0.0.1"
+  port: 5432
+  username: "postgres"
+  password: "postgres"
+  database_name: "rust_backend_setup_db"
+  require_ssl: false
+#email_client:
+#  base_url: "localhost"
+#  sender_email: "test@gmail.com"
+#  authorization_token: ""
+#  timeout_milliseconds: 10000
+#redis_uri: "redis://127.0.0.1:6379"
+#  Set proper ones for in production

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT * FROM refresh_tokens\n        WHERE refresh_tokens.id = $1\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "parent_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "session_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "issued_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 4,
+        "name": "not_before",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "expiration",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "used_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "user_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "82f0b4bff9427475faca643093d9ed15c3fb7e6fa41e117dd1ba6f43ccd92a93"
+}

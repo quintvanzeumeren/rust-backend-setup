@@ -1,0 +1,7 @@
+application:
+  host: 127.0.0.1
+  base_url: http://127.0.0.1
+  encryption_key: "*@$72dQa49$4Vi$PZBY7u&i2@$8tbkhv"
+database:
+  require_ssl: false
+  

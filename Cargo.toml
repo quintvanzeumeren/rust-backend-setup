@@ -1,0 +1,23 @@
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace]
+resolver = "2"
+members = [
+    "app",
+
+    # -- Libraries
+    "libs/lib-auth",
+    "libs/lib-domain",
+    "libs/lib-test-util",
+    "libs/lib-util",
+]
+
+#[package]
+#name = "rust-backend-setup"
+#version = "0.1.0"
+#edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace.dependencies]

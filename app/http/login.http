@@ -1,0 +1,10 @@
+### POST login request
+POST http://{{host}}/internal/v1/login
+Content-Type: application/json
+
+{
+  "username": "test",
+  "password": "test"
+}
+
+###
