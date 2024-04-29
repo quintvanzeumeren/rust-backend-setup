@@ -7,22 +7,19 @@ use axum::http::StatusCode;
 use axum::Json;
 use axum::response::{IntoResponse, Response};
 use chrono::{DateTime, Utc};
-use pasetors::keys::SymmetricKey;
-use pasetors::version4::V4;
 use password_hash::SaltString;
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
 use sqlx::{Executor, PgPool, Postgres, query, Transaction};
 use tokio::task::JoinError;
 use uuid::Uuid;
-use lib_auth::security::encryption::encryptor::Encryptor;
-use lib_auth::security::token::token_encryptor::EncryptedToken;
 
+use lib_auth::security::encryption::encryptor::Encryptor;
 use lib_domain::sessions::state::newly_created::NewlyCreated;
 use lib_domain::sessions::user_session::UserSession;
 use lib_domain::user::password::{MatchError, MatchResult, Password};
-use crate::app_state::AppState;
 
+use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};
 use crate::queries::save_newly_created_user_session::save_newly_created_user_session;
 use crate::telemetry::spawn_blocking_with_tracing;
@@ -223,22 +220,4 @@ async fn update_user_password(
 
     transaction.execute(query).await?;
     return Ok(());
-
 }
-
-// type EncryptSessionTokenResult = Result<EncryptedToken, LocalPasetoV4EncryptionError>;
-
-// async fn encrypt_session_tokens(
-//     session: UserSession<NewlyCreated>,
-//     encryption_key: SymmetricKey<V4>
-// ) -> Result<(EncryptSessionTokenResult, EncryptSessionTokenResult), JoinError> {
-//     spawn_blocking_with_tracing(move || {
-//         let encrypted_refresh_token =
-//             session.state().refresh_token().encrypt(&encryption_key);
-// 
-//         let encrypted_access_token =
-//             session.state().access_token().encrypt(&encryption_key);
-// 
-//         (encrypted_refresh_token, encrypted_access_token)
-//     }).await
-// }

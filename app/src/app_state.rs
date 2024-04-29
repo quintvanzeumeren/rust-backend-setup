@@ -1,13 +1,10 @@
 use pasetors::keys::SymmetricKey;
 use pasetors::version4::V4;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
-use infrastructure::paseto_token_encryptor::LocalPasetoV4TokenEncryptor;
-use lib_auth::security::token::token_encryptor::TokenEncryptor;
-use lib_domain::sessions::token::UserSessionToken;
-use lib_domain::sessions::tokens::RefreshToken;
+
+use infrastructure::paseto::paseto_token_encryptor::LocalPasetoV4TokenEncryptor;
+
 use crate::configuration::configuration::Configuration;
 
 #[derive(Clone)]

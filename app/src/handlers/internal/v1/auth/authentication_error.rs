@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use infrastructure::paseto_token_encryptor::LocalPasetoV4DecryptionError;
+use infrastructure::paseto::paseto_token_encryptor::LocalPasetoV4DecryptionError;
 use lib_util::errors::errors::format_error_chain;
 
 use crate::util::handlers::InternalErrorResponse;
@@ -29,7 +29,6 @@ pub enum AuthenticationError {
 
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error)
-
 }
 
 impl Debug for AuthenticationError {

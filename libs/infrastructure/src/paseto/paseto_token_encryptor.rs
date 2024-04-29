@@ -10,10 +10,11 @@ use secrecy::{ExposeSecret, Secret};
 use uuid::Uuid;
 use lib_auth::security::encryption::decryptor::Decryptor;
 use lib_auth::security::encryption::encryptor::Encryptor;
-use lib_auth::security::token::paseto_claims::PasetoClaims;
+
 use lib_auth::security::token::token::{Token};
 use lib_auth::security::token::token_encryptor::{EncryptedToken, TokenEncryptor};
 use lib_util::errors::errors::format_error_chain;
+use crate::paseto::paseto_claims::PasetoClaims;
 
 #[derive(Clone)]
 pub struct LocalPasetoV4TokenEncryptor {

@@ -83,11 +83,11 @@ use crate::security::token::token::Token;
 //     use uuid::Uuid;
 //     use crate::security::token::plain_token::PlainToken;
 //     use crate::security::token::token::Token;
-// 
+//
 //     fn str() -> String {
 //         Uuid::new_v4().to_string()
 //     }
-// 
+//
 //     fn new_token<T: Serialize + DeserializeOwned + Clone>(data: T) -> PlainToken<T> {
 //         PlainToken::new(
 //             str().as_str(),
@@ -98,7 +98,7 @@ use crate::security::token::token::Token;
 //             data
 //         )
 //     }
-// 
+//
 //     fn data_json() -> Value {
 //         json!({
 //             "user_id": Uuid::new_v4(),
@@ -106,12 +106,12 @@ use crate::security::token::token::Token;
 //             "lastname": str(),
 //         })
 //     }
-// 
+//
 //     fn is_within_second(dt1: DateTime<Utc>, dt2: DateTime<Utc>) -> bool {
 //         let difference = (dt1 - dt2).num_seconds().abs();
 //         difference <= 1
 //     }
-// 
+//
 //     #[test]
 //     fn test_new_token_creation() {
 //         let subject = str();
@@ -120,7 +120,7 @@ use crate::security::token::token::Token;
 //         let active_duration = Duration::hours(2);
 //         let active_from = Utc::now() + Duration::minutes(12);
 //         let data = data_json();
-// 
+//
 //         let issued_at = Utc::now();
 //         let token = PlainToken::new(
 //             subject.as_str(),
@@ -130,29 +130,29 @@ use crate::security::token::token::Token;
 //             active_from.clone(),
 //             data.clone()
 //         );
-// 
+//
 //         assert_eq!(token.id.get_version_num(), 4);
 //         assert_eq!(token.id, *token.get_id());
-// 
+//
 //         assert_eq!(token.subject, subject);
 //         assert_eq!(token.get_subject(), subject);
-// 
+//
 //         assert_eq!(token.audience, audience);
 //         assert_eq!(token.get_audience(), audience);
-// 
+//
 //         assert_eq!(token.issuer, issuer);
 //         assert_eq!(token.get_issuer(), issuer);
-// 
+//
 //         let expiration = active_from + active_duration;
 //         assert_eq!(token.expiration, expiration);
 //         assert_eq!(*token.get_expiration(), expiration);
-// 
+//
 //         assert_eq!(token.not_before, active_from);
 //         assert_eq!(*token.get_not_before(), active_from);
-// 
+//
 //         assert!(is_within_second(token.issued_at, issued_at));
 //         assert!(is_within_second(*token.get_issued_at(), issued_at));
-// 
+//
 //         assert_eq!(token.custom_claims, data);
 //         assert_eq!(*token.get_custom_claims(), data)
 //     }

@@ -1183,6 +1183,7 @@ dependencies = [
  "regex",
  "secrecy",
  "serde",
+ "serde_json",
  "thiserror",
  "tracing",
  "uuid",
