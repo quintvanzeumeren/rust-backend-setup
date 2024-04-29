@@ -2,12 +2,12 @@ use std::sync::Arc;
 use anyhow::Context;
 use axum::extract::State;
 use axum::http::StatusCode;
+use crate::app_state::AppState;
 
 use crate::extractors::authenticated_user::AuthenticatedUser;
 use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};
 use crate::queries::get_active_session_by_id::get_active_session_by_id;
 use crate::queries::save_just_ended_user_session::save_just_ended_session;
-use crate::routes::AppState;
 
 #[tracing::instrument(
     name = "Logging out user by invalidating user session",

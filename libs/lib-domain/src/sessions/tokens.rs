@@ -1,7 +1,8 @@
 use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
+use lib_auth::security::token::token::{Token};
+use crate::sessions::token::UserSessionToken;
 
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
@@ -11,14 +12,19 @@ pub struct AccessToken {
     pub refresh_token_id: Uuid,
 }
 
-impl Into<LocalPasetoV4Token<AccessToken>> for AccessToken {
-    fn into(self) -> LocalPasetoV4Token<AccessToken> {
-        LocalPasetoV4Token::new(
-            "access_token",
-            self.user_id.to_string().as_str(),
-            "rust_backend_setup",
-            Duration::minutes(5),
-            Utc::now(),
+impl Into<UserSessionToken<AccessToken>> for AccessToken {
+    fn into(self) -> UserSessionToken<AccessToken> {
+
+        let now = Utc::now();
+
+        UserSessionToken::new(
+            Uuid::new_v4(),
+            "access_token".to_string(),
+            self.user_id.to_string(),
+            "rust_backend_setup".to_string(),
+            now + Duration::minutes(5),
+            now.clone(),
+            now,
             self,
         )
     }
@@ -31,14 +37,18 @@ pub struct RefreshToken {
     pub parent_id: Option<Uuid>,
 }
 
-impl Into<LocalPasetoV4Token<RefreshToken>> for RefreshToken {
-    fn into(self) -> LocalPasetoV4Token<RefreshToken> {
-        LocalPasetoV4Token::new(
-            RefreshToken::subject(),
-            self.user_id.to_string().as_str(),
-            RefreshToken::issuer(),
-            Duration::hours(4),
-            Utc::now(),
+impl Into<UserSessionToken<RefreshToken>> for RefreshToken {
+    fn into(self) -> UserSessionToken<RefreshToken> {
+        let now = Utc::now();
+
+        UserSessionToken::new(
+            Uuid::new_v4(),
+            RefreshToken::subject().to_string(),
+            self.user_id.to_string(),
+            RefreshToken::issuer().to_string(),
+            now + Duration::hours(4),
+            now,
+            now,
             self,
         )
     }

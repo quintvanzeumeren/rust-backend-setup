@@ -1,6 +1,5 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
 use lib_auth::security::token::token::Token;
 use crate::sessions::state::active::Active;
 use crate::sessions::state::already_ended::AlreadyEnded;
@@ -8,6 +7,7 @@ use crate::sessions::state::just_ended::JustEnded;
 use crate::sessions::state::newly_created::NewlyCreated;
 use crate::sessions::state::refreshed::Refreshed;
 use crate::sessions::state::state::{SessionEndReason, State};
+use crate::sessions::token::UserSessionToken;
 use crate::sessions::tokens::{AccessToken, RefreshToken};
 
 #[derive(Clone, PartialEq, Debug)]
@@ -38,13 +38,13 @@ impl UserSession<NewlyCreated> {
         let created_at = Utc::now();
         let session_id = Uuid::new_v4();
 
-        let refresh_token: LocalPasetoV4Token<RefreshToken> = RefreshToken {
+        let refresh_token: UserSessionToken<RefreshToken> = RefreshToken {
             user_id: user_id.clone(),
             session_id: session_id.clone(),
             parent_id: None,
         }.into();
 
-        let access_token: LocalPasetoV4Token<AccessToken> = AccessToken {
+        let access_token: UserSessionToken<AccessToken> = AccessToken {
             user_id: user_id.clone(),
             session_id: session_id.clone(),
             refresh_token_id: refresh_token.get_id().clone(),
@@ -79,7 +79,7 @@ impl UserSession<Active> {
 
     pub fn refresh(
         self,
-        refresh_token: LocalPasetoV4Token<RefreshToken>
+        refresh_token: UserSessionToken<RefreshToken>
     ) -> Result<UserSession<Refreshed>, UserSession<JustEnded>> {
         let latest_refresh_token = &self.state.latest_refresh_token;
         // let refresh_token_used_previously = *latest_refresh_token.get_id() != *refresh_token.get_id();
@@ -136,7 +136,7 @@ impl UserSession<Active> {
         })
     }
 
-    fn refresh_token_used_before(&self, refresh_token: &LocalPasetoV4Token<RefreshToken>) -> bool {
+    fn refresh_token_used_before(&self, refresh_token: &UserSessionToken<RefreshToken>) -> bool {
         // There can only be one valid refresh token at the time,
         // therefor it must only be the latest token
         self.state.latest_refresh_token.id != refresh_token.id
@@ -180,12 +180,12 @@ impl UserSession<AlreadyEnded> {
 mod tests {
     use chrono::{DateTime, Duration, Utc};
     use uuid::Uuid;
-    use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
     use lib_auth::security::token::token::Token;
     use crate::sessions::state::active::Active;
     use crate::sessions::state::just_ended::JustEnded;
     use crate::sessions::state::newly_created::NewlyCreated;
     use crate::sessions::state::state::SessionEndReason;
+    use crate::sessions::token::UserSessionToken;
     use crate::sessions::tokens::RefreshToken;
     use crate::sessions::user_session::UserSession;
 
@@ -258,7 +258,7 @@ mod tests {
     #[test]
     fn test_refresh_should_end_session_with_previous_used_refresh_token() {
         let session = UserSession::<NewlyCreated>::new(&Uuid::new_v4());
-        let invalid_refresh_token: LocalPasetoV4Token<RefreshToken> = RefreshToken {
+        let invalid_refresh_token: UserSessionToken<RefreshToken> = RefreshToken {
             user_id: Uuid::new_v4(),
             session_id: Uuid::new_v4(),
             parent_id: None,
@@ -301,12 +301,15 @@ mod tests {
     #[test]
     fn test_refresh_should_end_session_with_expired_used_refresh_token() {
         let session = UserSession::<NewlyCreated>::new(&Uuid::new_v4());
-        let invalid_refresh_token = LocalPasetoV4Token::new(
-            Uuid::new_v4().to_string().as_str(),
-            Uuid::new_v4().to_string().as_str(),
-            Uuid::new_v4().to_string().as_str(),
-            -Duration::hours(2),
-            Utc::now(),
+        let now = Utc::now();
+        let invalid_refresh_token = UserSessionToken::new(
+            Uuid::new_v4(),
+            Uuid::new_v4().to_string().to_string(),
+            Uuid::new_v4().to_string().to_string(),
+            Uuid::new_v4().to_string().to_string(),
+            now - Duration::hours(2),
+            now.clone(),
+            now,
             RefreshToken {
                 user_id: Uuid::new_v4(),
                 session_id: Uuid::new_v4(),

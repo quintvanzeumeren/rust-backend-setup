@@ -1,17 +1,18 @@
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
+
 use crate::sessions::state::state::State;
+use crate::sessions::token::UserSessionToken;
 use crate::sessions::tokens::{AccessToken, RefreshToken};
 
 pub struct NewlyCreated {
-    pub(in crate::sessions) refresh_token: LocalPasetoV4Token<RefreshToken>,
-    pub(in crate::sessions) access_token: LocalPasetoV4Token<AccessToken>,
+    pub(in crate::sessions) refresh_token: UserSessionToken<RefreshToken>,
+    pub(in crate::sessions) access_token: UserSessionToken<AccessToken>,
 }
 
 impl NewlyCreated {
-    pub fn refresh_token(&self) -> &LocalPasetoV4Token<RefreshToken> {
+    pub fn refresh_token(&self) -> &UserSessionToken<RefreshToken> {
         &self.refresh_token
     }
-    pub fn access_token(&self) -> &LocalPasetoV4Token<AccessToken> {
+    pub fn access_token(&self) -> &UserSessionToken<AccessToken> {
         &self.access_token
     }
 }

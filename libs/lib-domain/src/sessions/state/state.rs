@@ -1,4 +1,4 @@
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
+use crate::sessions::token::UserSessionToken;
 use crate::sessions::tokens::RefreshToken;
 pub trait State: Sized {}
 
@@ -17,7 +17,7 @@ pub enum SessionEndReason {
     /// AttemptedToReuseRefreshToken happens when a previously used refresh token
     /// is attempted to be used twice. May happen if the refresh token got stolen/leaked.
     AttemptedToReuseRefreshToken {
-        caused_by: LocalPasetoV4Token<RefreshToken>
+        caused_by: UserSessionToken<RefreshToken>
     },
 
     /// Similar reason for UsedExpiredRefreshToken. When access the access token is used after

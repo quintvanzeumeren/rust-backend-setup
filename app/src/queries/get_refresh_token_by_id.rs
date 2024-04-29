@@ -1,6 +1,6 @@
 use sqlx::{PgPool, query_as};
 use uuid::Uuid;
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
+use lib_domain::sessions::token::UserSessionToken;
 use lib_domain::sessions::tokens::RefreshToken;
 use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 
@@ -14,7 +14,7 @@ use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 pub async fn get_refresh_token_by_id(
     db: &PgPool,
     refresh_token_id: &Uuid,
-) -> Result<Option<LocalPasetoV4Token<RefreshToken>>, sqlx::Error> {
+) -> Result<Option<UserSessionToken<RefreshToken>>, sqlx::Error> {
     let query_result = query_as!(
         RefreshTokenRecord,
         r#"

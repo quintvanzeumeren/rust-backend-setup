@@ -9,6 +9,7 @@ edition = "2021"
 lib-auth = { path = "../libs/lib-auth"}
 lib-util = { path = "../libs/lib-util"}
 lib-domain = { path = "../libs/lib-domain"}
+infrastructure = { path = "../libs/infrastructure"}
 
 anyhow = "1.0.80"
 axum = "0.7.4"

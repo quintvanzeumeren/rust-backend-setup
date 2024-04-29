@@ -9,7 +9,9 @@
       <sourceFolder url="file://$MODULE_DIR$/libs/lib-test-util/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/libs/lib-util/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/libs/infrastructure/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/volumes" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

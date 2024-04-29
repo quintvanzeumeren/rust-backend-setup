@@ -2,12 +2,12 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
 use lib_domain::sessions::state::active::Active;
 use lib_domain::sessions::state::just_ended::JustEnded;
 use lib_domain::sessions::state::newly_created::NewlyCreated;
 use lib_domain::sessions::state::refreshed::Refreshed;
 use lib_domain::sessions::state::state::SessionEndReason;
+use lib_domain::sessions::token::UserSessionToken;
 use lib_domain::sessions::tokens::RefreshToken;
 use lib_domain::sessions::user_session::UserSession;
 
@@ -22,7 +22,7 @@ pub struct UserSessionRecord {
 }
 
 impl UserSessionRecord {
-    pub fn to_active_session(self, latest_token: LocalPasetoV4Token<RefreshToken>) -> UserSession<Active> {
+    pub fn to_active_session(self, latest_token: UserSessionToken<RefreshToken>) -> UserSession<Active> {
         UserSession::<Active>::new(
             self.id,
             self.user_id,

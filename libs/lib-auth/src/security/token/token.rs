@@ -1,19 +1,26 @@
 use chrono::{DateTime, Utc};
-use secrecy::Secret;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use uuid::Uuid;
-
 
 // TODO: should decouple the Encryptor and Decryptor traits from the Token trades:
 // Most functionality for using the token trait does not need to require either Encryptor or Decryptor. 
 // Currently the UserSession API is directly coupled to using a specific token because of the need 
 // to specify the Encryptor and Decryptor traits without benefit.
 
-pub trait Token<'a, CustomClaims, EncryptionKeyType>: Encryptor<EncryptionKeyType> + Decryptor<EncryptionKeyType> + Clone
-    where
-        CustomClaims: Serialize + DeserializeOwned + Clone
-{
+pub trait Token<'a>: Clone + Sized {
+    type CustomClaims: Serialize + DeserializeOwned + Clone;
+
+    fn new(
+        id: Uuid,
+        subject: String,
+        audience: String,
+        issuer: String,
+        expiration: DateTime<Utc>,
+        not_before: DateTime<Utc>,
+        issued_at: DateTime<Utc>,
+        custom_claims: Self::CustomClaims
+    ) -> Self;
 
     /// Returns the ID of the token.
     fn get_id(&'a self) -> &'a Uuid;
@@ -37,7 +44,7 @@ pub trait Token<'a, CustomClaims, EncryptionKeyType>: Encryptor<EncryptionKeyTyp
     fn get_issued_at(&'a self) -> &'a DateTime<Utc>;
 
     /// Returns the additional claims that where registered on the token
-    fn get_custom_claims(&'a self) -> &'a CustomClaims;
+    fn get_custom_claims(&'a self) -> &'a Self::CustomClaims;
     
     /// expired returns true if the expiration time of the token was passed 
     fn expired(&'a self) -> bool {
@@ -48,22 +55,4 @@ pub trait Token<'a, CustomClaims, EncryptionKeyType>: Encryptor<EncryptionKeyTyp
     fn active(&'a self) -> bool {
         *self.get_not_before() < Utc::now()
     }
-}
-
-pub struct EncryptedToken {
-    pub token: Secret<String>,
-    pub expires_at: DateTime<Utc>
-}
-
-pub trait Encryptor<EncryptionKeyType> {
-    type EncryptionError;
-
-    fn encrypt(&self, encryption_key: EncryptionKeyType) -> Result<EncryptedToken, Self::EncryptionError>;
-
-}
-
-pub trait Decryptor<DecryptionKeyType>: Sized {
-    type DecryptionError;
-
-    fn decrypt(encrypted_token: &Secret<String>, decryption_key: DecryptionKeyType) -> Result<Self, Self::DecryptionError>;
 }

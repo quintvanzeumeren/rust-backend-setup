@@ -1,9 +1,9 @@
 use uuid::Uuid;
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
 use lib_auth::security::token::token::Token;
+use lib_domain::sessions::token::UserSessionToken;
 use lib_domain::sessions::tokens::RefreshToken;
 
-pub fn random_refresh_token(user_id: &Uuid, session_id: &Uuid) -> LocalPasetoV4Token<RefreshToken> {
+pub fn random_refresh_token(user_id: &Uuid, session_id: &Uuid) -> UserSessionToken<RefreshToken> {
     RefreshToken {
         user_id: user_id.clone(),
         session_id: session_id.clone(),
@@ -11,7 +11,7 @@ pub fn random_refresh_token(user_id: &Uuid, session_id: &Uuid) -> LocalPasetoV4T
     }.into()
 }
 
-pub fn random_refresh_token_from(token: &LocalPasetoV4Token<RefreshToken>) -> LocalPasetoV4Token<RefreshToken> {
+pub fn random_refresh_token_from(token: &UserSessionToken<RefreshToken>) -> UserSessionToken<RefreshToken> {
     RefreshToken {
         user_id: token.custom_claims.user_id.clone(),
         session_id: token.custom_claims.session_id.clone(),

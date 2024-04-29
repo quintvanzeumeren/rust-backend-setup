@@ -2,8 +2,7 @@ use std::fmt::{Debug, Formatter};
 
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4DecryptionError;
+use infrastructure::paseto_token_encryptor::LocalPasetoV4DecryptionError;
 use lib_util::errors::errors::format_error_chain;
 
 use crate::util::handlers::InternalErrorResponse;

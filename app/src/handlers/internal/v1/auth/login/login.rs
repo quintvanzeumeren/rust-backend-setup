@@ -15,16 +15,16 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Executor, PgPool, Postgres, query, Transaction};
 use tokio::task::JoinError;
 use uuid::Uuid;
+use lib_auth::security::encryption::encryptor::Encryptor;
+use lib_auth::security::token::token_encryptor::EncryptedToken;
 
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4EncryptionError;
-use lib_auth::security::token::token::{EncryptedToken, Encryptor};
 use lib_domain::sessions::state::newly_created::NewlyCreated;
 use lib_domain::sessions::user_session::UserSession;
 use lib_domain::user::password::{MatchError, MatchResult, Password};
+use crate::app_state::AppState;
 
 use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};
 use crate::queries::save_newly_created_user_session::save_newly_created_user_session;
-use crate::routes::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
 
 #[derive(Deserialize)]
@@ -118,7 +118,17 @@ pub async fn login(
     save_newly_created_user_session(&mut transaction, &new_session).await
         .context("Failed to save new user session to the database")?;
 
-    let (encrypted_refresh_token, encrypted_access_token) = encrypt_session_tokens(new_session, state.encryption_key.clone())
+    let cipher = state.new_token_encryptor();
+    let (encrypted_refresh_token, encrypted_access_token) =
+        spawn_blocking_with_tracing(move || {
+            let encrypted_refresh_token =
+                cipher.encrypt(new_session.state().refresh_token());
+
+            let encrypted_access_token =
+                cipher.encrypt(new_session.state().access_token());
+
+            (encrypted_refresh_token, encrypted_access_token)
+        })
         .await
         .context("Failed to spawn blocking tokio task to encrypt session tokens")?;
 
@@ -216,18 +226,19 @@ async fn update_user_password(
 
 }
 
-type EncryptSessionTokenResult = Result<EncryptedToken, LocalPasetoV4EncryptionError>;
-async fn encrypt_session_tokens(
-    session: UserSession<NewlyCreated>,
-    encryption_key: SymmetricKey<V4>
-) -> Result<(EncryptSessionTokenResult, EncryptSessionTokenResult), JoinError> {
-    spawn_blocking_with_tracing(move || {
-        let encrypted_refresh_token =
-            session.state().refresh_token().encrypt(&encryption_key);
+// type EncryptSessionTokenResult = Result<EncryptedToken, LocalPasetoV4EncryptionError>;
 
-        let encrypted_access_token =
-            session.state().access_token().encrypt(&encryption_key);
-
-        (encrypted_refresh_token, encrypted_access_token)
-    }).await
-}
+// async fn encrypt_session_tokens(
+//     session: UserSession<NewlyCreated>,
+//     encryption_key: SymmetricKey<V4>
+// ) -> Result<(EncryptSessionTokenResult, EncryptSessionTokenResult), JoinError> {
+//     spawn_blocking_with_tracing(move || {
+//         let encrypted_refresh_token =
+//             session.state().refresh_token().encrypt(&encryption_key);
+// 
+//         let encrypted_access_token =
+//             session.state().access_token().encrypt(&encryption_key);
+// 
+//         (encrypted_refresh_token, encrypted_access_token)
+//     }).await
+// }

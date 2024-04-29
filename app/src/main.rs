@@ -1,7 +1,8 @@
 use anyhow::Context;
+use app::app_state::AppState;
 use app::configuration::configuration::get_configuration;
 use app::database::get_connection_pool;
-use app::routes::{AppState, router};
+use app::routes::router;
 use app::startup::{migrate, run};
 use app::telemetry::{get_subscriber, init_subscriber};
 

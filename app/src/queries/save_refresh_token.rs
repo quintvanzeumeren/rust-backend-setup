@@ -1,5 +1,5 @@
 use sqlx::{Executor, Postgres, Transaction};
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
+use lib_domain::sessions::token::UserSessionToken;
 use lib_domain::sessions::tokens::RefreshToken;
 use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 
@@ -9,7 +9,7 @@ use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 )]
 pub async fn save_refresh_token(
     transaction: &mut Transaction<'_, Postgres>,
-    refresh_token: &LocalPasetoV4Token<RefreshToken>
+    refresh_token: &UserSessionToken<RefreshToken>
 ) -> sqlx::Result<()> {
     let refresh_token_record = RefreshTokenRecord::from(refresh_token);
     transaction.execute(sqlx::query!(

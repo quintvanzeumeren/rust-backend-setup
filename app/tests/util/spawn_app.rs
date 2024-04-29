@@ -4,9 +4,10 @@ use pasetors::keys::{Generate, SymmetricKey};
 use pasetors::version4::V4;
 use reqwest::{Response, StatusCode};
 use sqlx::PgPool;
+use app::app_state::AppState;
 
 use app::configuration::configuration::get_configuration;
-use app::routes::{AppState, router};
+use app::routes::{router};
 use app::telemetry::{get_subscriber, init_subscriber};
 use crate::util::api_client::ApiClient;
 use crate::util::test_app::{AbortOnDrop, TestApp};

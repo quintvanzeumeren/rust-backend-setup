@@ -77,6 +77,7 @@ dependencies = [
  "chrono",
  "config",
  "fake",
+ "infrastructure",
  "lib-auth",
  "lib-domain",
  "lib-test-util",
@@ -1076,6 +1077,21 @@ checksum = "168fb715dda47215e360912c096649d23d58bf392ac62f73919e831745e40f26"
 dependencies = [
  "equivalent",
  "hashbrown 0.14.3",
+]
+
+[[package]]
+name = "infrastructure"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "lib-auth",
+ "lib-util",
+ "pasetors",
+ "secrecy",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]

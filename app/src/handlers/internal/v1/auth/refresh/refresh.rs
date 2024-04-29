@@ -7,17 +7,18 @@ use axum::Json;
 use chrono::{DateTime, Utc};
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
-
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
-use lib_auth::security::token::token::{Decryptor, Encryptor, Token};
-use lib_domain::sessions::tokens::RefreshToken;
+use lib_domain::sessions::tokens::{AccessToken, RefreshToken};
+use crate::app_state::AppState;
 
 use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};
 use crate::queries::get_active_session_by_id::get_active_session_by_id;
 use crate::queries::save_just_ended_user_session::save_just_ended_session;
 use crate::queries::save_refreshed_user_session::save_refreshed_session;
-use crate::routes::AppState;
 use crate::telemetry::spawn_blocking_with_tracing;
+use lib_auth::security::encryption::decryptor::Decryptor;
+use lib_auth::security::encryption::encryptor::Encryptor;
+use lib_auth::security::token::token::Token;
+use lib_domain::sessions::token::UserSessionToken;
 
 #[derive(Deserialize)]
 pub struct RefreshRequest {
@@ -47,10 +48,10 @@ pub async fn refresh(
     refresh_request: Json<RefreshRequest>
 ) -> AuthenticationResult<(StatusCode, Json<RefreshResponse>)> {
 
+    let token_encryptor = state.new_token_encryptor();
+
     // TODO: put decrypt in tokio blocking
-    let refresh_token = LocalPasetoV4Token::<RefreshToken>::decrypt(
-        &refresh_request.refresh_token, &state.encryption_key
-    )?;
+    let refresh_token: UserSessionToken<RefreshToken> = token_encryptor.decrypt(&refresh_request.refresh_token)?;
 
     tracing::Span::current().record("user_id", &tracing::field::display(&refresh_token.get_custom_claims().user_id));
     tracing::Span::current().record("session_id", &tracing::field::display(&refresh_token.get_custom_claims().session_id));
@@ -78,13 +79,11 @@ pub async fn refresh(
                 access_token,
                 refresh_token
             ) = spawn_blocking_with_tracing(move || {
-                let encryption_access_result = refresh_session.state()
-                    .new_access_token()
-                    .encrypt(&state.encryption_key);
+                let encryption_access_result =
+                    token_encryptor.encrypt(refresh_session.state().new_access_token());
 
-                let encryption_refresh_result = refresh_session.state()
-                    .new_refresh_token()
-                    .encrypt(&state.encryption_key);
+                let encryption_refresh_result =
+                    token_encryptor.encrypt(refresh_session.state().new_refresh_token());
 
                 (encryption_access_result, encryption_refresh_result)
             }).await.context("Failed to spawn blocking tokio task to encrypt refreshed session tokens")?;

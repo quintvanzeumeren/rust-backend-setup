@@ -1,8 +1,8 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
 use lib_auth::security::token::token::Token;
+use lib_domain::sessions::token::UserSessionToken;
 use lib_domain::sessions::tokens::RefreshToken;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -17,9 +17,9 @@ pub struct RefreshTokenRecord {
     pub used_at: Option<NaiveDateTime>
 }
 
-impl Into<LocalPasetoV4Token<RefreshToken>> for RefreshTokenRecord {
-    fn into(self) -> LocalPasetoV4Token<RefreshToken> {
-        LocalPasetoV4Token {
+impl Into<UserSessionToken<RefreshToken>> for RefreshTokenRecord {
+    fn into(self) -> UserSessionToken<RefreshToken> {
+        UserSessionToken {
             id: self.id,
             subject: RefreshToken::subject().to_string(),
             audience: self.user_id.to_string(),
@@ -35,8 +35,8 @@ impl Into<LocalPasetoV4Token<RefreshToken>> for RefreshTokenRecord {
         }
     }
 }
-impl From<&LocalPasetoV4Token<RefreshToken>> for RefreshTokenRecord {
-    fn from(token: &LocalPasetoV4Token<RefreshToken>) -> Self {
+impl From<&UserSessionToken<RefreshToken>> for RefreshTokenRecord {
+    fn from(token: &UserSessionToken<RefreshToken>) -> Self {
         RefreshTokenRecord {
             id: *token.get_id(),
             parent_id: token.get_custom_claims().parent_id,
@@ -53,8 +53,8 @@ impl From<&LocalPasetoV4Token<RefreshToken>> for RefreshTokenRecord {
 #[cfg(test)]
 mod tests {
     use uuid::Uuid;
-    use lib_auth::security::token::local_paseto_v4_token::LocalPasetoV4Token;
     use lib_auth::security::token::token::Token;
+    use lib_domain::sessions::token::UserSessionToken;
     use lib_domain::sessions::tokens::RefreshToken;
     use lib_test_util::random::refresh_token::random_refresh_token;
     use lib_test_util::random::user_session::random_newly_created_user_session;
@@ -88,7 +88,7 @@ mod tests {
         let token = random_refresh_token(&user_id, &session.user_id());
 
         let expected = RefreshTokenRecord::from(&token);
-        let into: LocalPasetoV4Token<RefreshToken> = expected.clone().into();
+        let into: UserSessionToken<RefreshToken> = expected.clone().into();
         let got = RefreshTokenRecord::from(&into);
         assert_eq!(expected, got)
     }
