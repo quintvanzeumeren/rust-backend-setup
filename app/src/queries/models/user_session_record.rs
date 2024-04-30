@@ -7,7 +7,7 @@ use lib_domain::sessions::state::just_ended::JustEnded;
 use lib_domain::sessions::state::newly_created::NewlyCreated;
 use lib_domain::sessions::state::refreshed::Refreshed;
 use lib_domain::sessions::state::state::SessionEndReason;
-use lib_domain::sessions::token::UserSessionToken;
+use lib_domain::sessions::user_session_token::UserSessionToken;
 use lib_domain::sessions::tokens::RefreshToken;
 use lib_domain::sessions::user_session::UserSession;
 

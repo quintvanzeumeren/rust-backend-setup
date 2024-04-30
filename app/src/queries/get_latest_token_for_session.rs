@@ -1,6 +1,6 @@
 use sqlx::{PgPool, query_as};
 use uuid::Uuid;
-use lib_domain::sessions::token::UserSessionToken;
+use lib_domain::sessions::user_session_token::UserSessionToken;
 
 use lib_domain::sessions::tokens::RefreshToken;
 

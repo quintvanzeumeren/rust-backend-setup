@@ -1,6 +1,6 @@
 
 use crate::sessions::state::state::State;
-use crate::sessions::token::UserSessionToken;
+use crate::sessions::user_session_token::UserSessionToken;
 use crate::sessions::tokens::{AccessToken, RefreshToken};
 
 pub struct NewlyCreated {

@@ -4,6 +4,8 @@ use serde::Serialize;
 use uuid::Uuid;
 
 use lib_auth::security::token::token::Token;
+use crate::shared::activation_time::ActivationTime;
+use crate::shared::expiration::Expiration;
 
 #[derive(Clone, Debug)]
 pub struct UserSessionToken<CC: Serialize + DeserializeOwned + Clone> {
@@ -11,8 +13,8 @@ pub struct UserSessionToken<CC: Serialize + DeserializeOwned + Clone> {
     pub subject: String,
     pub audience: String,
     pub issuer: String,
-    pub expiration: DateTime<Utc>,
-    pub not_before: DateTime<Utc>,
+    pub expiration: Expiration,
+    pub not_before: ActivationTime,
     pub issued_at: DateTime<Utc>,
     pub custom_claims: CC
 }
@@ -35,8 +37,8 @@ impl <'a, CC: Serialize + DeserializeOwned + Clone> Token<'a> for UserSessionTok
             subject,
             audience,
             issuer,
-            expiration,
-            not_before,
+            expiration: expiration.into(),
+            not_before: not_before.into(),
             issued_at,
             custom_claims,
         }
@@ -59,11 +61,11 @@ impl <'a, CC: Serialize + DeserializeOwned + Clone> Token<'a> for UserSessionTok
     }
 
     fn get_expiration(&'a self) -> &'a DateTime<Utc> {
-        &self.expiration
+        &self.expiration.0
     }
 
     fn get_not_before(&'a self) -> &'a DateTime<Utc> {
-        &self.not_before
+        &self.not_before.0.0
     }
 
     fn get_issued_at(&'a self) -> &'a DateTime<Utc> {
@@ -83,7 +85,7 @@ mod tests {
     use serde_json::{json, Value};
     use uuid::Uuid;
     use lib_auth::security::token::token::Token;
-    use crate::sessions::token::UserSessionToken;
+    use crate::sessions::user_session_token::UserSessionToken;
 
     fn str() -> String {
         Uuid::new_v4().to_string()
@@ -119,7 +121,7 @@ mod tests {
     #[test]
     fn test_new_token_creation() {
         let now = Utc::now();
-        
+
         let id = Uuid::new_v4();
         let subject = str();
         let audience = str();
@@ -127,7 +129,7 @@ mod tests {
         let active_duration = now + Duration::hours(2);
         let active_from = now + Duration::minutes(12);
         let data = data_json();
-        
+
 
         let issued_at = Utc::now();
         let token = UserSessionToken::new(
@@ -152,11 +154,11 @@ mod tests {
 
         assert_eq!(token.issuer, issuer);
         assert_eq!(token.get_issuer(), issuer);
-        
-        assert_eq!(token.expiration, active_duration);
+
+        assert_eq!(active_duration, token.expiration.into());
         assert_eq!(*token.get_expiration(), active_duration);
 
-        assert_eq!(token.not_before, active_from);
+        assert_eq!(active_from, token.not_before.into());
         assert_eq!(*token.get_not_before(), active_from);
 
         assert!(is_within_second(token.issued_at, issued_at));

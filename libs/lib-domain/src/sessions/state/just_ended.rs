@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 
 use crate::sessions::state::state::{SessionEndReason, State};
-use crate::sessions::token::UserSessionToken;
+use crate::sessions::user_session_token::UserSessionToken;
 use crate::sessions::tokens::RefreshToken;
 
 #[derive(Debug)]

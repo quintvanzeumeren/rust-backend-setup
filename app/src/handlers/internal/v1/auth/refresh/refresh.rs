@@ -18,7 +18,7 @@ use crate::telemetry::spawn_blocking_with_tracing;
 use lib_auth::security::encryption::decryptor::Decryptor;
 use lib_auth::security::encryption::encryptor::Encryptor;
 use lib_auth::security::token::token::Token;
-use lib_domain::sessions::token::UserSessionToken;
+use lib_domain::sessions::user_session_token::UserSessionToken;
 
 #[derive(Deserialize)]
 pub struct RefreshRequest {

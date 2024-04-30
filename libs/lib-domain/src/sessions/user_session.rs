@@ -7,7 +7,7 @@ use crate::sessions::state::just_ended::JustEnded;
 use crate::sessions::state::newly_created::NewlyCreated;
 use crate::sessions::state::refreshed::Refreshed;
 use crate::sessions::state::state::{SessionEndReason, State};
-use crate::sessions::token::UserSessionToken;
+use crate::sessions::user_session_token::UserSessionToken;
 use crate::sessions::tokens::{AccessToken, RefreshToken};
 
 #[derive(Clone, PartialEq, Debug)]
@@ -185,7 +185,7 @@ mod tests {
     use crate::sessions::state::just_ended::JustEnded;
     use crate::sessions::state::newly_created::NewlyCreated;
     use crate::sessions::state::state::SessionEndReason;
-    use crate::sessions::token::UserSessionToken;
+    use crate::sessions::user_session_token::UserSessionToken;
     use crate::sessions::tokens::RefreshToken;
     use crate::sessions::user_session::UserSession;
 

@@ -3,9 +3,9 @@ use crate::shared::expiration::Expiration;
 
 /// Activation is time attribute that determines if something is ready to be used as of
 /// the current date and time.
-/// 
-#[derive(Clone)]
-pub struct ActivationTime(Expiration);
+///
+#[derive(Clone, Copy, Debug)]
+pub struct ActivationTime(pub Expiration);
 
 impl ActivationTime {
     fn has_passed(&self) -> bool {
@@ -57,7 +57,7 @@ mod tests {
     fn test_has_passed() {
         let now = Utc::now();
         let before = now - Duration::hours(2);
-        
+
         let activation = ActivationTime::from(before);
         assert_eq!(before, activation.0.into());
         assert!(activation.has_passed());
@@ -74,14 +74,14 @@ mod tests {
         assert!(activation.has_not_passed());
         assert_ne!(activation.has_passed(), activation.has_not_passed());
     }
-    
+
     #[test]
     fn test_type_conversions() {
         let now = Utc::now();
         let soon = now + Duration::hours(2);
         let activation_time = ActivationTime::from(Duration::hours(2));
         assert!(within_duration(soon, activation_time.clone().into(), Duration::seconds(1)));
-        
+
         let duration: Duration = activation_time.into();
         assert!(within_duration(soon, now + duration, Duration::seconds(1)))
     }

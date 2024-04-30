@@ -1,4 +1,4 @@
-use crate::sessions::token::UserSessionToken;
+use crate::sessions::user_session_token::UserSessionToken;
 use crate::sessions::tokens::RefreshToken;
 pub trait State: Sized {}
 

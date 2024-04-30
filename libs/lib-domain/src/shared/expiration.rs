@@ -1,8 +1,8 @@
 use chrono::{DateTime, Duration, Utc};
 
 /// Expiration represents a deadline/expiration for given `DateTime<Utc>`.
-#[derive(Copy, Clone)]
-pub struct Expiration(DateTime<Utc>);
+#[derive(Copy, Clone, Debug)]
+pub struct Expiration(pub DateTime<Utc>);
 
 impl Expiration {
     pub fn has_passed(&self) -> bool {

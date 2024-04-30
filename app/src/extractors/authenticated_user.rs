@@ -11,7 +11,7 @@ use serde::Serialize;
 use uuid::Uuid;
 use lib_auth::security::encryption::decryptor::Decryptor;
 use lib_auth::security::token::token::Token;
-use lib_domain::sessions::token::UserSessionToken;
+use lib_domain::sessions::user_session_token::UserSessionToken;
 use lib_domain::sessions::tokens::AccessToken;
 use crate::app_state::AppState;
 
