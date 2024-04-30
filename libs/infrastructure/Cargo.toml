@@ -8,13 +8,14 @@ edition = "2021"
 [dependencies]
 lib-auth = { path = "../lib-auth"}
 lib-util = { path = "../lib-util" }
-serde_json = "1.0.114"
-serde = { version = "1.0.197", features = ["derive"] }
-secrecy = { version = "0.8.0", features = ["serde"] }
-chrono = { version = "0.4.34", features = ["serde"]}
-pasetors = "0.6.8"
-uuid = { version = "1.3.0", features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
-thiserror = "1.0.57"
+
+pasetors.workspace = true
+serde_json.workspace = true
+serde.workspace = true
+secrecy.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+thiserror.workspace = true
 
 [lints]
 workspace = true

@@ -1161,7 +1161,6 @@ dependencies = [
  "chrono",
  "enum_dispatch",
  "lib-util",
- "pasetors",
  "password-hash",
  "rand",
  "secrecy",
