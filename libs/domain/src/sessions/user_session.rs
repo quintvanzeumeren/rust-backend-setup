@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
-use lib_auth::security::token::token::Token;
+use security::token::token::Token;
 use crate::sessions::state::active::Active;
 use crate::sessions::state::already_ended::AlreadyEnded;
 use crate::sessions::state::just_ended::JustEnded;
@@ -180,7 +180,7 @@ impl UserSession<AlreadyEnded> {
 mod tests {
     use chrono::{DateTime, Duration, Utc};
     use uuid::Uuid;
-    use lib_auth::security::token::token::Token;
+    use security::token::token::Token;
     use crate::sessions::state::active::Active;
     use crate::sessions::state::just_ended::JustEnded;
     use crate::sessions::state::newly_created::NewlyCreated;

@@ -8,11 +8,11 @@ use chrono::{DateTime, Utc};
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
 
-use lib_auth::security::encryption::decryptor::Decryptor;
-use lib_auth::security::encryption::encryptor::Encryptor;
-use lib_auth::security::token::token::Token;
-use lib_domain::sessions::tokens::RefreshToken;
-use lib_domain::sessions::user_session_token::UserSessionToken;
+use security::encryption::decryptor::Decryptor;
+use security::encryption::encryptor::Encryptor;
+use security::token::token::Token;
+use domain::sessions::tokens::RefreshToken;
+use domain::sessions::user_session_token::UserSessionToken;
 
 use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};

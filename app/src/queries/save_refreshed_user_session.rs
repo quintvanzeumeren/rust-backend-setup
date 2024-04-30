@@ -1,7 +1,7 @@
 use sqlx::{Postgres, Transaction};
 
-use lib_domain::sessions::state::refreshed::Refreshed;
-use lib_domain::sessions::user_session::UserSession;
+use domain::sessions::state::refreshed::Refreshed;
+use domain::sessions::user_session::UserSession;
 
 use crate::queries::save_refresh_token::save_refresh_token;
 
@@ -19,10 +19,10 @@ pub async fn save_refreshed_session(transaction: &mut Transaction<'_, Postgres>,
 mod tests {
     use sqlx::PgPool;
 
-    use lib_auth::security::token::token::Token;
-    use lib_test_util::random::_common::{random_salt, random_secret};
-    use lib_test_util::random::user::random_user;
-    use lib_test_util::random::user_session::random_newly_created_user_session;
+    use security::token::token::Token;
+    use test_utility::random::_common::{random_salt, random_secret};
+    use test_utility::random::user::random_user;
+    use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::get_active_session_by_id::get_active_session_by_id;
     use crate::queries::get_refresh_token_by_id::get_refresh_token_by_id;

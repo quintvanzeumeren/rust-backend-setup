@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lib-auth = { path = "../libs/lib-auth"}
+security ={ path = "../libs/security" }
 lib-util = { path = "../libs/lib-util"}
-lib-domain = { path = "../libs/lib-domain"}
+domain = { path = "../libs/domain" }
 infrastructure = { path = "../libs/infrastructure"}
 
 anyhow = { version = "1.0.80" }
@@ -47,4 +47,4 @@ features = ["runtime-tokio", "macros", "postgres", "uuid", "chrono", "migrate"]
 workspace = true
 
 [dev-dependencies]
-lib-test-util = { path = "../libs/lib-test-util"}
+test-utility = { path = "../libs/test-utility" }

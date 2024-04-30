@@ -1,7 +1,7 @@
 
-use lib_auth::security::token::token::Token;
-use lib_domain::sessions::user_session_token::UserSessionToken;
-use lib_domain::sessions::tokens::{AccessToken, RefreshToken};
+use security::token::token::Token;
+use domain::sessions::user_session_token::UserSessionToken;
+use domain::sessions::tokens::{AccessToken, RefreshToken};
 
 pub fn random_access_token_for(refresh_token: UserSessionToken<RefreshToken>) -> UserSessionToken<AccessToken> {
     AccessToken {

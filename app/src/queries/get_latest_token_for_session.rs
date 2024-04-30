@@ -1,8 +1,8 @@
 use sqlx::{PgPool, query_as};
 use uuid::Uuid;
-use lib_domain::sessions::user_session_token::UserSessionToken;
+use domain::sessions::user_session_token::UserSessionToken;
 
-use lib_domain::sessions::tokens::RefreshToken;
+use domain::sessions::tokens::RefreshToken;
 
 use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 
@@ -41,10 +41,10 @@ pub async fn get_latest_token_for_session(
 mod tests {
     use sqlx::PgPool;
 
-    use lib_test_util::random::_common::{random_salt, random_secret};
-    use lib_test_util::random::refresh_token::random_refresh_token_from;
-    use lib_test_util::random::user::random_user;
-    use lib_test_util::random::user_session::random_newly_created_user_session;
+    use test_utility::random::_common::{random_salt, random_secret};
+    use test_utility::random::refresh_token::random_refresh_token_from;
+    use test_utility::random::user::random_user;
+    use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::get_latest_token_for_session::get_latest_token_for_session;
     use crate::queries::models::refresh_token_record::RefreshTokenRecord;

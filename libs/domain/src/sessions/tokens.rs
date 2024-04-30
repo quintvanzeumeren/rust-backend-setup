@@ -1,7 +1,7 @@
 use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use lib_auth::security::token::token::{Token};
+use security::token::token::{Token};
 use crate::sessions::user_session_token::UserSessionToken;
 
 

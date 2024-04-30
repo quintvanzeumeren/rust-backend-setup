@@ -1,8 +1,8 @@
 use password_hash::SaltString;
 use secrecy::Secret;
 use uuid::Uuid;
-use lib_domain::user::password::Password;
-use lib_domain::user::user::User;
+use domain::user::password::Password;
+use domain::user::user::User;
 
 pub fn random_user(password: Secret<String>, salt_string: &SaltString) -> User {
     User {

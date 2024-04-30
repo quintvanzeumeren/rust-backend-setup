@@ -76,11 +76,9 @@ dependencies = [
  "bcrypt",
  "chrono",
  "config",
+ "domain",
  "fake",
  "infrastructure",
- "lib-auth",
- "lib-domain",
- "lib-test-util",
  "lib-util",
  "once_cell",
  "pasetors",
@@ -89,10 +87,12 @@ dependencies = [
  "regex",
  "reqwest",
  "secrecy",
+ "security",
  "serde",
  "serde-aux",
  "serde_json",
  "sqlx",
+ "test-utility",
  "thiserror",
  "tokio",
  "tower-http",
@@ -534,6 +534,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "442039f5147480ba31067cb00ada1adae6892028e40e45fc5de7b7df6dcc1b5f"
 dependencies = [
  "const-random",
+]
+
+[[package]]
+name = "domain"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "lib-util",
+ "password-hash",
+ "rand",
+ "regex",
+ "secrecy",
+ "security",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
@@ -1084,10 +1101,10 @@ name = "infrastructure"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "lib-auth",
  "lib-util",
  "pasetors",
  "secrecy",
+ "security",
  "serde",
  "serde_json",
  "thiserror",
@@ -1151,57 +1168,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 dependencies = [
  "spin 0.5.2",
-]
-
-[[package]]
-name = "lib-auth"
-version = "0.1.0"
-dependencies = [
- "argon2",
- "chrono",
- "enum_dispatch",
- "lib-util",
- "password-hash",
- "rand",
- "secrecy",
- "serde",
- "serde_json",
- "thiserror",
- "uuid",
-]
-
-[[package]]
-name = "lib-domain"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "lib-auth",
- "lib-util",
- "password-hash",
- "rand",
- "regex",
- "secrecy",
- "serde",
- "serde_json",
- "thiserror",
- "uuid",
-]
-
-[[package]]
-name = "lib-test-util"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "lib-auth",
- "lib-domain",
- "lib-util",
- "password-hash",
- "rand",
- "regex",
- "secrecy",
- "serde",
- "thiserror",
- "uuid",
 ]
 
 [[package]]
@@ -1929,6 +1895,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "security"
+version = "0.1.0"
+dependencies = [
+ "argon2",
+ "chrono",
+ "enum_dispatch",
+ "lib-util",
+ "password-hash",
+ "rand",
+ "secrecy",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "uuid",
+]
+
+[[package]]
 name = "serde"
 version = "1.0.198"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2387,6 +2370,23 @@ dependencies = [
  "fastrand",
  "rustix",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "test-utility"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "domain",
+ "lib-util",
+ "password-hash",
+ "rand",
+ "regex",
+ "secrecy",
+ "security",
+ "serde",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]

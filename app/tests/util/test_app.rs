@@ -5,7 +5,7 @@ use secrecy::Secret;
 use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
-use lib_auth::security::hash::schema::{get_latest_scheme, Scheme};
+use security::hash::schema::{get_latest_scheme, Scheme};
 use crate::util::api_client::ApiClient;
 use crate::util::test_user::anonymous::Anonymous;
 use crate::util::test_user::logged_in::LoggedIn;
@@ -75,7 +75,7 @@ impl TestApp {
 
     pub async fn login(&self, user: &TestUser<'_, Anonymous>) -> Response {
         self.api_client
-            .post("/internal/v1/auth/login")
+            .post("/internal/v1/security/login")
             .json(&json!({
                 "username": user.username,
                 "password": user.password
@@ -96,7 +96,7 @@ impl TestApp {
 
     pub async fn refresh(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .post("/internal/v1/auth/refresh")
+            .post("/internal/v1/security/refresh")
             .json(&json!({
                 "refresh_token": user.state.refresh_token.token
             }))
@@ -107,7 +107,7 @@ impl TestApp {
 
     pub async fn logout(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .post("/internal/v1/auth/logout")
+            .post("/internal/v1/security/logout")
             .headers(self.auth_header(user))
             .send()
             .await
@@ -142,7 +142,7 @@ impl TestApp {
 
     pub async fn post_login(&self, body: Value) -> Response {
         self.api_client
-            .post("/internal/v1/auth/login")
+            .post("/internal/v1/security/login")
             .json(&body)
             .send()
             .await

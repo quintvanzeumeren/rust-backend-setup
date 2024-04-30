@@ -1,7 +1,7 @@
 use sqlx::{Executor, Postgres, Transaction};
 
-use lib_domain::sessions::state::newly_created::NewlyCreated;
-use lib_domain::sessions::user_session::UserSession;
+use domain::sessions::state::newly_created::NewlyCreated;
+use domain::sessions::user_session::UserSession;
 
 use crate::queries::models::user_session_record::UserSessionRecord;
 use crate::queries::save_refresh_token::save_refresh_token;
@@ -34,9 +34,9 @@ pub async fn save_newly_created_user_session(
 mod tests {
     use sqlx::{PgPool, query_as};
 
-    use lib_test_util::random::_common::{random_salt, random_secret};
-    use lib_test_util::random::user::random_user;
-    use lib_test_util::random::user_session::random_newly_created_user_session;
+    use test_utility::random::_common::{random_salt, random_secret};
+    use test_utility::random::user::random_user;
+    use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::models::refresh_token_record::RefreshTokenRecord;
     use crate::queries::models::user_session_record::UserSessionRecord;

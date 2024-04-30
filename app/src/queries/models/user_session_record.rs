@@ -2,14 +2,14 @@ use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use lib_domain::sessions::state::active::Active;
-use lib_domain::sessions::state::just_ended::JustEnded;
-use lib_domain::sessions::state::newly_created::NewlyCreated;
-use lib_domain::sessions::state::refreshed::Refreshed;
-use lib_domain::sessions::state::state::SessionEndReason;
-use lib_domain::sessions::user_session_token::UserSessionToken;
-use lib_domain::sessions::tokens::RefreshToken;
-use lib_domain::sessions::user_session::UserSession;
+use domain::sessions::state::active::Active;
+use domain::sessions::state::just_ended::JustEnded;
+use domain::sessions::state::newly_created::NewlyCreated;
+use domain::sessions::state::refreshed::Refreshed;
+use domain::sessions::state::state::SessionEndReason;
+use domain::sessions::user_session_token::UserSessionToken;
+use domain::sessions::tokens::RefreshToken;
+use domain::sessions::user_session::UserSession;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserSessionRecord {
@@ -83,7 +83,7 @@ impl From<&UserSession<JustEnded>> for UserSessionRecord {
 #[cfg(test)]
 mod tests {
     use uuid::Uuid;
-    use lib_test_util::random::user_session::random_newly_created_user_session;
+    use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::models::user_session_record::UserSessionRecord;
 

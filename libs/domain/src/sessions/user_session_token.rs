@@ -3,7 +3,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use uuid::Uuid;
 
-use lib_auth::security::token::token::Token;
+use security::token::token::Token;
 use crate::shared::activation_time::ActivationTime;
 use crate::shared::expiration::Expiration;
 
@@ -84,7 +84,7 @@ mod tests {
     use serde::Serialize;
     use serde_json::{json, Value};
     use uuid::Uuid;
-    use lib_auth::security::token::token::Token;
+    use security::token::token::Token;
     use crate::sessions::user_session_token::UserSessionToken;
 
     fn str() -> String {

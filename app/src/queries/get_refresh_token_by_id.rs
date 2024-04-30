@@ -1,7 +1,7 @@
 use sqlx::{PgPool, query_as};
 use uuid::Uuid;
-use lib_domain::sessions::user_session_token::UserSessionToken;
-use lib_domain::sessions::tokens::RefreshToken;
+use domain::sessions::user_session_token::UserSessionToken;
+use domain::sessions::tokens::RefreshToken;
 use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 
 #[tracing::instrument(

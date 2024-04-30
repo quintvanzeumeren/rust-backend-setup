@@ -8,9 +8,9 @@ members = [
 
     # -- Libraries
     "libs/infrastructure",
-    "libs/lib-auth",
-    "libs/lib-domain",
-    "libs/lib-test-util",
+    "libs/security",
+    "libs/domain",
+    "libs/test-utility",
     "libs/lib-util",
 ]
 

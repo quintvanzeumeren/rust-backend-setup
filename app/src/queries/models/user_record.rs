@@ -1,9 +1,9 @@
 use secrecy::ExposeSecret;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use lib_domain::user::password::Password;
+use domain::user::password::Password;
 
-use lib_domain::user::user::User;
+use domain::user::user::User;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserRecord {
@@ -37,10 +37,10 @@ impl TryInto<User> for UserRecord {
 #[cfg(test)]
 mod tests {
     use secrecy::ExposeSecret;
-    use lib_domain::user::user::User;
+    use domain::user::user::User;
 
-    use lib_test_util::random::_common::{random_salt, random_secret};
-    use lib_test_util::random::user::random_user;
+    use test_utility::random::_common::{random_salt, random_secret};
+    use test_utility::random::user::random_user;
 
     use crate::queries::models::user_record::UserRecord;
 

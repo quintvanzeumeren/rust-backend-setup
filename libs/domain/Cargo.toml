@@ -1,5 +1,5 @@
 [package]
-name = "lib-test-util"
+name = "domain"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,10 +8,10 @@ edition = "2021"
 [dependencies]
 # -- Local
 lib-util = { path = "../lib-util"}
-lib-auth = { path = "../lib-auth"}
-lib-domain = { path = "../lib-domain"}
+security ={ path = "../security" }
 
-# Shared
+# -- Other
+password-hash.workspace = true
 thiserror.workspace = true
 serde.workspace = true
 uuid.workspace = true
@@ -19,10 +19,10 @@ chrono.workspace = true
 rand.workspace = true
 secrecy.workspace = true
 regex.workspace = true
-password-hash.workspace = true
 
-
-# -- Other
+[dev-dependencies]
+serde_json.workspace = true
 
 [lints]
 workspace = true
+

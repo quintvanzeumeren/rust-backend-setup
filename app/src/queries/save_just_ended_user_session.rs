@@ -1,6 +1,6 @@
 use sqlx::{Executor, Postgres, query, Transaction};
-use lib_domain::sessions::state::just_ended::JustEnded;
-use lib_domain::sessions::user_session::UserSession;
+use domain::sessions::state::just_ended::JustEnded;
+use domain::sessions::user_session::UserSession;
 use crate::queries::models::user_session_record::UserSessionRecord;
 
 async fn _save_just_ended_session(transaction: &mut Transaction<'_, Postgres>, user_session_record: UserSessionRecord) -> Result<(), sqlx::Error> {

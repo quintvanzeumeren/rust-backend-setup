@@ -1,8 +1,8 @@
 use sqlx::{PgPool, query_as};
 use tracing::warn;
 use uuid::Uuid;
-use lib_domain::sessions::state::active::Active;
-use lib_domain::sessions::user_session::UserSession;
+use domain::sessions::state::active::Active;
+use domain::sessions::user_session::UserSession;
 use crate::queries::get_latest_token_for_session::get_latest_token_for_session;
 use crate::queries::models::user_session_record::UserSessionRecord;
 

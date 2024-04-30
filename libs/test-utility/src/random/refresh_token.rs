@@ -1,7 +1,7 @@
 use uuid::Uuid;
-use lib_auth::security::token::token::Token;
-use lib_domain::sessions::user_session_token::UserSessionToken;
-use lib_domain::sessions::tokens::RefreshToken;
+use security::token::token::Token;
+use domain::sessions::user_session_token::UserSessionToken;
+use domain::sessions::tokens::RefreshToken;
 
 pub fn random_refresh_token(user_id: &Uuid, session_id: &Uuid) -> UserSessionToken<RefreshToken> {
     RefreshToken {

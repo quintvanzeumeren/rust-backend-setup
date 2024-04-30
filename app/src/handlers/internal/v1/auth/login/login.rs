@@ -14,10 +14,10 @@ use sqlx::{Executor, PgPool, Postgres, query, Transaction};
 use tokio::task::JoinError;
 use uuid::Uuid;
 
-use lib_auth::security::encryption::encryptor::Encryptor;
-use lib_domain::sessions::state::newly_created::NewlyCreated;
-use lib_domain::sessions::user_session::UserSession;
-use lib_domain::user::password::{MatchError, MatchResult, Password};
+use security::encryption::encryptor::Encryptor;
+use domain::sessions::state::newly_created::NewlyCreated;
+use domain::sessions::user_session::UserSession;
+use domain::user::password::{MatchError, MatchResult, Password};
 
 use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};

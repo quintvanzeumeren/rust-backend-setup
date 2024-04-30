@@ -1,6 +1,6 @@
 use sqlx::{Executor, Postgres, query, Transaction};
 
-use lib_domain::user::user::User;
+use domain::user::user::User;
 
 use crate::queries::models::user_record::UserRecord;
 
@@ -23,8 +23,8 @@ pub async fn save_user(transaction: &mut Transaction<'_, Postgres>, user: &User)
 mod tests {
     use sqlx::{PgPool, query_as};
 
-    use lib_test_util::random::_common::{random_salt, random_secret};
-    use lib_test_util::random::user::random_user;
+    use test_utility::random::_common::{random_salt, random_secret};
+    use test_utility::random::user::random_user;
 
     use crate::queries::models::user_record::UserRecord;
     use crate::queries::save_user::save_user;
