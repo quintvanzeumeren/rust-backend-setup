@@ -11,8 +11,6 @@ lib-util = { path = "../lib-util"}
 lib-auth = { path = "../lib-auth"}
 
 # -- Other
-tracing = { version = "0.1.40", features = ["log"] }
-
 password-hash.workspace = true
 thiserror.workspace = true
 serde.workspace = true
