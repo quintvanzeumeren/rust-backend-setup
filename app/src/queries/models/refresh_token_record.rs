@@ -1,9 +1,10 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
 use lib_auth::security::token::token::Token;
-use lib_domain::sessions::user_session_token::UserSessionToken;
 use lib_domain::sessions::tokens::RefreshToken;
+use lib_domain::sessions::user_session_token::UserSessionToken;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct RefreshTokenRecord {
@@ -52,13 +53,14 @@ impl From<&UserSessionToken<RefreshToken>> for RefreshTokenRecord {
 
 #[cfg(test)]
 mod tests {
-    use chrono::{DateTime, Utc};
     use uuid::Uuid;
+
     use lib_auth::security::token::token::Token;
-    use lib_domain::sessions::user_session_token::UserSessionToken;
     use lib_domain::sessions::tokens::RefreshToken;
+    use lib_domain::sessions::user_session_token::UserSessionToken;
     use lib_test_util::random::refresh_token::random_refresh_token;
     use lib_test_util::random::user_session::random_newly_created_user_session;
+
     use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 
     #[test]
@@ -66,8 +68,6 @@ mod tests {
         let user_id = Uuid::new_v4();
         let session = random_newly_created_user_session(&user_id);
         let token = random_refresh_token(&user_id, &session.user_id());
-        
-        
 
         let expected = RefreshTokenRecord {
             id: token.id,

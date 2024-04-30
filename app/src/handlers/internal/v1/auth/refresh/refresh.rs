@@ -7,18 +7,19 @@ use axum::Json;
 use chrono::{DateTime, Utc};
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
-use lib_domain::sessions::tokens::{AccessToken, RefreshToken};
-use crate::app_state::AppState;
 
+use lib_auth::security::encryption::decryptor::Decryptor;
+use lib_auth::security::encryption::encryptor::Encryptor;
+use lib_auth::security::token::token::Token;
+use lib_domain::sessions::tokens::RefreshToken;
+use lib_domain::sessions::user_session_token::UserSessionToken;
+
+use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};
 use crate::queries::get_active_session_by_id::get_active_session_by_id;
 use crate::queries::save_just_ended_user_session::save_just_ended_session;
 use crate::queries::save_refreshed_user_session::save_refreshed_session;
 use crate::telemetry::spawn_blocking_with_tracing;
-use lib_auth::security::encryption::decryptor::Decryptor;
-use lib_auth::security::encryption::encryptor::Encryptor;
-use lib_auth::security::token::token::Token;
-use lib_domain::sessions::user_session_token::UserSessionToken;
 
 #[derive(Deserialize)]
 pub struct RefreshRequest {

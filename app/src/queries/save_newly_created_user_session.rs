@@ -1,6 +1,5 @@
 use sqlx::{Executor, Postgres, Transaction};
 
-use lib_auth::security::token::token::Token;
 use lib_domain::sessions::state::newly_created::NewlyCreated;
 use lib_domain::sessions::user_session::UserSession;
 

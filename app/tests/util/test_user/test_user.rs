@@ -1,17 +1,13 @@
 use chrono::{DateTime, Utc};
-use password_hash::SaltString;
-use reqwest::header::{AUTHORIZATION, HeaderMap, HeaderValue};
-use secrecy::Secret;
 use serde::Deserialize;
-use serde_json::{json, to_string};
 use uuid::Uuid;
-use lib_auth::security::hash::schema::{get_latest_scheme, Scheme};
-use crate::util::api_client::ApiClient;
+
+use lib_auth::security::hash::schema::Scheme;
+
 use crate::util::test_app::TestApp;
 use crate::util::test_user::anonymous::Anonymous;
 use crate::util::test_user::logged_in::LoggedIn;
 use crate::util::test_user::user_state::{Token, UserState};
-
 
 pub struct TestUser<'a, State: UserState + Clone> {
     pub user_id: Uuid,

@@ -4,7 +4,6 @@ use reqwest::Response;
 use secrecy::Secret;
 use serde_json::{json, Value};
 use sqlx::PgPool;
-use tracing::log::Log;
 use uuid::Uuid;
 use lib_auth::security::hash::schema::{get_latest_scheme, Scheme};
 use crate::util::api_client::ApiClient;

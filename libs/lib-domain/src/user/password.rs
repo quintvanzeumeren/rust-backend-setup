@@ -154,7 +154,7 @@ mod tests {
     #[test]
     fn create_password_from() {
         let salt = get_salt();
-        let (pw1, password1) = password(&salt);
+        let (_, password1) = password(&salt);
 
         let hash_str = password1.hash_string().expose_secret();
         let result = Password::try_from(hash_str.as_str());

@@ -72,7 +72,7 @@ mod tests {
         transaction.commit().await.expect("Failed to commit transaction");
 
         let mut latest_refresh_token = session.state().refresh_token().clone();
-        for i in 0..10 {
+        for _ in 0..10 {
 
             let mut transaction = db.begin()
                 .await

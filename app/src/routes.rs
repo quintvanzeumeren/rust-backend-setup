@@ -1,17 +1,12 @@
 use std::sync::Arc;
+
 use axum::Router;
 use axum::routing::{get, post};
-use pasetors::keys::SymmetricKey;
-use pasetors::version4::V4;
-use sqlx::PgPool;
-use sqlx::postgres::PgPoolOptions;
 use tower_http::trace::TraceLayer;
-use lib_auth::security::token::token::Token;
-use lib_auth::security::token::token_encryptor::TokenEncryptor;
-use lib_domain::sessions::tokens::RefreshToken;
-use crate::app_state::AppState;
 
-use crate::configuration::configuration::Configuration;
+use lib_auth::security::token::token::Token;
+
+use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::login::login::login;
 use crate::handlers::internal::v1::auth::logout::logout::logout;
 use crate::handlers::internal::v1::auth::refresh::refresh::refresh;

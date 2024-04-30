@@ -3,12 +3,8 @@ use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::PgPool;
-use tracing::log::__private_api::log;
 use uuid::Uuid;
 use crate::util::spawn_app::{assert_status_eq, spawn_app};
-
-use crate::util::test_user::anonymous::Anonymous;
-use crate::util::test_user::test_user::TestUser;
 
 #[sqlx::test]
 async fn login_should_give_unprocessable_entity_for_invalid_body(db: PgPool) {

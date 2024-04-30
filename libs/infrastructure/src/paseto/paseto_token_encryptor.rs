@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Formatter};
-use std::marker::PhantomData;
+
 use chrono::DateTime;
 use pasetors::claims::{Claims, ClaimsValidationRules};
 use pasetors::keys::SymmetricKey;
@@ -8,12 +8,13 @@ use pasetors::token::UntrustedToken;
 use pasetors::version4::V4;
 use secrecy::{ExposeSecret, Secret};
 use uuid::Uuid;
+
 use lib_auth::security::encryption::decryptor::Decryptor;
 use lib_auth::security::encryption::encryptor::Encryptor;
-
-use lib_auth::security::token::token::{Token};
+use lib_auth::security::token::token::Token;
 use lib_auth::security::token::token_encryptor::{EncryptedToken, TokenEncryptor};
 use lib_util::errors::errors::format_error_chain;
+
 use crate::paseto::paseto_claims::PasetoClaims;
 
 #[derive(Clone)]
