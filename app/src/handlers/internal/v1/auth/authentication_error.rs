@@ -11,7 +11,6 @@ pub type AuthenticationResult<T> = Result<T, AuthenticationError>;
 
 #[derive(thiserror::Error)]
 pub enum AuthenticationError {
-
     #[error("Request headers for the access token is invalid")]
     AccessTokenHeadersInvalid,
 
@@ -28,7 +27,7 @@ pub enum AuthenticationError {
     TokenDecryptionError(#[from] LocalPasetoV4DecryptionError),
 
     #[error(transparent)]
-    UnexpectedError(#[from] anyhow::Error)
+    UnexpectedError(#[from] anyhow::Error),
 }
 
 impl Debug for AuthenticationError {
@@ -40,15 +39,19 @@ impl Debug for AuthenticationError {
 impl IntoResponse for AuthenticationError {
     fn into_response(self) -> Response {
         match self {
-            AuthenticationError::AccessTokenHeadersInvalid |
-            AuthenticationError::SessionNotActive |
-            AuthenticationError::CredentialsInvalid |
-            AuthenticationError::TokenInvalid => StatusCode::UNAUTHORIZED.into_response(),
+            AuthenticationError::AccessTokenHeadersInvalid
+            | AuthenticationError::SessionNotActive
+            | AuthenticationError::CredentialsInvalid
+            | AuthenticationError::TokenInvalid => StatusCode::UNAUTHORIZED.into_response(),
             AuthenticationError::TokenDecryptionError(e) => match e {
-                LocalPasetoV4DecryptionError::TokenNotYetActive => StatusCode::UNAUTHORIZED.into_response(),
-                _ => InternalErrorResponse::from(tracing::Span::current()).into_response()
+                LocalPasetoV4DecryptionError::TokenNotYetActive => {
+                    StatusCode::UNAUTHORIZED.into_response()
+                }
+                _ => InternalErrorResponse::from(tracing::Span::current()).into_response(),
             },
-            AuthenticationError::UnexpectedError(_) => InternalErrorResponse::from(tracing::Span::current()).into_response(),
+            AuthenticationError::UnexpectedError(_) => {
+                InternalErrorResponse::from(tracing::Span::current()).into_response()
+            }
         }
     }
 }

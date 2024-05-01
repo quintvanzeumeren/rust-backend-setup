@@ -1,2 +1,2 @@
-mod current_user;
 mod auth;
+mod current_user;

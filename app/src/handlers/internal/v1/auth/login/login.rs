@@ -4,23 +4,25 @@ use std::sync::Arc;
 use anyhow::Context;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::Json;
 use axum::response::{IntoResponse, Response};
+use axum::Json;
 use chrono::{DateTime, Utc};
 use password_hash::SaltString;
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
-use sqlx::{Executor, PgPool, Postgres, query, Transaction};
+use sqlx::{query, Executor, PgPool, Postgres, Transaction};
 use tokio::task::JoinError;
 use uuid::Uuid;
 
-use security::encryption::encryptor::Encryptor;
 use domain::sessions::state::newly_created::NewlyCreated;
 use domain::sessions::user_session::UserSession;
 use domain::user::password::{MatchError, MatchResult, Password};
+use security::encryption::encryptor::Encryptor;
 
 use crate::app_state::AppState;
-use crate::handlers::internal::v1::auth::authentication_error::{AuthenticationError, AuthenticationResult};
+use crate::handlers::internal::v1::auth::authentication_error::{
+    AuthenticationError, AuthenticationResult,
+};
 use crate::queries::save_newly_created_user_session::save_newly_created_user_session;
 use crate::telemetry::spawn_blocking_with_tracing;
 
@@ -69,8 +71,8 @@ pub async fn login(
     // See: https://en.wikipedia.org/wiki/Timing_attack
     // and https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/03-Identity_Management_Testing/04-Testing_for_Account_Enumeration_and_Guessable_User_Account
     let mut user_id = None;
-    let mut expected_user_password = get_dummy_hash()
-        .context("Failed to create default password")?;
+    let mut expected_user_password =
+        get_dummy_hash().context("Failed to create default password")?;
 
     let optional_user_credentials = get_user_credentials(&state.db, &credentials.username)
         .await
@@ -87,12 +89,15 @@ pub async fn login(
         .context("Failed to submitted password with expected password")?;
 
     let user_id = user_id.ok_or(AuthenticationError::CredentialsInvalid)?;
-    let mut transaction = state.db.begin().await
+    let mut transaction = state
+        .db
+        .begin()
+        .await
         .context("Failed to start a Postgres transaction")?;
 
-    match match_result  {
+    match match_result {
         MatchResult::DoesNotMatch => return Err(AuthenticationError::CredentialsInvalid),
-        MatchResult::Matches => {},
+        MatchResult::Matches => {}
         MatchResult::MatchesButSchemeOutdated => {
             // TODO: move this code in its own function
             // TODO: shouldn't fail entire login operation if we cannot update the password, better to just log it
@@ -101,9 +106,9 @@ pub async fn login(
                 let salt_string = salt();
                 return Password::new(password, &salt_string);
             })
-                .await
-                .context("Failed to spawn tokio blocking task to rehash outdated password")?
-                .context("Failed hash the password of user")?;
+            .await
+            .context("Failed to spawn tokio blocking task to rehash outdated password")?
+            .context("Failed hash the password of user")?;
 
             update_user_password(&mut transaction, user_id.clone(), hash_result)
                 .await
@@ -112,27 +117,31 @@ pub async fn login(
     };
 
     let new_session = UserSession::<NewlyCreated>::new(&user_id);
-    save_newly_created_user_session(&mut transaction, &new_session).await
+    save_newly_created_user_session(&mut transaction, &new_session)
+        .await
         .context("Failed to save new user session to the database")?;
 
     let cipher = state.new_token_encryptor();
     let (encrypted_refresh_token, encrypted_access_token) =
         spawn_blocking_with_tracing(move || {
-            let encrypted_refresh_token =
-                cipher.encrypt(new_session.state().refresh_token());
+            let encrypted_refresh_token = cipher.encrypt(new_session.state().refresh_token());
 
-            let encrypted_access_token =
-                cipher.encrypt(new_session.state().access_token());
+            let encrypted_access_token = cipher.encrypt(new_session.state().access_token());
 
             (encrypted_refresh_token, encrypted_access_token)
         })
         .await
         .context("Failed to spawn blocking tokio task to encrypt session tokens")?;
 
-    let encrypted_refresh_token = encrypted_refresh_token.context("Failed to encrypt refresh token")?;
-    let encrypted_access_token = encrypted_access_token.context("Failed to encrypt access token")?;
+    let encrypted_refresh_token =
+        encrypted_refresh_token.context("Failed to encrypt refresh token")?;
+    let encrypted_access_token =
+        encrypted_access_token.context("Failed to encrypt access token")?;
 
-    transaction.commit().await.context("Failed to commit transaction")?;
+    transaction
+        .commit()
+        .await
+        .context("Failed to commit transaction")?;
 
     Ok(LoginResponse::UserLoggedInSuccessfully {
         access_token: encrypted_access_token.token.expose_secret().clone(),
@@ -151,11 +160,11 @@ struct UserCredentials {
     password: Password,
 }
 
-#[tracing::instrument(
-    name = "Fetching user credentials for username",
-    skip(db, username)
-)]
-async fn get_user_credentials(db: &PgPool, username: &String) -> anyhow::Result<Option<UserCredentials>> {
+#[tracing::instrument(name = "Fetching user credentials for username", skip(db, username))]
+async fn get_user_credentials(
+    db: &PgPool,
+    username: &String,
+) -> anyhow::Result<Option<UserCredentials>> {
     let row = query!(
         r#"
            SELECT user_id, password_hash FROM users
@@ -163,34 +172,32 @@ async fn get_user_credentials(db: &PgPool, username: &String) -> anyhow::Result<
         "#,
         username
     )
-        .fetch_optional(db)
-        .await
-        .context("Failed to perform a query to retrieve stored credentials.")?
-        .map(|row| (row.user_id, Secret::new(row.password_hash)));
+    .fetch_optional(db)
+    .await
+    .context("Failed to perform a query to retrieve stored credentials.")?
+    .map(|row| (row.user_id, Secret::new(row.password_hash)));
 
     if row.is_none() {
-        return Ok(None)
+        return Ok(None);
     }
 
     let (user_id, pw_hash) = row.unwrap();
     let password = Password::try_from(pw_hash.expose_secret().clone())?;
 
-    Ok(Some(
-        UserCredentials {
-            user_id,
-            password,
-        }
-    ))
+    Ok(Some(UserCredentials { user_id, password }))
 }
 
 #[tracing::instrument(
     name = "Comparing expected password with submitted password",
     skip(expected_password, submitted_password)
 )]
-async fn verify_if_password_matches(expected_password: Password, submitted_password: &Secret<String>) -> Result<Result<MatchResult, MatchError>, JoinError> {
+async fn verify_if_password_matches(
+    expected_password: Password,
+    submitted_password: &Secret<String>,
+) -> Result<Result<MatchResult, MatchError>, JoinError> {
     // Moving matches into a different thread because its operation is considered heavy,
     // which can block tokio runtime.
-    let password =  submitted_password.clone();
+    let password = submitted_password.clone();
     spawn_blocking_with_tracing(move || expected_password.matches(&password)).await
 }
 
@@ -205,7 +212,7 @@ fn salt() -> SaltString {
 async fn update_user_password(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
-    new_password: Password
+    new_password: Password,
 ) -> Result<(), sqlx::Error> {
     let password_hash = new_password.hash_string();
     let query = sqlx::query!(
