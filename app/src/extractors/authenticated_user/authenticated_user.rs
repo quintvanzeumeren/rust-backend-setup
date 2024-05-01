@@ -7,19 +7,19 @@ use axum_extra::headers::Authorization;
 use axum_extra::headers::authorization::Bearer;
 use axum_extra::TypedHeader;
 use secrecy::Secret;
-use serde::Serialize;
 use uuid::Uuid;
+
+use domain::sessions::tokens::AccessToken;
+use domain::sessions::user_session_token::UserSessionToken;
 use security::encryption::decryptor::Decryptor;
 use security::token::token::Token;
-use domain::sessions::user_session_token::UserSessionToken;
-use domain::sessions::tokens::AccessToken;
-use crate::app_state::AppState;
 
+use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
 
-
-#[derive(Serialize, Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct AuthenticatedUser {
+    pub state: Arc<AppState>,
     pub user_id: Uuid,
     pub session_id: Uuid,
     pub refresh_token_id: Uuid
@@ -66,6 +66,7 @@ impl<S> FromRequestParts<S> for AuthenticatedUser where
         }
 
         Ok(AuthenticatedUser {
+            state: app_state,
             user_id: access_token.get_custom_claims().user_id,
             session_id: access_token.get_custom_claims().session_id,
             refresh_token_id: access_token.get_custom_claims().refresh_token_id

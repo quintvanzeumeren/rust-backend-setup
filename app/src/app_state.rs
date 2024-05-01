@@ -7,7 +7,7 @@ use infrastructure::paseto::paseto_token_encryptor::LocalPasetoV4TokenEncryptor;
 
 use crate::configuration::configuration::Configuration;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppState {
     pub db: PgPool,
     pub encryption_key: SymmetricKey<V4>,
