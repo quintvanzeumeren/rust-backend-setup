@@ -75,6 +75,14 @@ impl <'a, CC: Serialize + DeserializeOwned + Clone> Token<'a> for UserSessionTok
     fn get_custom_claims(&'a self) -> &'a Self::CustomClaims {
         &self.custom_claims
     }
+
+    fn expired(&'a self) -> bool {
+        self.expiration.has_passed()
+    }
+
+    fn active(&'a self) -> bool {
+        self.not_before.has_passed()
+    }
 }
 
 #[cfg(test)]

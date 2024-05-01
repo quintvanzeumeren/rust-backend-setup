@@ -8,11 +8,15 @@ use crate::shared::expiration::Expiration;
 pub struct ActivationTime(pub Expiration);
 
 impl ActivationTime {
-    fn has_passed(&self) -> bool {
+
+    /// has_passed returns true when the time of activation has been passed.
+    pub fn has_passed(&self) -> bool {
         self.0.has_passed()
     }
 
-    fn has_not_passed(&self) -> bool {
+    /// has_not_passed returns true when the time of activation has yet to be passed.
+    /// In other words, it is `now` is still before the activation time.
+    pub fn has_not_passed(&self) -> bool {
         !self.has_passed()
     }
 }

@@ -22,7 +22,7 @@ pub async fn logout(
         .await
         .context("Failed to query database to get active session")?
         .ok_or(AuthenticationError::SessionNotActive)?
-        .end_by_logout();
+        .end_duo_user_by_logout();
 
     let mut transaction = state.db.begin()
         .await

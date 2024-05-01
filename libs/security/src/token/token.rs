@@ -47,12 +47,8 @@ pub trait Token<'a>: Clone + Sized {
     fn get_custom_claims(&'a self) -> &'a Self::CustomClaims;
     
     /// expired returns true if the expiration time of the token was passed 
-    fn expired(&'a self) -> bool {
-        *self.get_expiration() < Utc::now()
-    }
+    fn expired(&'a self) -> bool;
 
     /// active returns true if the time in where the token becomes active (not before) has passed
-    fn active(&'a self) -> bool {
-        *self.get_not_before() < Utc::now()
-    }
+    fn active(&'a self) -> bool;
 }

@@ -21,8 +21,6 @@ secrecy.workspace = true
 regex.workspace = true
 password-hash.workspace = true
 
-
 # -- Other
-
 [lints]
 workspace = true

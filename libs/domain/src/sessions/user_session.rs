@@ -82,8 +82,11 @@ impl UserSession<Active> {
         refresh_token: UserSessionToken<RefreshToken>
     ) -> Result<UserSession<Refreshed>, UserSession<JustEnded>> {
         let latest_refresh_token = &self.state.latest_refresh_token;
-        // let refresh_token_used_previously = *latest_refresh_token.get_id() != *refresh_token.get_id();
-        if self.refresh_token_used_before(&refresh_token) {
+
+        // There can only be one valid refresh token at the time,
+        // therefor it must only be the latest token
+        let refresh_token_used_previously = *latest_refresh_token.get_id() != *refresh_token.get_id();
+        if refresh_token_used_previously {
             return Err(UserSession {
                 id: self.id,
                 user_id: self.user_id,
@@ -98,8 +101,7 @@ impl UserSession<Active> {
             })
         }
 
-        // let refresh_token_expired = Utc::now() > *latest_refresh_token.get_expiration();
-        if self.refresh_token_expired() {
+        if self.state.latest_refresh_token.expired() {
             return Err(UserSession {
                 id: self.id,
                 user_id: self.user_id,
@@ -111,6 +113,12 @@ impl UserSession<Active> {
                 }
             })
         }
+
+        // no need to check this currently as paseto token implementation will 
+        // raise an error when decrypting the token and time `not before` claim has not yet passed.
+        // therefor we currently cannot ever receive a token which is not yet activated.
+        // if self.state.latest_refresh_token.not_before.has_not_passed() {
+        // }
 
         let new_access_token = AccessToken {
             user_id: self.user_id.clone(),
@@ -135,18 +143,8 @@ impl UserSession<Active> {
             },
         })
     }
-
-    fn refresh_token_used_before(&self, refresh_token: &UserSessionToken<RefreshToken>) -> bool {
-        // There can only be one valid refresh token at the time,
-        // therefor it must only be the latest token
-        self.state.latest_refresh_token.id != refresh_token.id
-    }
-
-    fn refresh_token_expired(&self) -> bool {
-        Utc::now() > *self.state.latest_refresh_token.get_expiration()
-    }
     
-    pub fn end_by_logout(self) -> UserSession<JustEnded> {
+    pub fn end_duo_user_by_logout(self) -> UserSession<JustEnded> {
         UserSession {
             id: self.id,
             user_id: self.user_id,
@@ -375,7 +373,7 @@ mod tests {
             }
         };
         
-        let got = session.end_by_logout();
+        let got = session.end_duo_user_by_logout();
         
         assert_eq!(expected.id, got.id);
         assert_eq!(expected.user_id, got.user_id);
