@@ -21,9 +21,6 @@ use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::authentication_error::{
     AuthenticationError, AuthenticationResult,
 };
-use crate::queries::get_active_session_by_id::get_active_session_by_id;
-use crate::queries::save_just_ended_user_session::save_just_ended_session;
-use crate::queries::save_refreshed_user_session::save_refreshed_session;
 use crate::telemetry::spawn_blocking_with_tracing;
 
 #[derive(Deserialize)]
@@ -72,11 +69,11 @@ pub async fn refresh(
         &tracing::field::display(&refresh_token.get_id()),
     );
 
-    let active_session =
-        get_active_session_by_id(&state.db, &refresh_token.get_custom_claims().session_id)
-            .await
-            .context("Failed to active session from Postgres")?
-            .ok_or(AuthenticationError::SessionNotActive)?;
+    let active_session = state.db
+        .get_active_session_by_id(&refresh_token.get_custom_claims().session_id)
+        .await
+        .context("Failed to active session from Postgres")?
+        .ok_or(AuthenticationError::SessionNotActive)?;
 
     tracing::Span::current().record(
         "latest_session_refresh_token_id",
@@ -95,14 +92,10 @@ async fn save_refreshed_session_and_generate_response(
     state: Arc<AppState>,
     refreshed_session: UserSession<Refreshed>,
 ) -> AuthenticationResult<(StatusCode, Json<RefreshResponse>)> {
-    let mut transaction = state
-        .db
-        .begin()
-        .await
+    let mut transaction = state.db.new_transaction().await
         .context("Failed to start transaction to save refreshed session")?;
 
-    save_refreshed_session(&mut transaction, &refreshed_session)
-        .await
+    transaction.save_refreshed_session(&refreshed_session).await
         .context("Failed to save refresh session to Postgres")?;
 
     let token_encryptor = state.new_token_encryptor();
@@ -121,9 +114,7 @@ async fn save_refreshed_session_and_generate_response(
     let access_token = access_token.context("Failed to encrypt access token")?;
     let refresh_token = refresh_token.context("Failed to encrypt refresh token")?;
 
-    transaction
-        .commit()
-        .await
+    transaction.commit().await
         .context("Failed to commit refresh token to Postgres")?;
 
     Ok((
@@ -141,19 +132,13 @@ async fn save_ended_session_and_generate_response(
     state: Arc<AppState>,
     ended_session: UserSession<JustEnded>,
 ) -> AuthenticationResult<(StatusCode, Json<RefreshResponse>)> {
-    let mut transaction = state
-        .db
-        .begin()
-        .await
+    let mut transaction = state.db.new_transaction().await
         .context("Failed to start transaction to save refreshed session")?;
 
-    save_just_ended_session(&mut transaction, &ended_session)
-        .await
+    transaction.save_just_ended_session(&ended_session).await
         .context("Failed to save refresh session to Postgres")?;
 
-    transaction
-        .commit()
-        .await
+    transaction.commit().await
         .context("Failed to commit just ended token to Postgres")?;
 
     Err(AuthenticationError::TokenInvalid)

@@ -9,4 +9,8 @@ impl Database {
         let tx = self.0.begin().await?;
         Ok(Transaction(tx))
     }
+
+    pub fn db(&self) -> &PgPool {
+        &self.0
+    }
 }

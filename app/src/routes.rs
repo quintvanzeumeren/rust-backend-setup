@@ -4,8 +4,6 @@ use axum::Router;
 use axum::routing::{get, post};
 use tower_http::trace::TraceLayer;
 
-use security::token::token::Token;
-
 use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::login::login::login;
 use crate::handlers::internal::v1::auth::logout::logout::logout;

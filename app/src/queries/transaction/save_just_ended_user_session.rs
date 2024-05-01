@@ -1,4 +1,4 @@
-use sqlx::{Executor, query, query_file};
+use sqlx::{Executor, query_file};
 
 use domain::sessions::state::just_ended::JustEnded;
 use domain::sessions::user_session::UserSession;

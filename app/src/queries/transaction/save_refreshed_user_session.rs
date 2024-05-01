@@ -27,21 +27,17 @@ mod tests {
     use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::database::Database;
-    use crate::queries::get_active_session_by_id::get_active_session_by_id;
-    use crate::queries::get_refresh_token_by_id::get_refresh_token_by_id;
     use crate::queries::models::refresh_token_record::RefreshTokenRecord;
-    use crate::queries::save_user::save_user;
 
     #[sqlx::test]
     async fn test_save_refreshed_session(db: PgPool) {
-        let db2 = db.clone();
-        let database = Database(db2);
+        let database = Database(db);
         let mut transaction = database.new_transaction().await.expect("Failed to create transaction");
 
         // create and save a user
         let salt = random_salt();
         let user = random_user(random_secret(), &salt);
-        save_user(&mut transaction.0, &user)
+        transaction.save_user(&user)
             .await
             .expect("Failed to create user");
 
@@ -60,7 +56,7 @@ mod tests {
         let mut transaction = database.new_transaction().await.expect("Failed to create transaction");
 
         // get new session as active session
-        let active_session = get_active_session_by_id(&db, &session.id())
+        let active_session = database.get_active_session_by_id(&session.id())
             .await
             .expect("Failed to get active session by id")
             .expect("Failed to find active session by id");
@@ -82,11 +78,11 @@ mod tests {
             .expect("Failed to commit transaction");
 
         // check if the new refresh token is saved
-        let token =
-            get_refresh_token_by_id(&db, refreshed_session.state().new_refresh_token().get_id())
-                .await
-                .expect("Failed to get just saved refresh token by id")
-                .expect("Failed to find refresh token by id");
+        let token = database
+            .get_refresh_token_by_id(refreshed_session.state().new_refresh_token().get_id())
+            .await
+            .expect("Failed to get just saved refresh token by id")
+            .expect("Failed to find refresh token by id");
 
         let expected = RefreshTokenRecord::from(refreshed_session.state().new_refresh_token());
         let got = RefreshTokenRecord::from(&token);

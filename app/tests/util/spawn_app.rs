@@ -7,6 +7,7 @@ use sqlx::PgPool;
 use app::app_state::AppState;
 
 use app::configuration::configuration::get_configuration;
+use app::queries::database::Database;
 use app::routes::{router};
 use app::telemetry::{get_subscriber, init_subscriber};
 use crate::util::api_client::ApiClient;
@@ -61,7 +62,7 @@ pub async fn spawn_app(db: PgPool) -> TestApp {
         let app = router(
             // AppState::try_from(app_config).expect("Failed to build AppState")
             AppState {
-                db: app_db,
+                db: Database(app_db),
                 encryption_key: SymmetricKey::<V4>::generate()
                     .expect("Failed to random encryption key")
             }

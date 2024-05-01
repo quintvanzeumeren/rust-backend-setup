@@ -2,8 +2,6 @@ use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use security::hash::schema::Scheme;
-
 use crate::util::test_app::TestApp;
 use crate::util::test_user::anonymous::Anonymous;
 use crate::util::test_user::logged_in::LoggedIn;

@@ -1,40 +1,37 @@
-use sqlx::{PgPool, query_as};
+use sqlx::query_file_as;
 use uuid::Uuid;
-use domain::sessions::user_session_token::UserSessionToken;
 
 use domain::sessions::tokens::RefreshToken;
+use domain::sessions::user_session_token::UserSessionToken;
 
+use crate::queries::database::Database;
 use crate::queries::models::refresh_token_record::RefreshTokenRecord;
 
-#[tracing::instrument(
-name = "Querying Postgres for latest refresh token by session id",
-skip(db, session_id),
-fields(
-session_id = % session_id
-)
-)]
-pub async fn get_latest_token_for_session(
-    db: &PgPool,
-    session_id: &Uuid,
-) -> Result<Option<UserSessionToken<RefreshToken>>, sqlx::Error> {
-    let query_result = query_as!(
+impl Database {
+    #[tracing::instrument(
+    name = "Querying Postgres for latest refresh token by session id",
+    skip(self, session_id),
+    fields(session_id = % session_id)
+    )]
+    pub async fn get_latest_token_for_session(
+        &self,
+        session_id: &Uuid,
+    ) -> Result<Option<UserSessionToken<RefreshToken>>, sqlx::Error> {
+        let query_result = query_file_as!(
         RefreshTokenRecord,
-        r#"
-        SELECT * FROM refresh_tokens
-        WHERE refresh_tokens.session_id = $1
-        ORDER BY refresh_tokens.issued_at DESC
-        LIMIT 1
-        "#,
+        "src/queries/get_latest_token_for_session.sql",
         session_id
     )
-        .fetch_optional(db)
-        .await?;
+            .fetch_optional(self.db())
+            .await?;
 
-    if let Some(token) = query_result {
-        return Ok(Some(token.into()))
+        if let Some(token) = query_result {
+            return Ok(Some(token.into()))
+        }
+
+        Ok(None)
     }
 
-    Ok(None)
 }
 
 #[cfg(test)]
@@ -46,26 +43,24 @@ mod tests {
     use test_utility::random::user::random_user;
     use test_utility::random::user_session::random_newly_created_user_session;
 
-    use crate::queries::get_latest_token_for_session::get_latest_token_for_session;
+    use crate::queries::database::Database;
     use crate::queries::models::refresh_token_record::RefreshTokenRecord;
-    use crate::queries::save_newly_created_user_session::save_newly_created_user_session;
-    use crate::queries::save_refresh_token::save_refresh_token;
-    use crate::queries::save_user::save_user;
 
     #[sqlx::test]
     async fn test_latest_token_for_session_2(db: PgPool) {
-        let mut transaction = db.begin().await.expect("Failed to create transaction");
+        let db = Database(db);
+        let mut transaction = db.new_transaction().await.expect("Failed to create transaction");
 
         // create and save a user
         let salt = random_salt();
         let user = random_user(random_secret(), &salt);
-        save_user(&mut transaction, &user)
+        transaction.save_user(&user)
             .await
             .expect("Failed to create user");
 
         // create new session
         let session = random_newly_created_user_session(&user.id);
-        save_newly_created_user_session(&mut transaction, &session)
+        transaction.save_newly_created_user_session(&session)
             .await
             .expect("Failed to save newly created user session");
 
@@ -74,7 +69,7 @@ mod tests {
         let mut latest_refresh_token = session.state().refresh_token().clone();
         for _ in 0..10 {
 
-            let mut transaction = db.begin()
+            let mut transaction = db.new_transaction()
                 .await
                 .expect("Failed to create transaction");
 
@@ -82,7 +77,7 @@ mod tests {
 
             // get new session
             latest_refresh_token = random_refresh_token_from(&latest_refresh_token);
-            save_refresh_token(&mut transaction, &latest_refresh_token)
+            transaction.save_refresh_token(&latest_refresh_token)
                 .await
                 .expect("Failed to save refresh token");
 
@@ -90,7 +85,7 @@ mod tests {
             transaction.commit().await.expect("Failed to commit new refresh token");
 
             // get latest refresh token
-            let token = get_latest_token_for_session(&db, session.id())
+            let token = db.get_latest_token_for_session(session.id())
                 .await
                 .expect("Failed to query database to get latest session token")
                 .expect("Failed to find latest session token");

@@ -1,4 +1,4 @@
-use sqlx::{query, Executor};
+use sqlx::{Executor, query_file};
 
 use domain::user::user::User;
 
@@ -12,11 +12,8 @@ impl Transaction {
         user: &User,
     ) -> sqlx::Result<()> {
         let user_record = UserRecord::from(user);
-        self.0.execute(query!(
-            r#"
-            INSERT INTO users (user_id, username, password_hash)
-            VALUES ($1, $2, $3)
-        "#,
+        self.0.execute(query_file!(
+            "src/queries/transaction/save_user.sql",
             user_record.user_id,
             user_record.username,
             user_record.password_hash
@@ -35,7 +32,6 @@ mod tests {
     use crate::queries::database::Database;
 
     use crate::queries::models::user_record::UserRecord;
-    use crate::queries::save_user::save_user;
 
     #[sqlx::test]
     async fn test_save_user(db: PgPool) {

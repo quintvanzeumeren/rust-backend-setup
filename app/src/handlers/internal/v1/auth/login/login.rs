@@ -23,7 +23,6 @@ use crate::app_state::AppState;
 use crate::handlers::internal::v1::auth::authentication_error::{
     AuthenticationError, AuthenticationResult,
 };
-use crate::queries::save_newly_created_user_session::save_newly_created_user_session;
 use crate::telemetry::spawn_blocking_with_tracing;
 
 #[derive(Deserialize)]
@@ -74,7 +73,8 @@ pub async fn login(
     let mut expected_user_password =
         get_dummy_hash().context("Failed to create default password")?;
 
-    let optional_user_credentials = get_user_credentials(&state.db, &credentials.username)
+    // todo move into queries crate
+    let optional_user_credentials = get_user_credentials(&state.db.0, &credentials.username)
         .await
         .context("Failed to get user credentials from Postgres")?;
 
@@ -91,7 +91,7 @@ pub async fn login(
     let user_id = user_id.ok_or(AuthenticationError::CredentialsInvalid)?;
     let mut transaction = state
         .db
-        .begin()
+        .new_transaction()
         .await
         .context("Failed to start a Postgres transaction")?;
 
@@ -110,14 +110,15 @@ pub async fn login(
             .context("Failed to spawn tokio blocking task to rehash outdated password")?
             .context("Failed hash the password of user")?;
 
-            update_user_password(&mut transaction, user_id.clone(), hash_result)
+            // todo migrate update_user_password to Transaction struct
+            update_user_password(&mut transaction.0, user_id.clone(), hash_result)
                 .await
                 .context("Failed to password of user in Postgres")?;
         }
     };
 
     let new_session = UserSession::<NewlyCreated>::new(&user_id);
-    save_newly_created_user_session(&mut transaction, &new_session)
+    transaction.save_newly_created_user_session(&new_session)
         .await
         .context("Failed to save new user session to the database")?;
 
