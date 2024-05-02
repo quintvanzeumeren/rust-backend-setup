@@ -47,16 +47,6 @@ impl Scheme for Argon2Scheme {
     }
 }
 
-/* TODO:
-
-    - Continue the implementation of the Argon2Schema
-    - Figure out what you should return as possible errors
-    - After which, we need to figure out how to save it properly has a PHC string format.
-    - Add the database to the tests, and create a test user to add a user within the test database.
-    - After which we can test if we can authenticate a existing user.
-
- */
-
 #[cfg(test)]
 mod tests {
 	use password_hash::SaltString;

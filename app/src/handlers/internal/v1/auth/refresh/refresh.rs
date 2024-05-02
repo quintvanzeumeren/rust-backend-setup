@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use domain::sessions::tokens::RefreshToken;
 use domain::sessions::user_session::UserSession;
 use domain::sessions::user_session_token::UserSessionToken;
+use infrastructure::paseto::paseto_token_encryptor::LocalPasetoV4DecryptionError;
 use security::encryption::decryptor::Decryptor;
 use security::encryption::encryptor::Encryptor;
 use security::token::token::Token;
@@ -51,22 +52,23 @@ pub async fn refresh(
     refresh_request: Json<RefreshRequest>,
 ) -> AuthenticationResult<(StatusCode, Json<RefreshResponse>)> {
     let token_encryptor = state.new_token_encryptor();
+    let refresh_token = spawn_blocking_with_tracing(move || {
+        let refresh_token: Result<UserSessionToken<RefreshToken>, LocalPasetoV4DecryptionError> =
+            token_encryptor.decrypt(&refresh_request.refresh_token);
 
-    // TODO: put decrypt in tokio blocking
-    let refresh_token: UserSessionToken<RefreshToken> =
-        token_encryptor.decrypt(&refresh_request.refresh_token)?;
+        refresh_token
+    })
+        .await
+        .context("Failed to spawn blocking tokio task to encrypt refreshed session tokens")??;
 
     tracing::Span::current().record(
-        "user_id",
-        &tracing::field::display(&refresh_token.get_custom_claims().user_id),
+        "user_id", &tracing::field::display(&refresh_token.get_custom_claims().user_id),
     );
     tracing::Span::current().record(
-        "session_id",
-        &tracing::field::display(&refresh_token.get_custom_claims().session_id),
+        "session_id", &tracing::field::display(&refresh_token.get_custom_claims().session_id),
     );
     tracing::Span::current().record(
-        "refresh_token_id",
-        &tracing::field::display(&refresh_token.get_id()),
+        "refresh_token_id", &tracing::field::display(&refresh_token.get_id()),
     );
 
     let active_session = state.db

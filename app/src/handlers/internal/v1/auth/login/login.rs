@@ -51,8 +51,6 @@ impl IntoResponse for LoginResponse {
     }
 }
 
-// TODO: move get_user_credentials, and update_user_password out of this module and into the queries module.
-
 #[tracing::instrument(
     name = "Logging with username and hash",
     skip(state, credentials),
@@ -74,13 +72,14 @@ pub async fn login(
         get_dummy_hash().context("Failed to create default password")?;
 
     // todo move into queries crate
-    let optional_user_credentials = get_user_credentials(&state.db.0, &credentials.username)
+    let optional_user_credentials = state.db.get_user_credentials(&credentials.username)
         .await
         .context("Failed to get user credentials from Postgres")?;
-
+    
     if let Some(user_credentials) = optional_user_credentials {
         user_id = Some(user_credentials.user_id);
-        expected_user_password = user_credentials.password;
+        expected_user_password = Password::try_from(user_credentials.password_hash.expose_secret().clone())
+            .context("Failed to parse password hash")?;
     }
 
     let match_result = verify_if_password_matches(expected_user_password, &credentials.password)
@@ -110,8 +109,7 @@ pub async fn login(
             .context("Failed to spawn tokio blocking task to rehash outdated password")?
             .context("Failed hash the password of user")?;
 
-            // todo migrate update_user_password to Transaction struct
-            update_user_password(&mut transaction.0, user_id.clone(), hash_result)
+            transaction.update_user_password(user_id.clone(), hash_result)
                 .await
                 .context("Failed to password of user in Postgres")?;
         }
@@ -156,38 +154,6 @@ fn get_dummy_hash() -> anyhow::Result<Password> {
     Ok(Password::try_from("$argon2id$v=19$m=15000,t=2,p=1$gZiV/M1gPc22ElAH/Jh1Hw$CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno")?)
 }
 
-struct UserCredentials {
-    user_id: Uuid,
-    password: Password,
-}
-
-#[tracing::instrument(name = "Fetching user credentials for username", skip(db, username))]
-async fn get_user_credentials(
-    db: &PgPool,
-    username: &String,
-) -> anyhow::Result<Option<UserCredentials>> {
-    let row = query!(
-        r#"
-           SELECT user_id, password_hash FROM users
-           WHERE username = $1
-        "#,
-        username
-    )
-    .fetch_optional(db)
-    .await
-    .context("Failed to perform a query to retrieve stored credentials.")?
-    .map(|row| (row.user_id, Secret::new(row.password_hash)));
-
-    if row.is_none() {
-        return Ok(None);
-    }
-
-    let (user_id, pw_hash) = row.unwrap();
-    let password = Password::try_from(pw_hash.expose_secret().clone())?;
-
-    Ok(Some(UserCredentials { user_id, password }))
-}
-
 #[tracing::instrument(
     name = "Comparing expected password with submitted password",
     skip(expected_password, submitted_password)
@@ -204,28 +170,4 @@ async fn verify_if_password_matches(
 
 fn salt() -> SaltString {
     SaltString::generate(&mut rand::thread_rng())
-}
-
-#[tracing::instrument(
-    name = "Saving updated password of user to Postgres",
-    skip(transaction, user_id, new_password)
-)]
-async fn update_user_password(
-    transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
-    new_password: Password,
-) -> Result<(), sqlx::Error> {
-    let password_hash = new_password.hash_string();
-    let query = sqlx::query!(
-        r#"
-        UPDATE users
-        SET password_hash = $1
-        WHERE user_id = $2;
-        "#,
-        password_hash.expose_secret(),
-        user_id
-    );
-
-    transaction.execute(query).await?;
-    return Ok(());
 }

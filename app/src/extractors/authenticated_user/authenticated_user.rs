@@ -25,12 +25,6 @@ pub struct AuthenticatedUser {
     pub refresh_token_id: Uuid
 }
 
-// TODO: write additional integration tests that submit the following:
-// - inactive tokens,
-// - expired tokens,
-// - invalid encrypted token
-// - incorrect headers
-
 #[async_trait]
 impl<S> FromRequestParts<S> for AuthenticatedUser where
     Arc<AppState>: FromRef<S>,

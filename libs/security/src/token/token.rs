@@ -3,11 +3,6 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 use uuid::Uuid;
 
-// TODO: should decouple the Encryptor and Decryptor traits from the Token trades:
-// Most functionality for using the token trait does not need to require either Encryptor or Decryptor. 
-// Currently the UserSession API is directly coupled to using a specific token because of the need 
-// to specify the Encryptor and Decryptor traits without benefit.
-
 pub trait Token<'a>: Clone + Sized {
     type CustomClaims: Serialize + DeserializeOwned + Clone;
 

@@ -2,7 +2,6 @@ use reqwest::StatusCode;
 use sqlx::PgPool;
 use crate::util::spawn_app::{assert_status_eq, spawn_app};
 
-// TODO: test if logging out will prevent the refresh token from being used
 #[sqlx::test]
 async fn test_logging_out_will_invalidate_refresh_token(db: PgPool) {
     // Create app and initial user
