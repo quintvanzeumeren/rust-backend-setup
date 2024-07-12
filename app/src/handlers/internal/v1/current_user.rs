@@ -21,7 +21,7 @@ pub struct CurrentUser {
 impl From<AuthenticatedUser> for CurrentUser {
     fn from(value: AuthenticatedUser) -> Self {
         Self {
-            user_id: value.user_id,
+            user_id: value.user_id.0,
             session_id: value.session_id,
             refresh_token_id: value.refresh_token_id,
         }

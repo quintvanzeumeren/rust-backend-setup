@@ -1,13 +1,17 @@
 use std::path::PathBuf;
 use serde::Deserialize;
+use crate::configuration::admin::AdminConfig;
 use crate::configuration::application::ApplicationConfig;
 use crate::configuration::database::DatabaseConfig;
+use crate::configuration::telemetry::TelemetryConfig;
 
 #[derive(Deserialize, Clone)]
 pub struct Configuration {
     pub application: ApplicationConfig,
-    pub database: DatabaseConfig
+    pub database: DatabaseConfig,
+    pub admin: AdminConfig,
     // environment: Environment
+    pub telemetry: TelemetryConfig
 }
 
 /// APP_ENVIRONMENT is the name of the environment variable used to determine the running environment.

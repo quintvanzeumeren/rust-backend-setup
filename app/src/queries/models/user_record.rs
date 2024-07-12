@@ -1,23 +1,25 @@
 use secrecy::ExposeSecret;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use domain::user::password::Password;
 
-use domain::user::user::User;
+use domain::user::password::Password;
+use domain::user::user::{Admin, EndUser, User};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserRecord {
     pub user_id: Uuid,
     pub username: String,
     pub password_hash: String,
+    pub admin: bool
 }
 
 impl From<&User> for UserRecord {
     fn from(user: &User) -> Self {
         UserRecord {
-            user_id: user.id.clone(),
+            user_id: user.id.0,
             username: user.username.clone(),
             password_hash: user.hashed_password.hash_string().expose_secret().clone(),
+            admin: false
         }
     }
 }
@@ -25,20 +27,43 @@ impl From<&User> for UserRecord {
 impl TryInto<User> for UserRecord {
     type Error = password_hash::Error;
 
-    fn try_into(self) -> Result<User, Self::Error> {
-        Ok(User {
-            id: self.user_id,
-            username: self.username,
-            hashed_password: Password::try_from(self.password_hash)?,
-        })
+    fn try_into(self) -> Result<User<EndUser>, Self::Error> {
+        Ok(User::new(
+            self.user_id.into(),
+            self.username,
+            Password::try_from(self.password_hash)?,
+        ))
+    }
+}
+
+impl From<&User<Admin>> for UserRecord {
+    fn from(user: &User<Admin>) -> Self {
+        UserRecord {
+            user_id: user.id.0,
+            username: user.username.clone(),
+            password_hash: user.hashed_password.hash_string().expose_secret().clone(),
+            admin: true
+        }
+    }
+}
+
+impl TryInto<User<Admin>> for UserRecord {
+    type Error = password_hash::Error;
+
+    fn try_into(self) -> Result<User<Admin>, Self::Error> {
+        Ok(User::new(
+            self.user_id.into(),
+            self.username,
+            Password::try_from(self.password_hash)?,
+        ))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use secrecy::ExposeSecret;
-    use domain::user::user::User;
 
+    use domain::user::user::User;
     use test_utility::random::_common::{random_salt, random_secret};
     use test_utility::random::user::random_user;
 
@@ -50,7 +75,7 @@ mod tests {
         let user1 = random_user(random_secret(), &salt);
 
         let record = UserRecord::from(&user1);
-        assert_eq!(record.user_id, user1.id);
+        assert_eq!(record.user_id, user1.id.0);
         assert_eq!(record.username, user1.username);
         assert_eq!(record.password_hash, user1.hashed_password.hash_string().expose_secret().clone());
 

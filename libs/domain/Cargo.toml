@@ -19,6 +19,7 @@ chrono.workspace = true
 rand.workspace = true
 secrecy.workspace = true
 regex.workspace = true
+slug = "0.1.5"
 
 [dev-dependencies]
 serde_json.workspace = true

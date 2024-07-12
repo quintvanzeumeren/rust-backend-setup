@@ -37,12 +37,12 @@ mod tests {
         // create and save a user
         let salt = random_salt();
         let user = random_user(random_secret(), &salt);
-        transaction.save_user(&user)
+        transaction.save_new_user(&user)
             .await
             .expect("Failed to create user");
 
         // create new session
-        let session = random_newly_created_user_session(&user.id);
+        let session = random_newly_created_user_session(user.id);
         // save_newly_created_user_session(&mut transaction, &session)
         transaction.save_newly_created_user_session(&session)
             .await

@@ -4,7 +4,7 @@ use anyhow::Context;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::Json;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use domain::sessions::state::just_ended::JustEnded;
 use domain::sessions::state::refreshed::Refreshed;
 use secrecy::{ExposeSecret, Secret};
@@ -122,10 +122,12 @@ async fn save_refreshed_session_and_generate_response(
     Ok((
         StatusCode::CREATED,
         Json(RefreshResponse {
+            // we are removing 30 seconds from the actual expiration time, to increase the
+            // likelihood of the token refreshing the tokens on time
             access_token: access_token.token.expose_secret().clone(),
-            access_token_expiration: access_token.expires_at,
+            access_token_expiration: access_token.expires_at - Duration::seconds(30),
             refresh_token: refresh_token.token.expose_secret().clone(),
-            refresh_token_expiration: refresh_token.expires_at,
+            refresh_token_expiration: refresh_token.expires_at - Duration::seconds(30),
         }),
     ))
 }

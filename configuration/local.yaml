@@ -4,4 +4,9 @@ application:
   encryption_key: "*@$72dQa49$4Vi$PZBY7u&i2@$8tbkhv"
 database:
   require_ssl: false
-  
+admin:
+  username: admin
+  password: admin
+telemetry:
+  otlp_endpoint: "http://localhost:4318"
+  dataset_name: "local"

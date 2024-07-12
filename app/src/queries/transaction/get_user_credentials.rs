@@ -1,8 +1,7 @@
-use anyhow::Context;
-use secrecy::{ExposeSecret, Secret};
-use sqlx::{PgPool, query};
+use secrecy::{Secret};
+use sqlx::{query};
+use tracing::info;
 use uuid::Uuid;
-use domain::user::password::Password;
 use crate::queries::database::Database;
 
 impl Database {
@@ -23,9 +22,11 @@ impl Database {
             .map(|row| (row.user_id, Secret::new(row.password_hash)));
 
         if row.is_none() {
+            info!("Did not find user credentials for username");
             return Ok(None);
         }
 
+        info!("Found user credentials for username");
         let (user_id, pw_hash) = row.unwrap();
         Ok(Some(UserCredentials {
             user_id,

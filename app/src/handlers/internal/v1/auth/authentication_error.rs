@@ -28,6 +28,9 @@ pub enum AuthenticationError {
 
     #[error(transparent)]
     UnexpectedError(#[from] anyhow::Error),
+    
+    #[error("Not an admin")] 
+    AuthenticatedUserIsNotOfTypeAdmin
 }
 
 impl Debug for AuthenticationError {
@@ -42,7 +45,8 @@ impl IntoResponse for AuthenticationError {
             AuthenticationError::AccessTokenHeadersInvalid
             | AuthenticationError::SessionNotActive
             | AuthenticationError::CredentialsInvalid
-            | AuthenticationError::TokenInvalid => StatusCode::UNAUTHORIZED.into_response(),
+            | AuthenticationError::TokenInvalid
+            | AuthenticationError::AuthenticatedUserIsNotOfTypeAdmin => StatusCode::UNAUTHORIZED.into_response(),
             AuthenticationError::TokenDecryptionError(e) => match e {
                 LocalPasetoV4DecryptionError::TokenNotYetActive => {
                     StatusCode::UNAUTHORIZED.into_response()

@@ -25,7 +25,7 @@ impl UserSessionRecord {
     pub fn to_active_session(self, latest_token: UserSessionToken<RefreshToken>) -> UserSession<Active> {
         UserSession::<Active>::new(
             self.id,
-            self.user_id,
+            self.user_id.into(),
             self.created_at.and_utc(),
             Active {
                 latest_refresh_token: latest_token,
@@ -38,7 +38,7 @@ impl From<&UserSession<NewlyCreated>> for UserSessionRecord {
     fn from(session: &UserSession<NewlyCreated>) -> Self {
         UserSessionRecord {
             id: session.id().clone(),
-            user_id: session.user_id().clone(),
+            user_id: session.user_id().0,
             created_at: session.created_at().naive_utc(),
             ended_at: None,
             ending_reason: None,
@@ -51,7 +51,7 @@ impl From<&UserSession<Refreshed>> for UserSessionRecord {
     fn from(session: &UserSession<Refreshed>) -> Self {
         UserSessionRecord {
             id: session.id().clone(),
-            user_id: session.user_id().clone(),
+            user_id: session.user_id().0,
             created_at: session.created_at().naive_utc(),
             ended_at: None,
             ending_reason: None,
@@ -71,7 +71,7 @@ impl From<&UserSession<JustEnded>> for UserSessionRecord {
 
         UserSessionRecord {
             id: session.id().clone(),
-            user_id: session.user_id().clone(),
+            user_id: session.user_id().0,
             created_at: session.created_at().naive_utc(),
             ended_at: Some(session.state().session_end_time().naive_utc()),
             ending_reason: Some(session.state().reason_for_ending().to_string().to_string()),
@@ -89,12 +89,12 @@ mod tests {
 
     #[test]
     fn test_from_newly_created() {
-        let user_id = Uuid::new_v4();
-        let session = random_newly_created_user_session(&user_id);
+        let user_id = Uuid::new_v4().into();
+        let session = random_newly_created_user_session(user_id);
 
         let expected = UserSessionRecord {
             id: session.id().clone(),
-            user_id,
+            user_id: user_id.0,
             created_at: session.created_at().naive_utc().clone(),
             ended_at: None,
             ending_reason: None,
