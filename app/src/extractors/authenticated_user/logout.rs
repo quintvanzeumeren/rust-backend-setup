@@ -4,11 +4,12 @@ use crate::handlers::internal::v1::auth::authentication_error::AuthenticationErr
 
 impl AuthenticatedUser {
     pub async fn logout(self) -> Result<(), AuthenticationError> {
-        let session = self.state.db.get_active_session_by_id(&self.session_id)
+        let session = self.state.db
+            .get_active_session_by_id(&self.session_id)
             .await
             .context("Failed to query database to get active session")?
             .ok_or(AuthenticationError::SessionNotActive)?
-            .end_duo_user_by_logout();
+            .end_by_user_logout();
 
         let mut transaction = self.state.db.new_transaction()
             .await
@@ -18,7 +19,10 @@ impl AuthenticatedUser {
             .await
             .context("Failed to save updated user session to database")?;
 
-        transaction.commit().await.context("Failed to commit transaction containing updated database")?;
+        transaction.commit()
+            .await
+            .context("Failed to commit transaction containing updated database")?;
+
         Ok(())
     }
 }

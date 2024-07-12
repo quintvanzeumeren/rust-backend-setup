@@ -46,10 +46,10 @@ mod tests {
         let mut transaction = database.new_transaction().await.expect("Failed to create transaction");
         let salt = random_salt();
         let user = random_user(random_secret(), &salt);
-        transaction.save_user(&user).await
+        transaction.save_new_user(&user).await
             .expect("Failed to save user");
 
-        let session = random_newly_created_user_session(&user.id);
+        let session = random_newly_created_user_session(user.id);
         transaction.save_newly_created_user_session(&session).await
             .expect("Failed to save session");
 

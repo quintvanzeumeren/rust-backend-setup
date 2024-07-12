@@ -9,11 +9,12 @@ use crate::sessions::state::refreshed::Refreshed;
 use crate::sessions::state::state::{SessionEndReason, State};
 use crate::sessions::user_session_token::UserSessionToken;
 use crate::sessions::tokens::{AccessToken, RefreshToken};
+use crate::user::user_id::UserId;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct UserSession<T: State> {
     pub(crate) id: Uuid,
-    pub(crate) user_id: Uuid,
+    pub(crate) user_id: UserId,
     pub(crate) created_at: DateTime<Utc>,
     pub(crate) state: T
 }
@@ -22,7 +23,7 @@ impl<T: State> UserSession<T> {
     pub fn id(&self) -> &Uuid {
         &self.id
     }
-    pub fn user_id(&self) -> &Uuid {
+    pub fn user_id(&self) -> &UserId {
         &self.user_id
     }
     pub fn created_at(&self) -> &DateTime<Utc> {
@@ -34,25 +35,25 @@ impl<T: State> UserSession<T> {
 }
 
 impl UserSession<NewlyCreated> {
-    pub fn new(user_id: &Uuid) -> UserSession<NewlyCreated> {
+    pub fn new(user_id: UserId) -> UserSession<NewlyCreated> {
         let created_at = Utc::now();
         let session_id = Uuid::new_v4();
 
         let refresh_token: UserSessionToken<RefreshToken> = RefreshToken {
-            user_id: user_id.clone(),
+            user_id: user_id.0,
             session_id: session_id.clone(),
             parent_id: None,
         }.into();
 
         let access_token: UserSessionToken<AccessToken> = AccessToken {
-            user_id: user_id.clone(),
+            user_id: user_id.0,
             session_id: session_id.clone(),
             refresh_token_id: refresh_token.get_id().clone(),
         }.into();
 
         UserSession {
             id: session_id,
-            user_id: user_id.clone(),
+            user_id,
             created_at,
             state: NewlyCreated {
                 refresh_token,
@@ -65,7 +66,7 @@ impl UserSession<NewlyCreated> {
 impl UserSession<Active> {
     pub fn new(
         id: Uuid,
-        user_id: Uuid,
+        user_id: UserId,
         created_at: DateTime<Utc>,
         state: Active
     ) -> UserSession<Active> {
@@ -121,13 +122,13 @@ impl UserSession<Active> {
         // }
 
         let new_access_token = AccessToken {
-            user_id: self.user_id.clone(),
+            user_id: self.user_id.0,
             session_id: self.id.clone(),
             refresh_token_id: latest_refresh_token.get_id().clone(),
         }.into();
 
         let new_refresh_token = RefreshToken {
-            user_id: self.user_id.clone(),
+            user_id: self.user_id.0,
             session_id: self.id.clone(),
             parent_id: Some(latest_refresh_token.get_id().clone()),
         }.into();
@@ -144,7 +145,7 @@ impl UserSession<Active> {
         })
     }
     
-    pub fn end_duo_user_by_logout(self) -> UserSession<JustEnded> {
+    pub fn end_by_user_logout(self) -> UserSession<JustEnded> {
         UserSession {
             id: self.id,
             user_id: self.user_id,
@@ -161,7 +162,7 @@ impl UserSession<Active> {
 impl UserSession<AlreadyEnded> {
     pub fn new(
         id: Uuid,
-        user_id: Uuid,
+        user_id: UserId,
         created_at: DateTime<Utc>,
         state: Active
     ) -> UserSession<Active> {
@@ -189,15 +190,15 @@ mod tests {
 
     #[test]
     fn test_new_session() {
-        let user_id = Uuid::new_v4();
-        let session = UserSession::<NewlyCreated>::new(&user_id);
+        let user_id = Uuid::new_v4().into();
+        let session = UserSession::<NewlyCreated>::new(user_id);
 
         // Check if user session has correct properties
         assert_eq!(session.user_id, user_id);
-        assert_ne!(session.id, user_id);
+        assert_ne!(session.id, user_id.0);
 
         // Check if access token has correct properties
-        assert_eq!(session.state.access_token.get_custom_claims().user_id, user_id);
+        assert_eq!(session.state.access_token.get_custom_claims().user_id, user_id.0);
         assert_eq!(session.state.access_token.get_custom_claims().session_id, session.id);
         assert_eq!(
             session.state.access_token.get_custom_claims().refresh_token_id,
@@ -205,14 +206,14 @@ mod tests {
         );
 
         // Check if refresh token has correct properties
-        assert_eq!(session.state.refresh_token.get_custom_claims().user_id, user_id);
+        assert_eq!(session.state.refresh_token.get_custom_claims().user_id, user_id.0);
         assert_eq!(session.state.refresh_token.get_custom_claims().session_id, session.id);
         assert!(session.state.refresh_token.get_custom_claims().parent_id.is_none());
     }
 
     #[test]
     fn test_refresh_should_succeed_with_good_refresh_token() {
-        let session = UserSession::<NewlyCreated>::new(&Uuid::new_v4());
+        let session = UserSession::<NewlyCreated>::new(Uuid::new_v4().into());
         let refresh_token = session.state.refresh_token.clone();
         let session: UserSession<Active> = UserSession {
             id: session.id,
@@ -234,7 +235,7 @@ mod tests {
             assert_eq!(created_at, refresh_session.created_at);
 
             // Check if access token has correct properties
-            assert_eq!(refresh_session.state.new_access_token.get_custom_claims().user_id, user_id);
+            assert_eq!(refresh_session.state.new_access_token.get_custom_claims().user_id, user_id.0);
             assert_eq!(refresh_session.state.new_access_token.get_custom_claims().session_id, refresh_session.id);
             assert_eq!(
                 refresh_session.state.new_access_token.get_custom_claims().refresh_token_id,
@@ -242,7 +243,7 @@ mod tests {
             );
 
             // Check if refresh token has correct properties
-            assert_eq!(refresh_session.state.new_refresh_token.get_custom_claims().user_id, user_id);
+            assert_eq!(refresh_session.state.new_refresh_token.get_custom_claims().user_id, user_id.0);
             assert_eq!(refresh_session.state.new_refresh_token.get_custom_claims().session_id, refresh_session.id);
             assert_eq!(refresh_session.state.new_refresh_token.get_custom_claims().parent_id.unwrap(), *refresh_token.get_id());
 
@@ -255,7 +256,7 @@ mod tests {
 
     #[test]
     fn test_refresh_should_end_session_with_previous_used_refresh_token() {
-        let session = UserSession::<NewlyCreated>::new(&Uuid::new_v4());
+        let session = UserSession::<NewlyCreated>::new(Uuid::new_v4().into());
         let invalid_refresh_token: UserSessionToken<RefreshToken> = RefreshToken {
             user_id: Uuid::new_v4(),
             session_id: Uuid::new_v4(),
@@ -298,7 +299,7 @@ mod tests {
 
     #[test]
     fn test_refresh_should_end_session_with_expired_used_refresh_token() {
-        let session = UserSession::<NewlyCreated>::new(&Uuid::new_v4());
+        let session = UserSession::<NewlyCreated>::new(Uuid::new_v4().into());
         let now = Utc::now();
         let invalid_refresh_token = UserSessionToken::new(
             Uuid::new_v4(),
@@ -352,7 +353,7 @@ mod tests {
     #[test]
     fn test_end_by_logout() {
         let user_id = Uuid::new_v4();
-        let session = UserSession::<NewlyCreated>::new(&user_id);
+        let session = UserSession::<NewlyCreated>::new(user_id.into());
         let session: UserSession<Active> = UserSession {
             id: session.id,
             user_id: session.user_id,
@@ -373,7 +374,7 @@ mod tests {
             }
         };
         
-        let got = session.end_duo_user_by_logout();
+        let got = session.end_by_user_logout();
         
         assert_eq!(expected.id, got.id);
         assert_eq!(expected.user_id, got.user_id);

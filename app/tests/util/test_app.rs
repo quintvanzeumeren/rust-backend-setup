@@ -75,7 +75,7 @@ impl TestApp {
 
     pub async fn login(&self, user: &TestUser<'_, Anonymous>) -> Response {
         self.api_client
-            .post("/internal/v1/security/login")
+            .post("/internal/v1/auth/login")
             .json(&json!({
                 "username": user.username,
                 "password": user.password
@@ -96,7 +96,7 @@ impl TestApp {
 
     pub async fn refresh(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .post("/internal/v1/security/refresh")
+            .post("/internal/v1/auth/refresh")
             .json(&json!({
                 "refresh_token": user.state.refresh_token.token
             }))
@@ -107,7 +107,7 @@ impl TestApp {
 
     pub async fn logout(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .post("/internal/v1/security/logout")
+            .post("/internal/v1/auth/logout")
             .headers(self.auth_header(user))
             .send()
             .await
@@ -142,7 +142,7 @@ impl TestApp {
 
     pub async fn post_login(&self, body: Value) -> Response {
         self.api_client
-            .post("/internal/v1/security/login")
+            .post("/internal/v1/auth/login")
             .json(&body)
             .send()
             .await

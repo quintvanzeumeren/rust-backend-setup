@@ -1,18 +1,14 @@
-use std::fmt::Debug;
 use std::sync::Arc;
-
 use anyhow::Context;
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
 use axum::Json;
-use chrono::{DateTime, Utc};
+use axum::response::{IntoResponse, Response};
+use chrono::{DateTime, Duration, Utc};
 use password_hash::SaltString;
 use secrecy::{ExposeSecret, Secret};
 use serde::{Deserialize, Serialize};
-use sqlx::{query, Executor, PgPool, Postgres, Transaction};
 use tokio::task::JoinError;
-use uuid::Uuid;
 
 use domain::sessions::state::newly_created::NewlyCreated;
 use domain::sessions::user_session::UserSession;
@@ -52,7 +48,7 @@ impl IntoResponse for LoginResponse {
 }
 
 #[tracing::instrument(
-    name = "Logging with username and hash",
+    name = "Received user login request",
     skip(state, credentials),
     fields(
         user_id = tracing::field::Empty
@@ -115,7 +111,7 @@ pub async fn login(
         }
     };
 
-    let new_session = UserSession::<NewlyCreated>::new(&user_id);
+    let new_session = UserSession::<NewlyCreated>::new(user_id.into());
     transaction.save_newly_created_user_session(&new_session)
         .await
         .context("Failed to save new user session to the database")?;
@@ -143,10 +139,12 @@ pub async fn login(
         .context("Failed to commit transaction")?;
 
     Ok(LoginResponse::UserLoggedInSuccessfully {
+        // we are removing 30 seconds from the actual expiration time, to increase the
+        // likelihood of the token refreshing the tokens on time
         access_token: encrypted_access_token.token.expose_secret().clone(),
-        access_token_expiration: encrypted_access_token.expires_at,
+        access_token_expiration: encrypted_access_token.expires_at - Duration::seconds(30),
         refresh_token: encrypted_refresh_token.token.expose_secret().clone(),
-        refresh_token_expiration: encrypted_refresh_token.expires_at,
+        refresh_token_expiration: encrypted_refresh_token.expires_at - Duration::seconds(30),
     })
 }
 

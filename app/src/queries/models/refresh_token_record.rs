@@ -65,14 +65,14 @@ mod tests {
 
     #[test]
     fn test_from() {
-        let user_id = Uuid::new_v4();
-        let session = random_newly_created_user_session(&user_id);
-        let token = random_refresh_token(&user_id, &session.user_id());
+        let user_id = Uuid::new_v4().into();
+        let session = random_newly_created_user_session(user_id);
+        let token = random_refresh_token(user_id, &session.id());
 
         let expected = RefreshTokenRecord {
             id: token.id,
             parent_id: None,
-            user_id,
+            user_id: user_id.0,
             session_id: token.get_custom_claims().session_id,
             issued_at: token.issued_at.naive_utc(),
             not_before: token.not_before.0.0.naive_utc(),
@@ -86,9 +86,9 @@ mod tests {
     
     #[test]
     fn test_into() {
-        let user_id = Uuid::new_v4();
-        let session = random_newly_created_user_session(&user_id);
-        let token = random_refresh_token(&user_id, &session.user_id());
+        let user_id = Uuid::new_v4().into();
+        let session = random_newly_created_user_session(user_id);
+        let token = random_refresh_token(user_id, session.id());
 
         let expected = RefreshTokenRecord::from(&token);
         let into: UserSessionToken<RefreshToken> = expected.clone().into();
