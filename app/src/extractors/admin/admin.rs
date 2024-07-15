@@ -35,7 +35,7 @@ impl<S> FromRequestParts<S> for Admin where
         
         // let is_admin = authenticated_user.state.db.is_admin(&authenticated_user.user_id)
         //     .await
-        //     .context("An error occurred while checking authenticated user is an admin")?;
+        //     .Context("An error occurred while checking authenticated user is an admin")?;
         // if is_admin {
         //     return Ok(Self {
         //         authenticated_user

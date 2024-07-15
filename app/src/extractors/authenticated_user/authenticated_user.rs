@@ -37,7 +37,7 @@ impl<S> FromRequestParts<S> for AuthenticatedUser where
     // todo: figure out trace id can be matched with request.
     // Tracing does not seem to work properly, currently the trace id of an extractor does not match.
     // I assume this is duo to extractor being executed in a separate task prior to calling the handler.
-    // Because of which there is not yet a context from the function
+    // Because of which there is not yet a Context from the function
     
     #[tracing::instrument(
         name = "Received extract authenticated user request",

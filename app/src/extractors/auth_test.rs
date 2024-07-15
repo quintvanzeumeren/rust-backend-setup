@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use anyhow::Context;
 use axum::{async_trait, Json};
-use axum::extract::{FromRequest, FromRequestParts, Request};
+use axum::extract::{FromRequest, FromRequestParts, Path, Request};
 use serde::de::DeserializeOwned;
 use uuid::Uuid;
 use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;

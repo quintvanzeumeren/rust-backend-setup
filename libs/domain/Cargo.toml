@@ -20,6 +20,8 @@ rand.workspace = true
 secrecy.workspace = true
 regex.workspace = true
 slug = "0.1.5"
+strum = "0.26.3"
+strum_macros = "0.26.3"
 
 [dev-dependencies]
 serde_json.workspace = true

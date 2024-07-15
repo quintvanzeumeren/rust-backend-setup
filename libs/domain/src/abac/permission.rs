@@ -1,21 +1,28 @@
-use uuid::Uuid;
+use crate::organisation::member::Member;
 
-pub trait Permission<T> {
-    
-    /// Name returns the str value for the permission
-    fn name() -> &'static str;
-    
-    /// granted checks whenever the member is granted the permission
-    fn granted(member: Member, t: T) -> bool;
+pub type PermissionName = &'static str;
+
+pub trait Permission {
+
+    /// Context contains the necessary information to the Permission to decide
+    /// if the member is granted the permission
+    type Context;
+
+    /// Name returns the name of the permission as a 'static str
+    fn name() -> PermissionName;
+
+    /// grand checks whenever
+    fn is_granted(&self, member: Member, context: <Self as Permission>::Context) -> bool;
 }
 
-pub struct Member {
-    
-}
 
-struct Resource {
-    id: Uuid,
-    resource_type: String,
-    resource_id: Uuid
-}
+// pub struct Member {
+//
+// }
+//
+// struct Resource {
+//     id: Uuid,
+//     resource_type: String,
+//     resource_id: Uuid
+// }
 
