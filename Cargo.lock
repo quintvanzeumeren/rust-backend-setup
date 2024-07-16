@@ -622,6 +622,7 @@ name = "domain"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "enum_dispatch",
  "lib-util",
  "password-hash",
  "rand",

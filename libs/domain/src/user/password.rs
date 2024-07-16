@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use password_hash::{PasswordHash, SaltString};
 use secrecy::{ExposeSecret, Secret};
 use security::hash::error::Error;
-use security::hash::schema::{get_latest_scheme, get_scheme, is_latest_schema, Scheme};
+use security::hash::scheme::{get_latest_scheme, get_scheme, is_latest_schema, Scheme};
 use lib_util::errors::errors::format_error_chain;
 
 pub struct Password {

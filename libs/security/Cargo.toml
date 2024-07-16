@@ -9,8 +9,8 @@ edition = "2021"
 lib-util = { path = "../lib-util" }
 
 argon2 = { version = "0.5.3", features = ["std"] }
-enum_dispatch = "0.3.12"
 
+enum_dispatch.workspace = true
 password-hash.workspace = true
 secrecy.workspace = true
 serde.workspace = true

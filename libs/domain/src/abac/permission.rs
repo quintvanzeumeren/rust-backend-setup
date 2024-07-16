@@ -6,13 +6,16 @@ pub trait Permission {
 
     /// Context contains the necessary information to the Permission to decide
     /// if the member is granted the permission
-    type Context;
+    type Resource;
 
     /// Name returns the name of the permission as a 'static str
     fn name() -> PermissionName;
 
-    /// grand checks whenever
-    fn is_granted(&self, member: Member, context: <Self as Permission>::Context) -> bool;
+    // grand checks whenever
+    // fn is_granted(&self, member: Member, context: <Self as Permission>::Resource) -> bool;
+    
+    
+    
 }
 
 

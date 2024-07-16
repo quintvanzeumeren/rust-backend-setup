@@ -4,7 +4,7 @@ use password_hash::{Ident, PasswordHash, SaltString};
 use secrecy::Secret;
 use crate::hash::argon2::Argon2Scheme;
 use crate::hash::error::Error;
-use crate::hash::schema::SchemaDispatch::Argon2ID;
+use crate::hash::scheme::SchemaDispatch::Argon2ID;
 
 
 /// DEFAULT_SCHEME is the hash scheme all passwords should be using
@@ -46,7 +46,7 @@ pub fn get_latest_scheme() -> impl Scheme {
 mod tests {
     use argon2::ARGON2ID_IDENT;
     use password_hash::Ident;
-    use crate::hash::schema::{DEFAULT_SCHEME, get_latest_scheme, get_scheme, is_latest_schema};
+    use crate::hash::scheme::{DEFAULT_SCHEME, get_latest_scheme, get_scheme, is_latest_schema};
 
     #[test]
     fn test_use_right_default_scheme() {

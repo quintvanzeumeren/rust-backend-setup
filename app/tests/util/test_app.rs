@@ -5,7 +5,7 @@ use secrecy::Secret;
 use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
-use security::hash::schema::{get_latest_scheme, Scheme};
+use security::hash::scheme::{get_latest_scheme, Scheme};
 use crate::util::api_client::ApiClient;
 use crate::util::test_user::anonymous::Anonymous;
 use crate::util::test_user::logged_in::LoggedIn;

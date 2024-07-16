@@ -6,9 +6,9 @@ use serde::de::DeserializeOwned;
 use uuid::Uuid;
 use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
 
-struct AuthTest<P: Permission, D: DeserializeOwned + Into<P::Attributes>> {
-    permission: P,
-    data: D,
+struct AuthTest<PERMISSION: Permission, BODY: DeserializeOwned + Into<PERMISSION::Attributes>> {
+    permission: PERMISSION,
+    body: BODY,
 }
 
 // #[async_trait]
@@ -38,7 +38,7 @@ where
     type Rejection = AuthenticationError;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
-        // TODO allow for more data types
+        // TODO allow for more data resources
         let data = Json::<D>::from_request(req, state)
             .await
             .context("Failed to json")?;

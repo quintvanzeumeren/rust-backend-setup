@@ -3,7 +3,7 @@ use argon2::password_hash::SaltString;
 use password_hash::{PasswordHash, PasswordVerifier};
 use secrecy::{ExposeSecret, Secret};
 use crate::hash::error::Error;
-use crate::hash::schema::Scheme;
+use crate::hash::scheme::Scheme;
 
 
 /// As of march 2024:
@@ -53,7 +53,7 @@ mod tests {
 	use secrecy::{ExposeSecret, Secret};
 	use uuid::Uuid;
 	use crate::hash::argon2::Argon2Scheme;
-	use crate::hash::schema::Scheme;
+	use crate::hash::scheme::Scheme;
 
 
 	fn password() -> Secret<String> {

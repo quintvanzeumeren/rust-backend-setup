@@ -1,7 +1,10 @@
-use strum_macros::IntoStaticStr;
+mod read_members_of_organisation;
 
-#[derive(IntoStaticStr)]
+use enum_dispatch::enum_dispatch;
+use crate::abac::permissions::read_members_of_organisation::ReadMembersOfOrganisation;
+
+#[enum_dispatch(Scheme)]
 pub enum Permissions {
-    ReadUsersOfOrganisation
+    ReadMembersOfOrganisation(ReadMembersOfOrganisation)
 }
 
