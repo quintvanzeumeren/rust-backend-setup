@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT * FROM refresh_tokens\n        WHERE refresh_tokens.id = $1\n        LIMIT 1\n        ",
+  "query": "SELECT * FROM refresh_tokens\nWHERE refresh_tokens.session_id = $1\nORDER BY refresh_tokens.issued_at DESC\nLIMIT 1;",
   "describe": {
     "columns": [
       {
@@ -60,5 +60,5 @@
       false
     ]
   },
-  "hash": "82f0b4bff9427475faca643093d9ed15c3fb7e6fa41e117dd1ba6f43ccd92a93"
+  "hash": "5ccfc6285b18e5e81de1fa101208b7c88b425589468db3aaeb565b46882d39c1"
 }

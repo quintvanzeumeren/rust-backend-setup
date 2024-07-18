@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_sessions\nSET ended_at        = $2,\n    ending_reason   = $3,\n    ending_token_id = $4\nWHERE user_sessions.id = $1;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamp",
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dd056a8b7ff77f7ee11d14e6f781f9cff22637046dff4be85cf336046e698eb0"
+}
