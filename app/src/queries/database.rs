@@ -16,8 +16,8 @@ impl Database {
     }
 }
 
-impl Database {
-    pub fn get_permission_querier<P: Permission>(&self) -> Querier<P> {
-        Querier::new(self.0.clone())
-    }
-}
+// impl Database {
+//     pub fn get_permission_querier<P: Permission>(&self) -> Querier<P> {
+//         Querier::new(self.0.clone())
+//     }
+// }

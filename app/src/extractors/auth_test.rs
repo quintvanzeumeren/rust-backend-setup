@@ -47,6 +47,8 @@ where
 
         let req = Request::from_parts(parts, body);
         let body: Json<D> = Json::from_request(req, state).await.expect("todo proper error handling");
+        
+        let name = P::name();
 
         let querier = Box::new(authenticated_user.state.db.clone() as dyn PermissionQuerier<P>);
         let permission: P = querier.get_permission_for(authenticated_user.user_id).await?;
