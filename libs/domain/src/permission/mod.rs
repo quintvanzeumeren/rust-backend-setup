@@ -1,4 +1,4 @@
 pub mod permission;
 pub mod permissions;
-pub mod role;
+pub mod user_details;
 pub mod resource;

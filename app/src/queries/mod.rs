@@ -5,3 +5,4 @@ pub mod get_refresh_token_by_id;
 mod models;
 pub mod transaction;
 pub mod is_admin;
+pub mod permissions;

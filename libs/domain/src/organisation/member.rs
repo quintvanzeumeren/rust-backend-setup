@@ -1,6 +1,7 @@
 use uuid::Uuid;
-use crate::abac::permission::Permission;
+
 use crate::organisation::organisation_id::OrganisationId;
+use crate::permission::permission::Permission;
 use crate::user::user_id::UserId;
 
 pub struct Member<P: Permission> {

@@ -1,7 +1,6 @@
 use std::fmt::{Display, Formatter};
 
 use uuid::Uuid;
-use crate::abac::resource::resource_type::{ResourceName, ResourceType};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct OrganisationId(pub Uuid);
@@ -17,10 +16,3 @@ impl Display for OrganisationId {
         self.0.fmt(f)
     }
 }
-
-impl ResourceType for OrganisationId {
-    fn name() -> ResourceName {
-        "Organisation"
-    }
-}
-

@@ -1,4 +1,3 @@
-use crate::abac::resource::resource_type::{ResourceName, ResourceType};
 use crate::organisation::organisation_id::OrganisationId;
 use crate::shared::slug::Slug;
 
