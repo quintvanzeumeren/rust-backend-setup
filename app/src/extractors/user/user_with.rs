@@ -1,42 +1,30 @@
-use std::collections::HashMap;
+use std::sync::Arc;
+
 use anyhow::Context;
 use axum::{async_trait, Json, RequestExt};
-use axum::extract::{FromRequest, FromRequestParts, Path, Request};
+use axum::extract::{FromRef, FromRequest, FromRequestParts, Request};
 use serde::de::DeserializeOwned;
-use uuid::Uuid;
-use domain::permission::permission::Permission;
-use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
-use crate::queries::permissions::permission_querier::PermissionQuerier;
 
-struct AuthTest<PERMISSION: Permission, BODY: DeserializeOwned + Into<PERMISSION::Context>> {
-    permission: PERMISSION,
-    body: BODY,
+use domain::permission::permission::Permission;
+
+use crate::app_state::AppState;
+use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
+use crate::extractors::user::permission_extractor::permission_of::PermissionOf;
+use crate::extractors::user::user_extractor::UserExtractor;
+use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
+
+struct UserWith<Extractor: UserExtractor> {
+    pub content: Extractor::Content,
 }
 
-// #[async_trait]
-// impl<S, T, D, E> FromRequestParts<S> for AuthTest<T, D, E>
-// where
-//     Arc<AppState>: FromRef<S>,
-//     S: Send + Sync,
-//     T: Permission,
-//     D: DeserializeOwned + Into<T::Attributes>, 
-//     E: FromRequest<D>
-// {
-//     type Rejection = AuthenticationError;
-// 
-//     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-//         
-//         todo!()
-//     }
-// }
-
 #[async_trait]
-impl<P, S, D> FromRequest<S> for AuthTest<P,D>
+impl<P, S, D> FromRequest<S> for UserWith<PermissionOf<P, D>>
 where
     S: Send + Sync,
     P: Permission,
     D: DeserializeOwned + Into<P::Context>,
+    Arc<AppState>: FromRef<S>,
+    PermissionOf<P, D>: UserExtractor
 {
     type Rejection = AuthenticationError;
 
@@ -44,18 +32,23 @@ where
         let (parts, body) = req.into_parts();
         let mut mutable_parts = parts.clone();
         let authenticated_user = AuthenticatedUser::from_request_parts(&mut mutable_parts, state).await?;
-
+    
         let req = Request::from_parts(parts, body);
         let body: Json<D> = Json::from_request(req, state).await.expect("todo proper error handling");
         
-        let name = P::name();
-
-        let querier = Box::new(authenticated_user.state.db.clone() as dyn PermissionQuerier<P>);
-        let permission: P = querier.get_permission_for(authenticated_user.user_id).await?;
-        let has_permission = permission.is_granted_for(body.into());
-        if !has_permission { 
-            todo!("Return proper error response")    
-        }
+        // let name = P::name();
+        
+        let permission_extractor: PermissionOf<P, D> = PermissionOf::create(authenticated_user.state.db.clone());
+        let result = permission_extractor.extract(authenticated_user.user_id)
+            .await
+            .context("Failed to extract permission for user")?;
+    
+        // let querier = Box::new(authenticated_user.state.db.clone() as dyn PermissionQuerier<P>);
+        // let permission: P = querier.get_permission_for(authenticated_user.user_id).await?;
+        // let has_permission = permission.is_granted_for(body.into());
+        // if !has_permission { 
+        //     todo!("Return proper error response")    
+        // }
         
         todo!("Return proper object back to handler")
     }

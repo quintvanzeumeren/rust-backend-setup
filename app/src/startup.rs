@@ -32,9 +32,10 @@ pub async fn create_user_if_no_users(db: &Database, config: &Configuration, salt
             .context("Could not parse and hash admin password")?,
     );
 
-    let mut transaction = db.new_transaction().await.context("Failed to start transaction")?;
-    transaction.persist_new_admin(&admin).await.context("Failed to insert initial user")?;
-    transaction.commit().await.context("Failed to commit transaction")?;
+    todo!("fix this");
+    // let mut transaction = db.new_transaction().await.context("Failed to start transaction")?;
+    // transaction.persist_new_admin(&admin).await.context("Failed to insert initial user")?;
+    // transaction.commit().await.context("Failed to commit transaction")?;
     Ok(())
 }
 

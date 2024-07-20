@@ -1,6 +1,4 @@
 use sqlx::{Error, PgPool};
-use domain::permission::permission::Permission;
-use crate::queries::permissions::querier::Querier;
 use crate::queries::transaction::_transaction::Transaction;
 
 #[derive(Clone, Debug)]
@@ -10,7 +8,7 @@ impl Database {
         let tx = self.0.begin().await?;
         Ok(Transaction(tx))
     }
-    
+
     pub fn db(&self) -> &PgPool {
         &self.0
     }
