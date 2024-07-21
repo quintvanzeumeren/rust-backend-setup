@@ -1,22 +1,30 @@
 use std::marker::PhantomData;
-
+use axum::async_trait;
 use serde::de::DeserializeOwned;
 
 use domain::permission::permission::Permission;
 use domain::permission::permissions::read_organisation_users::ReadOrganisationUsers;
 use domain::user::user_id::UserId;
 
-use crate::extractors::user::user_extractor::UserExtractor;
+use crate::extractors::user::user_extractor::{UserContent, UserExtractor};
 use crate::queries::database::Database;
 
-pub struct PermissionOf<P: Permission, RequestContent: DeserializeOwned + Into<P::Context>> {
+pub struct PermissionOf<P, RequestContent>
+where
+    P: Permission,
+    RequestContent: DeserializeOwned + Into<P::Context> + Send + Sync
+{
     phantom_permission: PhantomData<P>,
     phantom_request_content: PhantomData<RequestContent>,
 
-    pub database: Database
+    database: Database
 }
 
-impl <P: Permission, RequestContent: DeserializeOwned + Into<P::Context>> PermissionOf<P, RequestContent> {
+impl <P, RequestContent> PermissionOf<P, RequestContent>
+where
+    P: Permission,
+    RequestContent: DeserializeOwned + Into<P::Context> + Send + Sync
+{
 
     pub fn create(database: Database) -> Self {
         PermissionOf {
@@ -27,12 +35,24 @@ impl <P: Permission, RequestContent: DeserializeOwned + Into<P::Context>> Permis
     }
 }
 
-impl <RC: DeserializeOwned + Into<<ReadOrganisationUsers as Permission>::Context>> UserExtractor for PermissionOf<ReadOrganisationUsers, RC> {
-    type Rejection = sqlx::Error;
-    type Content = ReadOrganisationUsers;
+impl<P, RC> UserContent for PermissionOf<P, RC> 
+where
+    P: Permission,
+    RC: DeserializeOwned + Into<<P as Permission>::Context> + Send + Sync
+{ 
+    type Content = P; 
+}
 
-    async fn extract(&self, user_id: UserId) -> Result<Self::Content, Self::Rejection> {
-        todo!()
+#[async_trait]
+impl <RC> UserExtractor<ReadOrganisationUsers> for PermissionOf<ReadOrganisationUsers, RC>
+where
+    RC: DeserializeOwned + Into<<ReadOrganisationUsers as Permission>::Context> + Send + Sync,
+{
+    type Rejection = sqlx::Error;
+
+    async fn extract(&self, user_id: UserId) -> Result<ReadOrganisationUsers, Self::Rejection> {
+        // todo implement
+        Err(sqlx::Error::RowNotFound)
     }
 }
 
