@@ -5,11 +5,6 @@ CREATE TABLE "organisations"
     "slug" varchar UNIQUE NOT NULL
 );
 
-CREATE TABLE "users"
-(
-    "id" UUID PRIMARY KEY
-);
-
 CREATE TABLE "user_roles"
 (
     "user_id" UUID NOT NULL,
@@ -24,7 +19,7 @@ CREATE TABLE "roles"
     "organisation_id" UUID    NOT NULL
 );
 
-CREATE TABLE "Permissions"
+CREATE TABLE "permissions"
 (
     "id"          UUID PRIMARY KEY,
     "role_id"     UUID    NOT NULL,
@@ -41,12 +36,12 @@ CREATE TABLE "resources"
 
 CREATE UNIQUE INDEX ON "roles" ("name", "organisation_id");
 
-CREATE UNIQUE INDEX ON "Permissions" ("role_id", "resource_id", "name");
+CREATE UNIQUE INDEX ON "permissions" ("role_id", "resource_id", "name");
 
 CREATE UNIQUE INDEX ON "resources" ("type", "resource_specific_id");
 
 ALTER TABLE "user_roles"
-    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+    ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
 
 ALTER TABLE "user_roles"
     ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
@@ -54,8 +49,8 @@ ALTER TABLE "user_roles"
 ALTER TABLE "roles"
     ADD FOREIGN KEY ("organisation_id") REFERENCES "organisations" ("id");
 
-ALTER TABLE "Permissions"
+ALTER TABLE "permissions"
     ADD FOREIGN KEY ("role_id") REFERENCES "roles" ("id");
 
-ALTER TABLE "Permissions"
+ALTER TABLE "permissions"
     ADD FOREIGN KEY ("resource_id") REFERENCES "resources" ("id");

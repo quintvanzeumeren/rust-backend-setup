@@ -19,12 +19,12 @@ impl PermissionAuthorizer for DeleteOrganisation {
 
     fn is_authorized_for(&self, resource_in_question: <Self as PermissionAuthorizer>::ResourceInQuestion) -> bool {
         // todo probably add more conditions to this delete operation
-        // like cannot delete organisation of paying customers.. 
-        let part_of_organisation = self.user_attributes.organisations.contains(&resource_in_question.organisation_to_delete)
+        // like cannot delete organisation of paying customers..
+        let part_of_organisation = self.user_attributes.organisations.contains(&resource_in_question.organisation_to_delete);
         if part_of_organisation {
             return false
         }
-        
+
         self.deletable_organisations.contains(&resource_in_question.organisation_to_delete)
     }
 }
