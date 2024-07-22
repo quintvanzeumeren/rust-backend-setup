@@ -14,7 +14,7 @@ impl Permission for AddUserToOrganisation {
         "AddUserToOrganisation"
     }
 
-    fn is_granted_for(&self, context: <Self as Permission>::Context) -> bool {
+    fn is_authorized(&self, context: <Self as Permission>::Context) -> bool {
         self.resources.iter()
             .map(|r| r.resource)
             .any(|r| r == context.organisation_id)

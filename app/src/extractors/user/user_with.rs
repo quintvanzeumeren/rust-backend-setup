@@ -6,7 +6,6 @@ use axum::extract::{FromRef, FromRequest, FromRequestParts, Request};
 use serde::de::DeserializeOwned;
 
 use domain::permission::permission::Permission;
-
 use crate::app_state::AppState;
 use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
 use crate::extractors::user::permission_extractor::permission_of::PermissionOf;
@@ -24,7 +23,7 @@ where
     P: Permission,
     D: DeserializeOwned + Into<P::Context> + Send + Sync,
     Arc<AppState>: FromRef<S>,
-    PermissionOf<P, D>: UserExtractor<P>
+    PermissionOf<P, D>: UserExtractor<Content = P>
 {
     type Rejection = AuthenticationError;
 
@@ -34,18 +33,21 @@ where
         let authenticated_user = AuthenticatedUser::from_request_parts(&mut mutable_parts, state).await?;
 
         let req = Request::from_parts(parts, body);
-        let body: Json<D> = Json::from_request(req, state).await.expect("todo proper error handling");
-
+        let body: Json<D> = Json::from_request(req, state)
+            .await
+            .map_err(|e| AuthenticationError::JsonRejection(e))?;
+        
         let permission_extractor: PermissionOf<P, D> = PermissionOf::create(authenticated_user.state.db.clone());
         let permission = permission_extractor.extract(authenticated_user.user_id)
             .await
             .context("Failed to extract permission for user")?;
-        
-        let has_permission = permission.is_granted_for(body.0.into());
-        if !has_permission {
-        //     todo!("Return proper error response")
+
+        if !permission.is_authorized(body.0.into()) {
+            return Ok(Self {
+                content: permission
+            })
         }
 
-        todo!("Return proper object back to handler")
+        Err(AuthenticationError::UnAuthorized)
     }
 }

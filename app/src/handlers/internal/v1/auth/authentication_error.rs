@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Formatter};
-
+use axum::extract::rejection::JsonRejection;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use infrastructure::paseto::paseto_token_encryptor::LocalPasetoV4DecryptionError;
@@ -30,7 +30,13 @@ pub enum AuthenticationError {
     UnexpectedError(#[from] anyhow::Error),
     
     #[error("Not an admin")] 
-    AuthenticatedUserIsNotOfTypeAdmin
+    AuthenticatedUserIsNotOfTypeAdmin,
+    
+    #[error("Unauthorized")]
+    UnAuthorized,
+    
+    #[error(transparent)]
+    JsonRejection(JsonRejection)
 }
 
 impl Debug for AuthenticationError {
@@ -46,6 +52,7 @@ impl IntoResponse for AuthenticationError {
             | AuthenticationError::SessionNotActive
             | AuthenticationError::CredentialsInvalid
             | AuthenticationError::TokenInvalid
+            | AuthenticationError::UnAuthorized
             | AuthenticationError::AuthenticatedUserIsNotOfTypeAdmin => StatusCode::UNAUTHORIZED.into_response(),
             AuthenticationError::TokenDecryptionError(e) => match e {
                 LocalPasetoV4DecryptionError::TokenNotYetActive => {
@@ -54,8 +61,10 @@ impl IntoResponse for AuthenticationError {
                 _ => InternalErrorResponse::from(tracing::Span::current()).into_response(),
             },
             AuthenticationError::UnexpectedError(_) => {
+                // todo verify if this actually works properly
                 InternalErrorResponse::from(tracing::Span::current()).into_response()
-            }
+            },
+            AuthenticationError::JsonRejection(e) => e.into_response()
         }
     }
 }

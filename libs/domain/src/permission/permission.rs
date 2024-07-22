@@ -12,5 +12,5 @@ pub trait Permission: Send + Sync {
     fn name() -> PermissionName;
 
     /// is_granted_for validates whenever the user has permission to do something with the resource.
-    fn is_granted_for(&self, context: <Self as Permission>::Context) -> bool;
+    fn is_authorized(&self, context: <Self as Permission>::Context) -> bool;
 }

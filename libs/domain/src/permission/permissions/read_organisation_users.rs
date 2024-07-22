@@ -16,7 +16,7 @@ impl Permission for ReadOrganisationUsers {
         "ReadOrganisationUsers"
     }
 
-    fn is_granted_for(&self, context: <Self as Permission>::Context) -> bool {
+    fn is_authorized(&self, context: <Self as Permission>::Context) -> bool {
         let user_is_part_of_organisation = self.user_details.organisations.contains(&context.organisation_id);
         if user_is_part_of_organisation {
             return true;

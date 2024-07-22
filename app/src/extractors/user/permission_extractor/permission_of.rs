@@ -35,16 +35,16 @@ where
     }
 }
 
-impl<P, RC> UserContent for PermissionOf<P, RC> 
+impl<P, RC> UserContent for PermissionOf<P, RC>
 where
     P: Permission,
     RC: DeserializeOwned + Into<<P as Permission>::Context> + Send + Sync
-{ 
-    type Content = P; 
+{
+    type Content = P;
 }
 
 #[async_trait]
-impl <RC> UserExtractor<ReadOrganisationUsers> for PermissionOf<ReadOrganisationUsers, RC>
+impl <RC> UserExtractor for PermissionOf<ReadOrganisationUsers, RC>
 where
     RC: DeserializeOwned + Into<<ReadOrganisationUsers as Permission>::Context> + Send + Sync,
 {
