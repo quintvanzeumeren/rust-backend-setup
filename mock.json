@@ -1,0 +1,23 @@
+
+{
+  "role": {
+    "name": "admin",
+    "permissions": [
+      {
+        "permission_name": "ReadOrganisationUsers",
+        "organisation_ids": [
+          "uuid",
+          "uuid",
+          "uuid",
+          "uuid",
+          "uuid",
+          "uuid",
+          "uuid"
+        ] 
+      },
+      {
+        "permission_name": "CreateOrganisation"
+      }
+    ]
+  }
+}

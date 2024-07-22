@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 use axum::async_trait;
 use serde::de::DeserializeOwned;
 
-use domain::permission::permission::Permission;
+use domain::permission::permission_authorizer::PermissionAuthorizer;
 use domain::permission::permissions::read_organisation_users::ReadOrganisationUsers;
 use domain::user::user_id::UserId;
 
@@ -11,8 +11,8 @@ use crate::queries::database::Database;
 
 pub struct PermissionOf<P, RequestContent>
 where
-    P: Permission,
-    RequestContent: DeserializeOwned + Into<P::Context> + Send + Sync
+    P: PermissionAuthorizer,
+    RequestContent: DeserializeOwned + Into<P::ResourceInQuestion> + Send + Sync
 {
     phantom_permission: PhantomData<P>,
     phantom_request_content: PhantomData<RequestContent>,
@@ -22,8 +22,8 @@ where
 
 impl <P, RequestContent> PermissionOf<P, RequestContent>
 where
-    P: Permission,
-    RequestContent: DeserializeOwned + Into<P::Context> + Send + Sync
+    P: PermissionAuthorizer,
+    RequestContent: DeserializeOwned + Into<P::ResourceInQuestion> + Send + Sync
 {
 
     pub fn create(database: Database) -> Self {
@@ -37,16 +37,17 @@ where
 
 impl<P, RC> UserContent for PermissionOf<P, RC>
 where
-    P: Permission,
-    RC: DeserializeOwned + Into<<P as Permission>::Context> + Send + Sync
+    P: PermissionAuthorizer,
+    RC: DeserializeOwned + Into<<P as PermissionAuthorizer>::ResourceInQuestion> + Send + Sync + Clone
 {
     type Content = P;
+    type RequestContent = RC;
 }
 
 #[async_trait]
 impl <RC> UserExtractor for PermissionOf<ReadOrganisationUsers, RC>
 where
-    RC: DeserializeOwned + Into<<ReadOrganisationUsers as Permission>::Context> + Send + Sync,
+    RC: DeserializeOwned + Into<<ReadOrganisationUsers as PermissionAuthorizer>::ResourceInQuestion> + Send + Sync + Clone,
 {
     type Rejection = sqlx::Error;
 

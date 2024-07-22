@@ -1,16 +1,21 @@
+use std::collections::HashSet;
+use std::fs::Permissions;
+use crate::permission::permission_authorizer::PermissionName;
+use crate::permission::resource::resource_id::ResourceId;
+use crate::permission::resource_type::ResourceType;
 
-
-pub type PermissionName = &'static str;
-
-pub trait Permission: Send + Sync {
-
-    /// Context contains the necessary information to the Permission to decide
-    /// if the member is granted the permission
-    type Context;
-
-    /// Name returns the name of the permission as a 'static str
-    fn name() -> PermissionName;
-
-    /// is_granted_for validates whenever the user has permission to do something with the resource.
-    fn is_authorized(&self, context: <Self as Permission>::Context) -> bool;
+pub enum Permission {
+    WithoutResource(PermissionName),
+    WithOrganisationResources {
+        permissions: Permissions,
+        resource_id: HashSet<ResourceId>,
+    }
+}
+impl Permission {
+    pub fn resource_type(&self) -> Option<&'static str> {
+        match self {
+            Permission::WithoutResource(_) => None,
+            Permission::WithOrganisationResources { .. } => Some(ResourceType::Organisation.into())
+        }
+    }
 }

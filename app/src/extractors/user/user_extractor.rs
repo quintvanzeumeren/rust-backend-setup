@@ -14,6 +14,7 @@ pub trait UserExtractor: Send + Sync + UserContent {
 
 pub trait UserContent {
     type Content;
+    type RequestContent: Clone;
 }
 
 
