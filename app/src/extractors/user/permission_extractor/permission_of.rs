@@ -3,7 +3,7 @@ use axum::async_trait;
 use serde::de::DeserializeOwned;
 
 use domain::permission::permission_authorizer::PermissionAuthorizer;
-use domain::permission::permissions::read_organisation_users::ReadOrganisationUsers;
+use domain::permission::permissions::read_team_members::ReadTeamMembers;
 use domain::user::user_id::UserId;
 
 use crate::extractors::user::user_extractor::{UserContent, UserExtractor};
@@ -45,13 +45,13 @@ where
 }
 
 #[async_trait]
-impl <RC> UserExtractor for PermissionOf<ReadOrganisationUsers, RC>
+impl <RC> UserExtractor for PermissionOf<ReadTeamMembers, RC>
 where
-    RC: DeserializeOwned + Into<<ReadOrganisationUsers as PermissionAuthorizer>::ResourceInQuestion> + Send + Sync + Clone,
+    RC: DeserializeOwned + Into<<ReadTeamMembers as PermissionAuthorizer>::ResourceInQuestion> + Send + Sync + Clone,
 {
     type Rejection = sqlx::Error;
 
-    async fn extract(&self, user_id: UserId) -> Result<ReadOrganisationUsers, Self::Rejection> {
+    async fn extract(&self, user_id: UserId) -> Result<ReadTeamMembers, Self::Rejection> {
         // todo implement
         Err(sqlx::Error::RowNotFound)
     }

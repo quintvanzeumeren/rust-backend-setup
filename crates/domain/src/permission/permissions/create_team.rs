@@ -1,11 +1,12 @@
 use crate::permission::permission_authorizer::{PermissionAuthorizer, PermissionName};
-/// CreateOrganisation checks if the user can create new organisation
-pub struct CreateOrganisation;
-impl PermissionAuthorizer for CreateOrganisation {
+
+/// CreateTeam checks if the user can create new team
+pub struct CreateTeam;
+impl PermissionAuthorizer for CreateTeam {
     type ResourceInQuestion = ();
 
     fn name() -> PermissionName {
-        "CreateOrganisation"
+        "CreateTeam"
     }
 
     fn is_authorized_for(&self, _: <Self as PermissionAuthorizer>::ResourceInQuestion) -> bool {

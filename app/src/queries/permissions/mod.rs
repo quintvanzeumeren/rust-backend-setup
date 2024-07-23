@@ -1,6 +1,4 @@
-use domain::permission::permission_authorizer::PermissionAuthorizer;
-
-pub mod read_organisation_users;
+pub mod read_team_members;
 pub mod permission_querier;
 
 

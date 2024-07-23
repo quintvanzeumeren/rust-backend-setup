@@ -6,7 +6,7 @@ use crate::permission::resource_type::ResourceType;
 
 pub enum Permission {
     WithoutResource(PermissionName),
-    WithOrganisationResources {
+    WithteamResources {
         permissions: Permissions,
         resource_id: HashSet<ResourceId>,
     }
@@ -15,7 +15,7 @@ impl Permission {
     pub fn resource_type(&self) -> Option<&'static str> {
         match self {
             Permission::WithoutResource(_) => None,
-            Permission::WithOrganisationResources { .. } => Some(ResourceType::Organisation.into())
+            Permission::WithteamResources { .. } => Some(ResourceType::Team.into())
         }
     }
 }
