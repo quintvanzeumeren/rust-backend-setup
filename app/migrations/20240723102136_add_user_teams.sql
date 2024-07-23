@@ -1,9 +1,4 @@
 -- Add migration script here
-
-CREATE TABLE "users" (
-    "user_id" UUID PRIMARY KEY
-);
-
 CREATE TABLE "teams" (
     "id" UUID PRIMARY KEY
 );

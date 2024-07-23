@@ -1,4 +1,4 @@
-use domain::permission::user_details::UserAttributes;
+use domain::permission::user_attributes::UserAttributes;
 use domain::user::user_id::UserId;
 
 use crate::queries::database::Database;

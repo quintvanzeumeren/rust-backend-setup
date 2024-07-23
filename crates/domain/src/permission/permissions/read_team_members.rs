@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use crate::team::team_id::TeamId;
 use crate::permission::permission_authorizer::{PermissionAuthorizer, PermissionName};
 use crate::permission::resource::resource::Resource;
-use crate::permission::user_details::UserAttributes;
+use crate::permission::user_attributes::UserAttributes;
 
 /// ReadTeamMembers checks if the user can read the members of an team
 pub struct ReadTeamMembers {

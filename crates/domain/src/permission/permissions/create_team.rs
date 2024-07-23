@@ -1,7 +1,10 @@
 use crate::permission::permission_authorizer::{PermissionAuthorizer, PermissionName};
+use crate::permission::user_attributes::UserAttributes;
 
 /// CreateTeam checks if the user can create new team
-pub struct CreateTeam;
+pub struct CreateTeam {
+    pub user: UserAttributes
+}
 impl PermissionAuthorizer for CreateTeam {
     type ResourceInQuestion = ();
 

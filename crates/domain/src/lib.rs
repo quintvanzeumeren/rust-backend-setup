@@ -3,4 +3,4 @@ pub mod shared;
 pub mod user;
 pub mod team;
 pub mod permission;
-mod role;
+pub mod role;

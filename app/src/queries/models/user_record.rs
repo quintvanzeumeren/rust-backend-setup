@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use domain::user::password::Password;
-use domain::user::user::{Admin, EndUser, User};
+use domain::user::user::User;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserRecord {
@@ -27,35 +27,12 @@ impl From<&User> for UserRecord {
 impl TryInto<User> for UserRecord {
     type Error = password_hash::Error;
 
-    fn try_into(self) -> Result<User<EndUser>, Self::Error> {
-        Ok(User::new(
-            self.user_id.into(),
-            self.username,
-            Password::try_from(self.password_hash)?,
-        ))
-    }
-}
-
-impl From<&User<Admin>> for UserRecord {
-    fn from(user: &User<Admin>) -> Self {
-        UserRecord {
-            user_id: user.id.0,
-            username: user.username.clone(),
-            password_hash: user.hashed_password.hash_string().expose_secret().clone(),
-            admin: true
-        }
-    }
-}
-
-impl TryInto<User<Admin>> for UserRecord {
-    type Error = password_hash::Error;
-
-    fn try_into(self) -> Result<User<Admin>, Self::Error> {
-        Ok(User::new(
-            self.user_id.into(),
-            self.username,
-            Password::try_from(self.password_hash)?,
-        ))
+    fn try_into(self) -> Result<User, Self::Error> {
+        Ok(User {
+            id: self.user_id.into(),
+            username: self.username,
+            hashed_password: Password::try_from(self.password_hash)?,
+        })
     }
 }
 

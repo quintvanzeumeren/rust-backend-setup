@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::team::team_id::TeamId;
 use crate::permission::permission_authorizer::{PermissionAuthorizer, PermissionName};
-use crate::permission::user_details::UserAttributes;
+use crate::permission::user_attributes::UserAttributes;
 
 /// DeleteTeam is a permission that checks if whenever the user can delete an team.
 pub struct DeleteTeam {

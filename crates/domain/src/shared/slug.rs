@@ -1,7 +1,7 @@
 use slug::slugify;
 
-#[derive(Clone, Debug, PartialEq, Hash)]
-pub struct Slug(String);
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Slug(pub String);
 
 impl Slug {
     pub fn new(s: String) -> Self {
@@ -20,6 +20,11 @@ impl From<String> for Slug {
     }
 }
 
+impl From<&'static str> for Slug {
+    fn from(value: &'static str) -> Self {
+        Self::new(value.to_string())
+    }
+}
 
 
 
