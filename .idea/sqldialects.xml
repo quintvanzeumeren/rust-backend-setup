@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/app/migrations/20240723093343_add_admin_column_to_organisation.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/app/migrations/20240723093656_remove_admin_column_from_users.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_latest_token_for_session.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_refresh_token_by_id.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_just_ended_user_session.sql" dialect="PostgreSQL" />
