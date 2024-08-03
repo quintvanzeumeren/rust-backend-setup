@@ -1,25 +1,26 @@
 use std::path::Path;
+
 use once_cell::sync::Lazy;
 use pasetors::keys::{Generate, SymmetricKey};
 use pasetors::version4::V4;
 use reqwest::{Response, StatusCode};
-use secrecy::Secret;
 use sqlx::PgPool;
 use tracing::Subscriber;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::{EnvFilter, Registry};
 use tracing_subscriber::fmt::MakeWriter;
 use tracing_subscriber::layer::SubscriberExt;
-use app::app_state::AppState;
 
+use app::app_state::AppState;
 use app::configuration::configuration::get_configuration;
-use app::configuration::telemetry::TelemetryConfig;
 use app::queries::database::Database;
-use app::routes::{router};
-use app::telemetry::{get_subscriber, init_subscriber, init_tracer};
+use app::routes::router;
+use app::startup::create_root_user;
+use app::telemetry::init_subscriber;
+use test_utility::random::_common::random_salt;
+
 use crate::util::api_client::ApiClient;
 use crate::util::test_app::{AbortOnDrop, TestApp};
-
 
 static TRACING: Lazy<()> = Lazy::new(|| {
     let default_filter_level = "info".to_string();
@@ -87,6 +88,10 @@ pub async fn spawn_app(db: PgPool) -> TestApp {
         .expect("Failed to create tcp listener");
     
     let app_port = listener.local_addr().unwrap().port();
+
+    create_root_user(&Database(db.clone()), &configuration, &random_salt())
+        .await
+        .expect("Failed to create root user");
     
     let app_db = db.clone();
     let _server = AbortOnDrop(tokio::spawn(async move {
@@ -98,6 +103,7 @@ pub async fn spawn_app(db: PgPool) -> TestApp {
                     .expect("Failed to random encryption key")
             }
         );
+        
         let listener = tokio::net::TcpListener::from_std(listener)
             .expect("Failed to get tcp listener from tokio");
 
@@ -105,22 +111,22 @@ pub async fn spawn_app(db: PgPool) -> TestApp {
     }));
 
     let address = format!("http://localhost:{}", app_port);
-    let test_app = TestApp {
-        address: address.clone(),
-        api_client: ApiClient {
+    return TestApp::new(
+        address.clone(),
+        app_port,
+        db,
+        ApiClient {
             app_address: address.clone()
         },
-        port: app_port,
-        pg_pool: db,
+        configuration,
 
         // server must be saved in order for the task that starts,
         // the http server (axum) to keep running, or its lifetime gets dropped.
         // the server aborts when TestApp goes out of scope
         _server
-    };
-
-    return test_app
+    );
 }
+
 pub fn assert_status_eq(
     response: &Response,
     status_code: StatusCode,

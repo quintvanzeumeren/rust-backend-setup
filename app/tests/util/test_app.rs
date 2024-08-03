@@ -1,10 +1,11 @@
 use password_hash::SaltString;
 use reqwest::header::{AUTHORIZATION, HeaderMap, HeaderValue};
 use reqwest::Response;
-use secrecy::Secret;
+use secrecy::{ExposeSecret, Secret};
 use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
+use app::configuration::configuration::Configuration;
 use security::hash::scheme::{get_latest_scheme, Scheme};
 use crate::util::api_client::ApiClient;
 use crate::util::test_user::anonymous::Anonymous;
@@ -22,15 +23,34 @@ impl Drop for AbortOnDrop {
 }
 
 pub struct TestApp {
-    pub address: String,
-    pub port: u16,
-    pub pg_pool: PgPool,
-    pub api_client: ApiClient,
-
-    pub _server: AbortOnDrop,
+    address: String,
+    port: u16,
+    pg_pool: PgPool,
+    api_client: ApiClient,
+    configuration: Configuration,
+    _server: AbortOnDrop,
 }
 
 impl TestApp {
+
+    pub fn new(
+        address: String,
+        port: u16,
+        pg_pool: PgPool,
+        api_client: ApiClient,
+        configuration: Configuration,
+        _server: AbortOnDrop
+    ) -> Self {
+        Self {
+            address,
+            port,
+            pg_pool,
+            api_client,
+            configuration,
+            _server
+        }
+    }
+
     pub async fn create_test_user(&self) -> TestUser<Anonymous> {
         let user_id = Uuid::new_v4();
         let username = Uuid::new_v4().to_string();
@@ -65,6 +85,27 @@ impl TestApp {
             // api_client: ApiClient {
             //     app_address: test_app.address.clone()
             // },
+        }
+    }
+
+    pub async fn get_root_user(&self) -> TestUser<LoggedIn> {
+        let root = TestUser {
+            user_id: Uuid::nil(),
+            username: self.configuration.admin.username.expose_secret().clone(),
+            password: self.configuration.admin.password.expose_secret().clone(),
+            state: Anonymous {},
+            app: &self,
+        };
+
+        let root = root.login().await;
+        let user_details = root.current_user().await;
+
+        TestUser {
+            user_id: user_details.user_id,
+            username: root.username,
+            password: root.password,
+            state: root.state,
+            app: &self
         }
     }
 }
