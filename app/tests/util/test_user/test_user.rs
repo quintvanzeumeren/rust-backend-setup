@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use reqwest::Response;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -126,6 +127,10 @@ impl<'a> TestUser<'a, LoggedIn> {
             .json::<ExpectedCurrentUserResponse>()
             .await
             .expect("Failed to parse response to ExpectedCurrentUserResponse")
+    }
+    
+    pub async fn create_team(&self, team_id: Uuid) -> Response {
+        self.app.create_team(self, team_id).await
     }
 
 }

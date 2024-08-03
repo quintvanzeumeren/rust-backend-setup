@@ -170,6 +170,18 @@ impl TestApp {
             }
         }
     }
+    
+    pub async fn create_team(&self, user: &TestUser<'_, LoggedIn>, team_id: Uuid) -> Response {
+        self.api_client
+            .post("/internal/v1/teams")
+            .headers(self.auth_header(user))
+            .json(&json!({
+                "id": team_id
+            }))
+            .send()
+            .await
+            .expect("Failed to send create_team request")
+    }
 }
 
 impl TestApp {
