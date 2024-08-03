@@ -10,7 +10,6 @@ pub struct UserRecord {
     pub user_id: Uuid,
     pub username: String,
     pub password_hash: String,
-    pub admin: bool
 }
 
 impl From<&User> for UserRecord {
@@ -19,7 +18,6 @@ impl From<&User> for UserRecord {
             user_id: user.id.0,
             username: user.username.clone(),
             password_hash: user.hashed_password.hash_string().expose_secret().clone(),
-            admin: false
         }
     }
 }
