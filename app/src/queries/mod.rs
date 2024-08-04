@@ -7,4 +7,4 @@ pub mod transaction;
 pub mod is_admin;
 pub mod permissions;
 pub mod get_user_credentials;
-mod get_user_details;
+mod get_user_attributes;

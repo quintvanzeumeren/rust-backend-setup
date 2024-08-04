@@ -1,3 +1,3 @@
 pub mod team_id;
-mod team;
+pub mod team;
 

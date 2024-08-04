@@ -3,7 +3,7 @@
 pub type PermissionName = &'static str;
 
 /// PermissionAuthorizer determines if the User has authorization to the ResourceInQuestion.
-pub trait PermissionAuthorizer: Send + Sync {
+pub trait PermissionAuthorizer: Send + Sync + Sized {
 
     /// ResourceInQuestion contains the attributes by which the Permission identifies the resource
     /// for which it's determining authorization.

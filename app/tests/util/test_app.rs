@@ -176,7 +176,7 @@ impl TestApp {
             .post("/internal/v1/teams")
             .headers(self.auth_header(user))
             .json(&json!({
-                "id": team_id
+                "team_id": team_id
             }))
             .send()
             .await
