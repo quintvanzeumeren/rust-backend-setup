@@ -4,7 +4,7 @@ use uuid::Uuid;
 use domain::sessions::state::active::Active;
 use domain::sessions::user_session::UserSession;
 use crate::queries::database::Database;
-use crate::queries::models::user_session_record::UserSessionRecord;
+use crate::queries::records::user_session_record::UserSessionRecord;
 
 
 impl Database {

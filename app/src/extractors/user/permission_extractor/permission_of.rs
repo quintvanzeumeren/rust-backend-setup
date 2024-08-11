@@ -52,7 +52,7 @@ where
 {
     type Rejection = sqlx::Error;
 
-    async fn extract(&self, user_id: &UserId) -> Result<ReadTeamMembers, Self::Rejection> {
+    async fn extract(&self, user_id: UserId) -> Result<ReadTeamMembers, Self::Rejection> {
         // todo implement
         Err(sqlx::Error::RowNotFound)
     }
@@ -65,11 +65,11 @@ where
 {
     type Rejection = sqlx::Error;
 
-    async fn extract(&self, user_id: &UserId) -> Result<Self::Content, Self::Rejection> {
-        let user_attributes = self.database.get_user_attributes(&user_id).await?;
+    async fn extract(&self, user_id: UserId) -> Result<Self::Content, Self::Rejection> {
+        let user_attributes = self.database.get_user_attributes(user_id).await?;
         
         Ok(CreateTeam {
-            user: user_attributes
+            user: user_attributes   
         })
     }
 }

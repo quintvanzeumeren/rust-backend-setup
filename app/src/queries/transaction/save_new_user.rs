@@ -1,6 +1,6 @@
 use sqlx::{Executor, query_file};
 use domain::user::user::User;
-use crate::queries::models::user_record::UserRecord;
+use crate::queries::records::user_record::UserRecord;
 use crate::queries::transaction::_transaction::Transaction;
 
 
@@ -29,7 +29,7 @@ mod tests {
     use test_utility::random::user::random_user;
     use crate::queries::database::Database;
 
-    use crate::queries::models::user_record::UserRecord;
+    use crate::queries::records::user_record::UserRecord;
 
     #[sqlx::test]
     async fn test_save_user(db: PgPool) {

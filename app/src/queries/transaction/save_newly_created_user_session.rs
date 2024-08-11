@@ -3,7 +3,7 @@ use sqlx::{Executor, query_file};
 use domain::sessions::state::newly_created::NewlyCreated;
 use domain::sessions::user_session::UserSession;
 
-use crate::queries::models::user_session_record::UserSessionRecord;
+use crate::queries::records::user_session_record::UserSessionRecord;
 use crate::queries::transaction::_transaction::Transaction;
 
 
@@ -37,8 +37,8 @@ mod tests {
     use test_utility::random::user_session::random_newly_created_user_session;
     use crate::queries::database::Database;
 
-    use crate::queries::models::refresh_token_record::RefreshTokenRecord;
-    use crate::queries::models::user_session_record::UserSessionRecord;
+    use crate::queries::records::refresh_token_record::RefreshTokenRecord;
+    use crate::queries::records::user_session_record::UserSessionRecord;
 
     #[sqlx::test]
     async fn test_save_new_session(db: PgPool) {

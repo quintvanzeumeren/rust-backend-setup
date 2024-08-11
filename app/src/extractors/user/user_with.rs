@@ -47,11 +47,11 @@ where
             .map_err(|e| AuthenticationError::JsonRejection(e))?;
 
         let permission_extractor: PermissionOf<P, Body> = PermissionOf::create(authenticated_user.state.db.clone());
-        let permission = permission_extractor.extract(&authenticated_user.user_id)
+        let permission = permission_extractor.extract(authenticated_user.user_id)
             .await
             .context("Failed to extract permission for user")?;
         
-        if !permission.is_authorized_for(body.0.clone().into()) {
+        if permission.is_authorized_for(body.0.clone().into()) {
             return Ok(Self {
                 content: permission,
                 request_content: body.0,

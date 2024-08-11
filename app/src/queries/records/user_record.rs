@@ -42,7 +42,7 @@ mod tests {
     use test_utility::random::_common::{random_salt, random_secret};
     use test_utility::random::user::random_user;
 
-    use crate::queries::models::user_record::UserRecord;
+    use crate::queries::records::user_record::UserRecord;
 
     #[test]
     fn test_from() {

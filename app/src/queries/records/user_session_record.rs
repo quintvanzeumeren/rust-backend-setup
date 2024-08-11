@@ -85,7 +85,7 @@ mod tests {
     use uuid::Uuid;
     use test_utility::random::user_session::random_newly_created_user_session;
 
-    use crate::queries::models::user_session_record::UserSessionRecord;
+    use crate::queries::records::user_session_record::UserSessionRecord;
 
     #[test]
     fn test_from_newly_created() {

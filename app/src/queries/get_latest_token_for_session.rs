@@ -5,7 +5,7 @@ use domain::sessions::tokens::RefreshToken;
 use domain::sessions::user_session_token::UserSessionToken;
 
 use crate::queries::database::Database;
-use crate::queries::models::refresh_token_record::RefreshTokenRecord;
+use crate::queries::records::refresh_token_record::RefreshTokenRecord;
 
 impl Database {
     #[tracing::instrument(
@@ -44,7 +44,7 @@ mod tests {
     use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::database::Database;
-    use crate::queries::models::refresh_token_record::RefreshTokenRecord;
+    use crate::queries::records::refresh_token_record::RefreshTokenRecord;
 
     #[sqlx::test]
     async fn test_latest_token_for_session_2(db: PgPool) {

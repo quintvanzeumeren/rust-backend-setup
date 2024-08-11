@@ -61,7 +61,7 @@ mod tests {
     use test_utility::random::refresh_token::random_refresh_token;
     use test_utility::random::user_session::random_newly_created_user_session;
 
-    use crate::queries::models::refresh_token_record::RefreshTokenRecord;
+    use crate::queries::records::refresh_token_record::RefreshTokenRecord;
 
     #[test]
     fn test_from() {
