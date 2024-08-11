@@ -182,6 +182,15 @@ impl TestApp {
             .await
             .expect("Failed to send create_team request")
     }
+    
+    pub async fn add_team_member(&self, user: &TestUser<'_, LoggedIn>, team_id: Uuid, user_id: Uuid) -> Response {
+        self.api_client
+            .post(format!("/internal/v1/teams/{}/users/{}", team_id, user_id).as_str())
+            .headers(self.auth_header(user))
+            .send()
+            .await
+            .expect("Failed to send add_team_member request")
+    }
 }
 
 impl TestApp {

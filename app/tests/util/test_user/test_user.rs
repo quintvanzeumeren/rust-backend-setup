@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
-use reqwest::Response;
+use reqwest::{Response, StatusCode};
 use serde::Deserialize;
 use uuid::Uuid;
-
+use domain::team::team_id::TeamId;
+use crate::util::spawn_app::assert_status_eq;
 use crate::util::test_app::TestApp;
 use crate::util::test_user::anonymous::Anonymous;
 use crate::util::test_user::logged_in::LoggedIn;
@@ -129,8 +130,12 @@ impl<'a> TestUser<'a, LoggedIn> {
             .expect("Failed to parse response to ExpectedCurrentUserResponse")
     }
     
-    pub async fn create_team(&self, team_id: Uuid) -> Response {
-        self.app.create_team(self, team_id).await
+    pub async fn create_team(&self) -> Uuid {
+        let team_id = Uuid::new_v4();
+        let response = self.app.create_team(self, team_id).await;
+        assert_status_eq(&response, StatusCode::CREATED, Some("Incorrect statuscode for when a team was created".to_string()));
+            
+        team_id
     }
 
 }

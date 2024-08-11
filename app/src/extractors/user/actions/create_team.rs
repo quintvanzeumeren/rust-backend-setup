@@ -7,7 +7,7 @@ use domain::team::team_id::TeamId;
 use crate::extractors::user::permission_extractor::permission_of::PermissionOf;
 use crate::extractors::user::user_with::UserWith;
 
-impl <RC> UserWith<PermissionOf<CreateTeam, RC>> 
+impl <RC> UserWith<PermissionOf<CreateTeam, RC>>
 where
     RC: DeserializeOwned + Into<<CreateTeam as PermissionAuthorizer>::ResourceInQuestion> + Send + Sync + Clone 
 {

@@ -19,10 +19,10 @@ impl PermissionAuthorizer for AddTeamMembers {
     }
 
     fn is_authorized_for(&self, context: <Self as PermissionAuthorizer>::ResourceInQuestion) -> bool {
-        self.teams_where_users_can_be_added_to.contains(&context.team_to_gain_user)
+        self.user.is_root() || self.teams_where_users_can_be_added_to.contains(&context.team_to_gain_user)
     }
 }
 
 pub struct AddUserToTeamContext {
-    team_to_gain_user: TeamId
+    pub team_to_gain_user: TeamId
 }
