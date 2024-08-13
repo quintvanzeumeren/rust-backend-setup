@@ -1,13 +1,13 @@
 use axum::http::StatusCode;
 use axum::Json;
-use axum::response::IntoResponse;
 use serde::Deserialize;
 use uuid::Uuid;
+
 use domain::permission::permission::Permission;
 use domain::permission::permissions::create_team::CreateTeam;
+
 use crate::extractors::user::user_with::UserWith;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
-use crate::policy::policies::create_team_policy::{CreateTeamContract, CreateTeamPolicy};
+use crate::policy::policies::create_team_policy::CreateTeamPolicy;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyAuthorizationError;
 

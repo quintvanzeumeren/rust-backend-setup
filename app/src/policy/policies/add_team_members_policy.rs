@@ -20,14 +20,14 @@ impl Policy for AddTeamMembersPolicy {
 
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection> {
         let user = state.db.get_user_attributes(user_in_question).await?;
-        
+
         let permission = AddTeamMembers {
             user,
             
             // todo fetch teams user can add members to
             teams_where_users_can_be_added_to: HashSet::default()
         };
-        
+
         Ok(Self {
             state,
             permission
@@ -42,7 +42,7 @@ impl Policy for AddTeamMembersPolicy {
         if !self.permission.is_authorized_for(details) {
             return Err(PolicyAuthorizationError::Forbidden)
         }
-        
+
         Ok(AddMemberContract {
             team_id: details,
             state: self.state.clone(),
@@ -58,12 +58,13 @@ pub struct AddMemberContract {
 }
 
 impl AddMemberContract {
-    
-    async fn add_member(&self, user_id: UserId) -> Result<(), sqlx::Error> {
-        let transaction = self.state.db.new_transaction().await?;
+
+    pub async fn add_member(&self, user_id: UserId) -> Result<(), sqlx::Error> {
+        let mut transaction = self.state.db.new_transaction().await?;
         
-        todo!("Add new method to add user to team transaction");
-        
+        transaction.add_member_to_team(self.team_id, user_id).await?;
+        transaction.commit().await?;
+
         Ok(())
     }
 

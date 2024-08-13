@@ -10,6 +10,7 @@ use crate::handlers::internal::v1::auth::logout::logout::logout;
 use crate::handlers::internal::v1::auth::refresh::refresh::refresh;
 use crate::handlers::internal::v1::current_user::current_user;
 use crate::handlers::internal::v1::teams::new_team::new_team;
+use crate::handlers::internal::v1::teams::users::add_member::add_member;
 use crate::handlers::internal::v1::users::me::me;
 use crate::handlers::v1::health_check::health_check;
 use crate::middleware::capture_trace_data::print_request_response;
@@ -23,6 +24,7 @@ pub fn router(app_state: AppState) -> Router {
         .route("/internal/v1/user/current", get(current_user))
         .route("/internal/v1/users/me", get(me))
         .route("/internal/v1/teams", post(new_team))
+        .route("/internal/v1/teams/:team_id/users/:user_id", post(add_member))
         .layer(middleware::from_fn(print_request_response))
         .layer(TraceLayer::new_for_http())
         .with_state(Arc::new(app_state))

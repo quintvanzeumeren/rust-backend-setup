@@ -1,8 +1,14 @@
+use anyhow::Context;
+use axum::extract::Path;
 use axum::http::StatusCode;
 use serde::Deserialize;
 use uuid::Uuid;
+
 use crate::extractors::user::user_with::UserWith;
+use crate::handlers::error::HandlerResponse;
 use crate::policy::policies::add_team_members_policy::AddTeamMembersPolicy;
+use crate::policy::policy::Policy;
+use crate::telemetry::TelemetryRecord;
 
 #[derive(Deserialize, Clone)]
 pub struct AddMemberParams {
@@ -10,13 +16,22 @@ pub struct AddMemberParams {
     pub user_id: Uuid
 }
 
-pub async fn add_member(user: UserWith<AddTeamMembersPolicy>) -> StatusCode {
-    todo!("Add easier type for user to add functionality");
-    // todo!("Implement handler...")
+#[tracing::instrument(
+    name = "Adding new user to team",
+    skip(user, params), 
+    fields (
+        new_member_id = tracing::field::Empty,
+        team_id = tracing::field::Empty,
+    )
+)]
+pub async fn add_member(user: UserWith<AddTeamMembersPolicy>, Path(params): Path<AddMemberParams>) -> HandlerResponse<StatusCode> {
+    params.user_id.record_in_telemetry("new_member_id");
+    params.team_id.record_in_telemetry("team_id");
     
-    // let team = user.add_members_to_team()?;
-    // team.add_member(user_id);
-    // 
-    // user.add_members_to_team
+    let add_members_contract = user.content.authorize(params.team_id.into())?;
+    add_members_contract.add_member(params.user_id.into())
+        .await
+        .context("Failed to add member to team")?;
     
+    Ok(StatusCode::OK)
 }

@@ -1,1 +1,1 @@
-mod add_member;
+pub mod add_member;
