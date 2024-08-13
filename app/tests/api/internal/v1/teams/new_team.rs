@@ -1,7 +1,8 @@
+use crate::util::spawn_app::{assert_status_eq, spawn_app};
 use reqwest::StatusCode;
 use sqlx::PgPool;
+use std::collections::HashSet;
 use uuid::Uuid;
-use crate::util::spawn_app::{assert_status_eq, spawn_app};
 
 #[sqlx::test]
 async fn create_new_team_test(db: PgPool) {
@@ -12,12 +13,12 @@ async fn create_new_team_test(db: PgPool) {
     let response = app.create_team(&root, team_id).await;
     assert_status_eq(&response, StatusCode::CREATED, None);
     
-    // todo verify if exist
+    let response = app.get_teams(&root).await;
+    assert_status_eq(&response, StatusCode::OK, None);
+
+    let teams = response.json::<HashSet<Uuid>>().await
+        .expect("Failed to parse get_teams result");
+
+    assert_eq!(teams.len(), 1);
+    assert!(teams.contains(&team_id));
 }
-
-// todo test duplicate team ids
-
-// #[derive(Deserialize)]
-// pub struct ExpectedNewTeamResponse {
-//     pub team_id: Uuid
-// }

@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use chrono::{DateTime, Utc};
 use reqwest::{Response, StatusCode};
 use serde::Deserialize;
@@ -136,6 +137,14 @@ impl<'a> TestUser<'a, LoggedIn> {
         assert_status_eq(&response, StatusCode::CREATED, Some("Incorrect statuscode for when a team was created".to_string()));
             
         team_id
+    }
+    
+    pub async fn get_teams(&self) -> HashSet<Uuid> {
+        self.app.get_teams(self)
+            .await
+            .json::<HashSet<Uuid>>()
+            .await
+            .expect("Failed to parse get_teams result")
     }
 
 }

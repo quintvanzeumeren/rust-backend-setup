@@ -10,3 +10,4 @@ pub mod get_user_credentials;
 mod get_user_attributes;
 mod get_user_teams;
 mod get_user_roles;
+mod get_teams;

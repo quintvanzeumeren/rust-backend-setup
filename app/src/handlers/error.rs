@@ -4,7 +4,7 @@ use axum::response::{IntoResponse, Response};
 use lib_util::errors::errors::format_error_chain;
 use crate::policy::policy_authorization_error::PolicyAuthorizationError;
 
-pub type HandlerResponse<T> = Result<T, HandlerError>;
+pub type HandlerResponse<T: IntoResponse> = Result<T, HandlerError>;
 
 #[derive(thiserror::Error)]
 pub enum HandlerError {
