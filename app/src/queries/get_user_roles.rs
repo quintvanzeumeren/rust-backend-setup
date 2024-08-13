@@ -1,8 +1,9 @@
 use std::collections::HashSet;
+
 use sqlx::query_file_as;
-use uuid::Uuid;
-use domain::role::role::Role;
+
 use domain::user::user_id::UserId;
+
 use crate::queries::database::Database;
 use crate::queries::records::role_record::RoleRecord;
 

@@ -1,85 +1,31 @@
-use std::fmt::Debug;
-use std::marker::PhantomData;
 use std::sync::Arc;
 
 use anyhow::Context;
-use axum::{async_trait, Json, RequestExt};
-use axum::extract::{FromRef, FromRequest, FromRequestParts, Path, Request};
+use axum::extract::{FromRef, FromRequest, FromRequestParts};
 use axum::http::request::Parts;
-use serde::de::DeserializeOwned;
+use axum::{async_trait, RequestExt};
 use uuid::Uuid;
 
-use domain::permission::permission_authorizer::PermissionAuthorizer;
 use domain::user::user_id::UserId;
 
 use crate::app_state::AppState;
 use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
-use crate::extractors::user::permission_extractor::permission_of::PermissionOf;
-use crate::extractors::user::user_extractor::{UserContent, UserExtractor};
 use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
+use crate::policy::policy::Policy;
 
-pub struct UserWith<Extractor: UserContent, ContentType: RequestContentType = JsonBody> {
-    pub content: Extractor::Content,
-    pub request_content: Extractor::RequestContent,
-
-    pub state: Arc<AppState>,
+pub struct UserWith<T> {
+    pub content: T,
     pub user_id: UserId,
     pub session_id: Uuid,
     pub refresh_token_id: Uuid,
-
-    phantom_data: PhantomData<ContentType>
 }
 
 #[async_trait]
-impl<P, S, Body> FromRequest<S> for UserWith<PermissionOf<P, Body>, JsonBody>
-where
-    S: Send + Sync,
-    P: PermissionAuthorizer,
-    Body: DeserializeOwned + Into<P::ResourceInQuestion> + Send + Sync + Clone,
-    Arc<AppState>: FromRef<S>,
-    PermissionOf<P, Body>: UserExtractor<Content = P, RequestContent = Body>
-{
-    type Rejection = AuthenticationError;
-
-    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
-        let (parts, body) = req.into_parts();
-        let mut mutable_parts = parts.clone();
-        let authenticated_user = AuthenticatedUser::from_request_parts(&mut mutable_parts, state).await?;
-
-        let req = Request::from_parts(parts, body);
-        let body: Json<Body> = Json::from_request(req, state)
-            .await
-            .map_err(|e| AuthenticationError::JsonRejection(e))?;
-
-        let permission_extractor: PermissionOf<P, Body> = PermissionOf::create(authenticated_user.state.db.clone());
-        let permission = permission_extractor.extract(authenticated_user.user_id)
-            .await
-            .context("Failed to extract permission for user")?;
-        
-        if permission.is_authorized_for(body.0.clone().into()) {
-            return Ok(Self {
-                content: permission,
-                request_content: body.0,
-                state: authenticated_user.state,
-                user_id: authenticated_user.user_id,
-                session_id: authenticated_user.session_id,
-                refresh_token_id: authenticated_user.refresh_token_id,
-                phantom_data: Default::default(),
-            })
-        }
-
-        Err(AuthenticationError::UnAuthorized)
-    }
-}
-
-#[async_trait]
-impl<P, S, Params> FromRequestParts<S> for UserWith<PermissionOf<P, Params>, QueryParams>
-where
-    S: Send + Sync,
-    P: PermissionAuthorizer,
-    Params: DeserializeOwned + Into<P::ResourceInQuestion> + Send + Sync + Clone,
-    Arc<AppState>: FromRef<S>,
-    PermissionOf<P, Params>: UserExtractor<Content = P, RequestContent = Params>
+impl <S, P> FromRequestParts<S> for UserWith<P>
+    where
+        S: Send + Sync,
+        Arc<AppState>: FromRef<S>,
+        P: Policy,
 {
     type Rejection = AuthenticationError;
 
@@ -87,32 +33,15 @@ where
         let mut mutable_parts = parts.clone();
         let authenticated_user = AuthenticatedUser::from_request_parts(&mut mutable_parts, state).await?;
 
-        let params: Path<Params> = Path::from_request_parts(parts, state).await.expect("todo handle error");
-        let permission_extractor: PermissionOf<P, Params> = PermissionOf::create(authenticated_user.state.db.clone());
-        let permission = permission_extractor.extract(authenticated_user.user_id)
+        let policy = P::new(authenticated_user.state, authenticated_user.user_id)
             .await
-            .context("Failed to extract permission for user")?;
+            .context("Failed to initialise Policy")?;
 
-        if !permission.is_authorized_for(params.0.clone().into()) {
-            return Ok(Self {
-                content: permission,
-                request_content: params.0,
-                state: authenticated_user.state,
-                user_id: authenticated_user.user_id,
-                session_id: authenticated_user.session_id,
-                refresh_token_id: authenticated_user.refresh_token_id,
-                phantom_data: Default::default(),
-            })
-        }
-
-        Err(AuthenticationError::UnAuthorized)
+        Ok(Self {
+            content: policy,
+            user_id: authenticated_user.user_id,
+            session_id: authenticated_user.session_id,
+            refresh_token_id: authenticated_user.refresh_token_id,
+        })
     }
 }
-
-pub trait RequestContentType {}
-
-pub struct JsonBody;
-impl RequestContentType for JsonBody {}
-
-pub struct QueryParams;
-impl RequestContentType for QueryParams {}

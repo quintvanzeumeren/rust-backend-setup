@@ -1,21 +1,17 @@
-use std::collections::HashSet;
-use std::fs::Permissions;
-use crate::permission::permission_authorizer::PermissionName;
-use crate::permission::resource::resource_id::ResourceId;
-use crate::permission::resource_type::ResourceType;
 
-pub enum Permission {
-    WithoutResource(PermissionName),
-    WithteamResources {
-        permissions: Permissions,
-        resource_id: HashSet<ResourceId>,
-    }
-}
-impl Permission {
-    pub fn resource_type(&self) -> Option<&'static str> {
-        match self {
-            Permission::WithoutResource(_) => None,
-            Permission::WithteamResources { .. } => Some(ResourceType::Team.into())
-        }
-    }
+
+pub type PermissionName = &'static str;
+
+/// PermissionAuthorizer determines if the User has authorization to the ResourceInQuestion.
+pub trait Permission: Send + Sync + Sized {
+
+    /// ResourceInQuestion contains the attributes by which the Permission identifies the resource
+    /// for which it's determining authorization.
+    type ResourceInQuestion;
+
+    /// Name returns the name of the permission as a 'static str
+    fn name() -> PermissionName;
+
+    /// is_authorized determines whenever the user is authorized for the Permission.
+    fn is_authorized_for(&self, resource_in_question: <Self as Permission>::ResourceInQuestion) -> bool;
 }

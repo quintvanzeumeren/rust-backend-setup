@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use crate::team::team_id::TeamId;
-use crate::permission::permission_authorizer::{PermissionAuthorizer, PermissionName};
+use crate::permission::permission::{Permission, PermissionName};
 use crate::permission::user_attributes::UserAttributes;
 use crate::role::role::ROLE_ROOT;
 
@@ -11,18 +11,14 @@ pub struct AddTeamMembers {
     pub teams_where_users_can_be_added_to: HashSet<TeamId>
 }
 
-impl PermissionAuthorizer for AddTeamMembers {
-    type ResourceInQuestion = AddUserToTeamContext;
+impl Permission for AddTeamMembers {
+    type ResourceInQuestion = TeamId;
 
     fn name() -> PermissionName {
         "AddTeamMembers"
     }
 
-    fn is_authorized_for(&self, context: <Self as PermissionAuthorizer>::ResourceInQuestion) -> bool {
-        self.user.is_root() || self.teams_where_users_can_be_added_to.contains(&context.team_to_gain_user)
+    fn is_authorized_for(&self, team_id: <Self as Permission>::ResourceInQuestion) -> bool {
+        self.user.is_root() || self.teams_where_users_can_be_added_to.contains(&team_id)
     }
-}
-
-pub struct AddUserToTeamContext {
-    pub team_to_gain_user: TeamId
 }

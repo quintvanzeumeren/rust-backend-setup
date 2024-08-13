@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use crate::team::team_id::TeamId;
-use crate::permission::permission_authorizer::{PermissionAuthorizer, PermissionName};
+use crate::permission::permission::{Permission, PermissionName};
 use crate::permission::resource::resource::Resource;
 use crate::permission::user_attributes::UserAttributes;
 
@@ -11,14 +11,14 @@ pub struct ReadTeamMembers {
     pub resources: HashSet<Resource<TeamId>>
 }
 
-impl PermissionAuthorizer for ReadTeamMembers {
+impl Permission for ReadTeamMembers {
     type ResourceInQuestion = ReadTeamMembersResource;
 
     fn name() -> PermissionName {
         "ReadTeamMembers"
     }
 
-    fn is_authorized_for(&self, context: <Self as PermissionAuthorizer>::ResourceInQuestion) -> bool {
+    fn is_authorized_for(&self, context: <Self as Permission>::ResourceInQuestion) -> bool {
         let user_is_part_of_team = self.user_attributes.teams.contains(&context.team_id);
         if user_is_part_of_team {
             return true;
