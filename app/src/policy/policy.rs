@@ -29,9 +29,9 @@ pub trait Policy: Sized {
     /// AuthenticationRejection is returned when the user either does not have authorization to
     /// perform the given operation, or something went wrong when determining
     /// if the user is authorized.
-    type AuthenticationRejection: IntoResponse + Error;
+    type AuthorizationRejection: IntoResponse + Error;
 
     /// Authorize dictates if the user can or cannot do an operation.
-    fn authorize(&self, details: Self::Details) -> Result<Self::Contract, Self::AuthenticationRejection>;
+    fn authorize(&self, details: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection>;
 
 }

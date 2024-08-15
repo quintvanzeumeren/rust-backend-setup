@@ -146,6 +146,14 @@ impl<'a> TestUser<'a, LoggedIn> {
             .await
             .expect("Failed to parse get_teams result")
     }
+    
+    pub async fn get_team_members(&self, team_id: Uuid) -> HashSet<Uuid> {
+        self.app.get_team_members(self, team_id)
+            .await
+            .json()
+            .await
+            .expect("Failed to parse get_team_members result")
+    }
 
 }
 

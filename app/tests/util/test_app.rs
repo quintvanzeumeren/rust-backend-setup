@@ -200,6 +200,15 @@ impl TestApp {
             .await
             .expect("Failed to send get_teams request")
     }
+    
+    pub async fn get_team_members(&self, user: &TestUser<'_, LoggedIn>, team_id: Uuid) -> Response {
+        self.api_client
+            .get(format!("/internal/v1/teams/{}/users", team_id).as_str())
+            .headers(self.auth_header(user))
+            .send()
+            .await
+            .expect("Failed to send get_team_members request")
+    }
 }
 
 impl TestApp {

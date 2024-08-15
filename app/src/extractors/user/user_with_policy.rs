@@ -13,15 +13,15 @@ use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser
 use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
 use crate::policy::policy::Policy;
 
-pub struct UserWith<T> {
-    pub content: T,
+pub struct UserWithPolicy<T: Policy> {
+    pub policy: T,
     pub user_id: UserId,
     pub session_id: Uuid,
     pub refresh_token_id: Uuid,
 }
 
 #[async_trait]
-impl <S, P> FromRequestParts<S> for UserWith<P>
+impl <S, P> FromRequestParts<S> for UserWithPolicy<P>
     where
         S: Send + Sync,
         Arc<AppState>: FromRef<S>,
@@ -38,7 +38,7 @@ impl <S, P> FromRequestParts<S> for UserWith<P>
             .context("Failed to initialise Policy")?;
 
         Ok(Self {
-            content: policy,
+            policy,
             user_id: authenticated_user.user_id,
             session_id: authenticated_user.session_id,
             refresh_token_id: authenticated_user.refresh_token_id,

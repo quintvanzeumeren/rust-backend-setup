@@ -36,9 +36,9 @@ impl Policy for ViewTeamsPolicy {
 
     type Details = ();
     type Contract = ViewTeamsContract;
-    type AuthenticationRejection = PolicyAuthorizationError;
+    type AuthorizationRejection = PolicyAuthorizationError;
 
-    fn authorize(&self, _: Self::Details) -> Result<Self::Contract, Self::AuthenticationRejection> {
+    fn authorize(&self, _: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection> {
         Ok(ViewTeamsContract {
             state: self.state.clone(),
             user_attributes: self.permission.user_attributes.clone(),

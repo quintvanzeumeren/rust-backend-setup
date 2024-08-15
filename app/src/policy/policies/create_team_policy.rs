@@ -33,9 +33,9 @@ impl Policy for CreateTeamPolicy {
 
     type Details = ();
     type Contract = CreateTeamContract;
-    type AuthenticationRejection = PolicyAuthorizationError;
+    type AuthorizationRejection = PolicyAuthorizationError;
 
-    fn authorize(&self, _: Self::Details) -> Result<Self::Contract, Self::AuthenticationRejection> {
+    fn authorize(&self, _: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection> {
         if self.permission.is_authorized_for(()) {
             return Ok(CreateTeamContract {
                 state: self.state.clone(),

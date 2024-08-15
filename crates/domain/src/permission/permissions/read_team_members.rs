@@ -12,27 +12,25 @@ pub struct ReadTeamMembers {
 }
 
 impl Permission for ReadTeamMembers {
-    type ResourceInQuestion = ReadTeamMembersResource;
+    type ResourceInQuestion = TeamId;
 
     fn name() -> PermissionName {
         "ReadTeamMembers"
     }
 
-    fn is_authorized_for(&self, context: <Self as Permission>::ResourceInQuestion) -> bool {
-        let user_is_part_of_team = self.user_attributes.teams.contains(&context.team_id);
+    fn is_authorized_for(&self, team_id: <Self as Permission>::ResourceInQuestion) -> bool {
+        if self.user_attributes.is_root() {  
+            return true;
+        }
+        
+        let user_is_part_of_team = self.user_attributes.teams.contains(&team_id);
         if user_is_part_of_team {
             return true;
         }
 
-        let user_has_access_to_resource = self.resources.iter()
+        return self.resources.iter()
             .map(|r| r.resource)
-            .any(|r| r == context.team_id);
-
-        return user_has_access_to_resource;
+            .any(|r| r == team_id);
     }
-}
-
-pub struct ReadTeamMembersResource {
-    pub team_id: TeamId
 }
 

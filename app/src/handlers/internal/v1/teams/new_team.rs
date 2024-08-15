@@ -6,7 +6,7 @@ use uuid::Uuid;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::create_team::CreateTeam;
 
-use crate::extractors::user::user_with::UserWith;
+use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::policy::policies::create_team_policy::CreateTeamPolicy;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyAuthorizationError;
@@ -15,8 +15,8 @@ use crate::policy::policy_authorization_error::PolicyAuthorizationError;
     name = "Adding a new team"
     skip_all,
 )]
-pub async fn new_team(user: UserWith<CreateTeamPolicy>, new_team_request: Json<NewTeamRequestBody>) -> Result<StatusCode, PolicyAuthorizationError> {
-    let create_team_contract = user.content.authorize(())?;
+pub async fn new_team(user: UserWithPolicy<CreateTeamPolicy>, new_team_request: Json<NewTeamRequestBody>) -> Result<StatusCode, PolicyAuthorizationError> {
+    let create_team_contract = user.policy.authorize(())?;
     let response = create_team_contract.create_team(new_team_request.team_id.into()).await;
     return Ok(match response {
         Ok(_) => StatusCode::CREATED,

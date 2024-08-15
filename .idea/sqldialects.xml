@@ -6,6 +6,7 @@
     <file url="file://$PROJECT_DIR$/app/migrations/20240723095135_remove_organisations.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/migrations/20240723104657_add_root_role.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_latest_token_for_session.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/app/src/queries/get_members_for_team.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_refresh_token_by_id.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/add_role_to_user.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_just_ended_user_session.sql" dialect="PostgreSQL" />
