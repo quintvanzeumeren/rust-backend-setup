@@ -25,6 +25,7 @@ strum = "0.26.3"
 strum_macros = "0.26.3"
 
 [dev-dependencies]
+test-utility ={ path = "../test-utility", default-features = true }
 serde_json.workspace = true
 
 [lints]

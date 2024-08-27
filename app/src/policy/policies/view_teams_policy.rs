@@ -26,11 +26,7 @@ impl Policy for ViewTeamsPolicy {
         Ok(Self {
             user_id: user_in_question,
             state,
-            permission: ViewTeam {
-                user_attributes,
-                // todo retrieve viewable teams for the user
-                viewable_teams: HashSet::default()
-            },
+            permission: ViewTeam::new(user_attributes),
         })
     }
 

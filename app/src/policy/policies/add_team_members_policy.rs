@@ -20,13 +20,7 @@ impl Policy for AddTeamMembersPolicy {
 
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection> {
         let user = state.db.get_user_attributes(user_in_question).await?;
-
-        let permission = AddTeamMembers {
-            user,
-            
-            // todo fetch teams user can add members to
-            teams_where_users_can_be_added_to: HashSet::default()
-        };
+        let permission = AddTeamMembers::new(user);
 
         Ok(Self {
             state,

@@ -21,9 +21,7 @@ impl Policy for CreateTeamPolicy {
 
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection> {
         let user = state.db.get_user_attributes(user_in_question).await?;
-        let permission = CreateTeam {
-            user,
-        };
+        let permission = CreateTeam::new(user);
 
         Ok(Self {
             state,

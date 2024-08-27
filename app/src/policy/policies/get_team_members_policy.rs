@@ -24,11 +24,7 @@ impl Policy for GetTeamMembersPolicy {
         
         Ok(Self {
             state,
-            permission: ReadTeamMembers {
-                user_attributes: user,
-                // todo fetch user resources
-                resources: Default::default(),
-            },
+            permission: ReadTeamMembers::new(user),
             user_id: user_in_question,
         })
     }

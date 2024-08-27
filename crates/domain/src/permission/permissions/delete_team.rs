@@ -1,34 +1,59 @@
-use std::collections::HashSet;
-
-use crate::team::team_id::TeamId;
 use crate::permission::permission::{Permission, PermissionName};
 use crate::permission::user_attributes::UserAttributes;
+use crate::team::team_id::TeamId;
 
 /// DeleteTeam is a permission that checks if whenever the user can delete an team.
 pub struct DeleteTeam {
     pub user_attributes: UserAttributes,
-    pub deletable_teams: HashSet<TeamId>
+}
+
+impl DeleteTeam {
+    pub fn new(user_attributes: UserAttributes) -> Self {
+        Self { user_attributes }
+    }
 }
 
 impl Permission for DeleteTeam {
-    type ResourceInQuestion = DeleteTeamContext;
+    type ResourceInQuestion = TeamId;
 
     fn name() -> PermissionName {
         "DeleteTeam"
     }
 
-    fn is_authorized_for(&self, resource_in_question: <Self as Permission>::ResourceInQuestion) -> bool {
-        // todo probably add more conditions to this delete operation
-        // like cannot delete team of paying customers..
-        let part_of_team = self.user_attributes.teams.contains(&resource_in_question.team_to_delete);
-        if part_of_team {
-            return false
-        }
-
-        self.deletable_teams.contains(&resource_in_question.team_to_delete)
+    fn is_authorized_for(&self, team_id: <Self as Permission>::ResourceInQuestion) -> bool {
+        self.user_attributes.is_root_or_admin()
     }
 }
 
-pub struct DeleteTeamContext {
-    pub team_to_delete: TeamId
+#[cfg(test)]
+mod tests {
+    use crate::permission::permission::Permission;
+    use crate::permission::permissions::delete_team::DeleteTeam;
+    use crate::permission::user_attributes::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
+    use uuid::Uuid;
+
+    #[test]
+    fn test_delete_team_name() {
+        assert_eq!(DeleteTeam::name(), "DeleteTeam");
+    }
+
+    #[test]
+    fn test_delete_team_authorization() {
+        let team_id = Uuid::new_v4().into();
+        let root = random_user_attributes_root(vec![]);
+        let permission = DeleteTeam::new(root);
+        assert!(permission.is_authorized_for(team_id));
+        
+        let admin = random_user_attributes_admin(vec![]);
+        let permission = DeleteTeam::new(admin);
+        assert!(permission.is_authorized_for(team_id));
+
+        let member = random_user_attributes_with(vec![team_id.0.clone()], vec![]);
+        let permission = DeleteTeam::new(member);
+        assert!(!permission.is_authorized_for(team_id));
+
+        let non_member = random_user_attributes_with(vec![], vec![]);
+        let permission = DeleteTeam::new(non_member);
+        assert!(!permission.is_authorized_for(team_id));
+    }
 }

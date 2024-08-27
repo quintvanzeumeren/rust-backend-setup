@@ -4,7 +4,8 @@
 
 ## Todos
 
-- [ ] Implement unit test for the implementations of the Permission trait
-- [ ] Retrieve additional data for Permissions within a Policy implementation (AddTeamMembersPolicy, GetTeamMembersPolicy, ViewTeamsPolicy)
-- [ ] Create a new resource for when a team is created
-- [ ] Add handlers for creating a new role, and ability assign permissions to roles.
+- [x] Implement unit test for the implementations of the Permission trait
+- [x] Add admin, who can do everything as root, except for managing admins, or root.
+- [ ] Add handler to create user (root can create admins only, admin can create normal users only)
+- [ ] Add handler to delete user (root can delete anyone, except himself, admin can delete normal users only)
+- [ ] Update add_member permissions so that root can add anyone, admin can only add himself or other non admin users

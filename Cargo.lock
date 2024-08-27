@@ -635,6 +635,7 @@ dependencies = [
  "slug",
  "strum",
  "strum_macros",
+ "test-utility",
  "thiserror",
  "uuid",
 ]

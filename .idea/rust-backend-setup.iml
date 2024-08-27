@@ -10,6 +10,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/lib-util/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/security/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/test-utility/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/domain/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/volumes" />
     </content>

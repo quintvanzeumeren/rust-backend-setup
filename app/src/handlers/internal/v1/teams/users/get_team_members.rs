@@ -1,14 +1,13 @@
-use std::collections::HashSet;
-use anyhow::Context;
-use axum::extract::Path;
-use axum::Json;
-use reqwest::StatusCode;
-use serde::Deserialize;
-use uuid::Uuid;
 use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::handlers::error::HandlerResponse;
 use crate::policy::policies::get_team_members_policy::GetTeamMembersPolicy;
 use crate::policy::policy::Policy;
+use anyhow::Context;
+use axum::extract::Path;
+use axum::Json;
+use serde::Deserialize;
+use std::collections::HashSet;
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 pub struct GetTeamMemberParams {
