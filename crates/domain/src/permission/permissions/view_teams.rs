@@ -14,13 +14,13 @@ impl ViewTeam {
 }
 
 impl Permission for ViewTeam {
-    type ResourceInQuestion = TeamId;
+    type Details = TeamId;
 
     fn name() -> PermissionName {
         "ViewTeam"
     }
 
-    fn is_authorized_for(&self, team_id: <Self as Permission>::ResourceInQuestion) -> bool {
+    fn is_authorized_for(&self, team_id: <Self as Permission>::Details) -> bool {
         self.user_attributes.is_root_or_admin() || self.user_attributes.teams.contains(&team_id)
     }
 }

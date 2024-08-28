@@ -17,7 +17,7 @@ impl From<&User> for UserRecord {
         UserRecord {
             user_id: user.id.0,
             username: user.username.clone(),
-            password_hash: user.hashed_password.hash_string().expose_secret().clone(),
+            password_hash: user.password.hash_string().expose_secret().clone(),
         }
     }
 }
@@ -29,7 +29,7 @@ impl TryInto<User> for UserRecord {
         Ok(User {
             id: self.user_id.into(),
             username: self.username,
-            hashed_password: Password::try_from(self.password_hash)?,
+            password: Password::try_from(self.password_hash)?,
         })
     }
 }
@@ -52,7 +52,7 @@ mod tests {
         let record = UserRecord::from(&user1);
         assert_eq!(record.user_id, user1.id.0);
         assert_eq!(record.username, user1.username);
-        assert_eq!(record.password_hash, user1.hashed_password.hash_string().expose_secret().clone());
+        assert_eq!(record.password_hash, user1.password.hash_string().expose_secret().clone());
 
         let record2 = UserRecord::from(&user1);
         assert_eq!(record, record2)
@@ -67,6 +67,6 @@ mod tests {
         let into_user: User = record.try_into().expect("Failed to transform UserRecord into User");
         assert_eq!(user1.id, into_user.id);
         assert_eq!(user1.username, into_user.username);
-        assert_eq!(user1.hashed_password.hash_string().expose_secret().clone(), into_user.hashed_password.hash_string().expose_secret().clone());
+        assert_eq!(user1.password.hash_string().expose_secret().clone(), into_user.password.hash_string().expose_secret().clone());
     }
 }

@@ -14,13 +14,13 @@ impl DeleteTeam {
 }
 
 impl Permission for DeleteTeam {
-    type ResourceInQuestion = TeamId;
+    type Details = TeamId;
 
     fn name() -> PermissionName {
         "DeleteTeam"
     }
 
-    fn is_authorized_for(&self, team_id: <Self as Permission>::ResourceInQuestion) -> bool {
+    fn is_authorized_for(&self, team_id: <Self as Permission>::Details) -> bool {
         self.user_attributes.is_root_or_admin()
     }
 }
@@ -43,7 +43,7 @@ mod tests {
         let root = random_user_attributes_root(vec![]);
         let permission = DeleteTeam::new(root);
         assert!(permission.is_authorized_for(team_id));
-        
+
         let admin = random_user_attributes_admin(vec![]);
         let permission = DeleteTeam::new(admin);
         assert!(permission.is_authorized_for(team_id));

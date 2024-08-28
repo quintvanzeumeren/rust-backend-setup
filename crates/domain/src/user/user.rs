@@ -4,5 +4,5 @@ use crate::user::user_id::UserId;
 pub struct User {
     pub id: UserId,
     pub username: String,
-    pub hashed_password: Password,
+    pub password: Password,
 }

@@ -13,13 +13,13 @@ impl CreateTeam {
 }
 
 impl Permission for CreateTeam {
-    type ResourceInQuestion = ();
+    type Details = ();
 
     fn name() -> PermissionName {
         "CreateTeam"
     }
 
-    fn is_authorized_for(&self, _: <Self as Permission>::ResourceInQuestion) -> bool {
+    fn is_authorized_for(&self, _: <Self as Permission>::Details) -> bool {
         self.user.is_root_or_admin()
     }
 }

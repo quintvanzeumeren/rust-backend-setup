@@ -17,13 +17,13 @@ impl ReadTeamMembers {
 }
 
 impl Permission for ReadTeamMembers {
-    type ResourceInQuestion = TeamId;
+    type Details = TeamId;
 
     fn name() -> PermissionName {
         "ReadTeamMembers"
     }
 
-    fn is_authorized_for(&self, team_id: <Self as Permission>::ResourceInQuestion) -> bool {
+    fn is_authorized_for(&self, team_id: <Self as Permission>::Details) -> bool {
         if self.user_attributes.is_root_or_admin() {  
             return true;
         }

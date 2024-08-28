@@ -29,7 +29,7 @@ pub async fn create_root_user(db: &Database, config: &Configuration, salt_string
     let new_root = User {
         id: Uuid::new_v4().into(),
         username: config.admin.username.expose_secret().to_string(),
-        hashed_password: Password::new(config.admin.password.clone(), salt_string)
+        password: Password::new(config.admin.password.clone(), salt_string)
             .context("Could not parse and hash admin password")?,
     };
 

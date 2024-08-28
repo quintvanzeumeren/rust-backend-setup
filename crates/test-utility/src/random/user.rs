@@ -9,6 +9,6 @@ pub fn random_user(password: Secret<String>, salt_string: &SaltString) -> User {
     User {
         id: Uuid::new_v4().into(),
         username: random_string(),
-        hashed_password: Password::new(password, salt_string).expect("Failed to random new password")
+        password: Password::new(password, salt_string).expect("Failed to random new password")
     }
 }

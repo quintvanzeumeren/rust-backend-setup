@@ -30,7 +30,7 @@ pub struct NewTeamRequestBody {
 }
 
 impl Into<()> for NewTeamRequestBody {
-    fn into(self) -> <CreateTeam as Permission>::ResourceInQuestion {
+    fn into(self) -> <CreateTeam as Permission>::Details {
         ()
     }
 }
