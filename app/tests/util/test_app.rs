@@ -116,7 +116,7 @@ impl TestApp {
 
     pub async fn login(&self, user: &TestUser<'_, Anonymous>) -> Response {
         self.api_client
-            .post("/internal/v1/auth/login")
+            .post("/v1/auth/login")
             .json(&json!({
                 "username": user.username,
                 "password": user.password
@@ -128,7 +128,7 @@ impl TestApp {
 
     pub async fn current_user(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .get("/internal/v1/user/current")
+            .get("/v1/user/current")
             .headers(self.auth_header(user))
             .send()
             .await
@@ -137,7 +137,7 @@ impl TestApp {
 
     pub async fn refresh(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .post("/internal/v1/auth/refresh")
+            .post("/v1/auth/refresh")
             .json(&json!({
                 "refresh_token": user.state.refresh_token.token
             }))
@@ -148,7 +148,7 @@ impl TestApp {
 
     pub async fn logout(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .post("/internal/v1/auth/logout")
+            .post("/v1/auth/logout")
             .headers(self.auth_header(user))
             .send()
             .await
@@ -173,7 +173,7 @@ impl TestApp {
     
     pub async fn create_team(&self, user: &TestUser<'_, LoggedIn>, team_id: Uuid) -> Response {
         self.api_client
-            .post("/internal/v1/teams")
+            .post("/v1/teams")
             .headers(self.auth_header(user))
             .json(&json!({
                 "team_id": team_id
@@ -185,7 +185,7 @@ impl TestApp {
     
     pub async fn add_team_member(&self, user: &TestUser<'_, LoggedIn>, team_id: Uuid, user_id: Uuid) -> Response {
         self.api_client
-            .post(format!("/internal/v1/teams/{}/users/{}", team_id, user_id).as_str())
+            .post(format!("/v1/teams/{}/users/{}", team_id, user_id).as_str())
             .headers(self.auth_header(user))
             .send()
             .await
@@ -194,7 +194,7 @@ impl TestApp {
     
     pub async fn get_teams(&self, user: &TestUser<'_, LoggedIn>) -> Response {
         self.api_client
-            .get("/internal/v1/teams")
+            .get("/v1/teams")
             .headers(self.auth_header(user))
             .send()
             .await
@@ -203,7 +203,7 @@ impl TestApp {
     
     pub async fn get_team_members(&self, user: &TestUser<'_, LoggedIn>, team_id: Uuid) -> Response {
         self.api_client
-            .get(format!("/internal/v1/teams/{}/users", team_id).as_str())
+            .get(format!("/v1/teams/{}/users", team_id).as_str())
             .headers(self.auth_header(user))
             .send()
             .await
@@ -222,7 +222,7 @@ impl TestApp {
 
     pub async fn post_login(&self, body: Value) -> Response {
         self.api_client
-            .post("/internal/v1/auth/login")
+            .post("/v1/auth/login")
             .json(&body)
             .send()
             .await

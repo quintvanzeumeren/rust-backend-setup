@@ -10,7 +10,7 @@ use domain::user::user_id::UserId;
 
 use crate::app_state::AppState;
 use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
+use crate::handlers::v1::auth::authentication_error::AuthenticationError;
 use crate::policy::policy::Policy;
 
 pub struct UserWithPolicy<T: Policy> {

@@ -3,7 +3,7 @@ use serde::Serialize;
 use uuid::Uuid;
 use crate::extractors::admin::admin::Admin;
 use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationResult;
+use crate::handlers::v1::auth::authentication_error::AuthenticationResult;
 
 #[derive(Serialize)]
 pub struct MeResponse {

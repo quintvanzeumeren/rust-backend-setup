@@ -19,7 +19,7 @@ use security::encryption::encryptor::Encryptor;
 use security::token::token::Token;
 
 use crate::app_state::AppState;
-use crate::handlers::internal::v1::auth::authentication_error::{
+use crate::handlers::v1::auth::authentication_error::{
     AuthenticationError, AuthenticationResult,
 };
 use crate::telemetry::spawn_blocking_with_tracing;

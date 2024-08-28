@@ -16,7 +16,7 @@ use security::encryption::decryptor::Decryptor;
 use security::token::token::Token;
 
 use crate::app_state::AppState;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
+use crate::handlers::v1::auth::authentication_error::AuthenticationError;
 use crate::telemetry::TelemetryRecord;
 
 #[derive(Debug, Clone)]

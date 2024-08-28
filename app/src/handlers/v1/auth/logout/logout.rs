@@ -1,7 +1,7 @@
 use axum::http::StatusCode;
 
 use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationResult;
+use crate::handlers::v1::auth::authentication_error::AuthenticationResult;
 
 #[tracing::instrument(
     name = "Logging out user by invalidating user session",
