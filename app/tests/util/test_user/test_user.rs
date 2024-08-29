@@ -5,11 +5,12 @@ use serde::Deserialize;
 use uuid::Uuid;
 use domain::team::team_id::TeamId;
 use crate::util::spawn_app::assert_status_eq;
-use crate::util::test_app::TestApp;
+use crate::util::test_app::{NewUserBody, TestApp};
 use crate::util::test_user::anonymous::Anonymous;
 use crate::util::test_user::logged_in::LoggedIn;
 use crate::util::test_user::user_state::{Token, UserState};
 
+#[derive(Clone)]
 pub struct TestUser<'a, State: UserState + Clone> {
     pub user_id: Uuid,
     pub username: String,
@@ -42,7 +43,7 @@ impl<'a, State: UserState + Clone> TestUser<'a, State> {
 }
 
 impl <'a> TestUser<'a, Anonymous> {
-    pub async fn login(&self) -> TestUser<LoggedIn> {
+    pub async fn login(self) -> TestUser<'a, LoggedIn> {
         let login_response = self.app.login(&self)
             .await
             .error_for_status()
@@ -155,6 +156,39 @@ impl<'a> TestUser<'a, LoggedIn> {
             .expect("Failed to parse get_team_members result")
     }
 
+    pub async fn get_user_details(&self) -> GetUserDetailsResponse {
+        self.get_user_details_of(self.user_id).await
+    }
+
+    pub async fn get_user_details_of(&self, user_id: Uuid) -> GetUserDetailsResponse {
+        self.app.get_user_details(&self, user_id)
+            .await
+            .json()
+            .await
+            .expect("Failed to parse get_user_details result")
+    }
+
+    pub async fn create_admin(&self) -> TestUser<'a, LoggedIn> {
+        let admin = NewUserBody {
+            id: Uuid::new_v4(),
+            username: Uuid::new_v4().to_string(),
+            password: Uuid::new_v4().to_string(),
+            roles: vec!["admin".to_string()],
+        };
+        let response = self.app.create_user(&self, admin.clone()).await;
+        assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));
+        let new_admin = self.app.test_user_from(admin.id, admin.username, admin.password);
+        let new_admin = new_admin.login().await;
+
+        new_admin
+    }
+}
+
+#[derive(Deserialize)]
+pub struct GetUserDetailsResponse {
+    pub id: Uuid,
+    pub teams: HashSet<Uuid>,
+    pub roles: HashSet<String>
 }
 
 #[derive(Deserialize, Debug)]

@@ -2,6 +2,7 @@ use password_hash::SaltString;
 use reqwest::header::{AUTHORIZATION, HeaderMap, HeaderValue};
 use reqwest::Response;
 use secrecy::{ExposeSecret, Secret};
+use serde::Serialize;
 use serde_json::{json, Value};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -108,6 +109,16 @@ impl TestApp {
             app: &self
         }
     }
+    
+    pub fn test_user_from(&self, id: Uuid, username: String, password: String) -> TestUser<Anonymous> {
+        TestUser {
+            user_id: id,
+            username,
+            password,
+            state: Anonymous {},
+            app: &self
+        }
+    }
 }
 
 
@@ -209,6 +220,24 @@ impl TestApp {
             .await
             .expect("Failed to send get_team_members request")
     }
+    pub async fn create_user(&self, user: &TestUser<'_, LoggedIn>, new_user: NewUserBody) -> Response {
+        self.api_client
+            .post("/v1/users")
+            .headers(self.auth_header(user))
+            .json(&json!(new_user))
+            .send()
+            .await
+            .expect("Failed to send create_user request")
+    }
+    
+    pub async fn get_user_details(&self, user: &TestUser<'_, LoggedIn>, user_id: Uuid) -> Response {
+        self.api_client
+            .get(format!("/v1/users/{}", user_id).as_str())
+            .headers(self.auth_header(user))
+            .send()
+            .await
+            .expect("Failed to send get_user_details request")
+    }
 }
 
 impl TestApp {
@@ -228,4 +257,12 @@ impl TestApp {
             .await
             .expect("Failed to execute request")
     }
+}
+
+#[derive(Serialize, Clone)]
+pub struct NewUserBody {
+    pub id: Uuid,
+    pub username: String,
+    pub password: String,
+    pub roles: Vec<String>
 }

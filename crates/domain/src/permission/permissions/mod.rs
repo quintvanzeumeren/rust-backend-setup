@@ -4,5 +4,6 @@ pub mod create_team;
 pub mod delete_team;
 pub mod view_teams;
 pub mod create_user;
+pub mod read_user_details_permission;
 
 
