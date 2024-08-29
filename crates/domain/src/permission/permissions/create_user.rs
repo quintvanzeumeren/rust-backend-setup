@@ -3,7 +3,7 @@ use crate::permission::user_attributes::UserAttributes;
 use crate::role::role_name::RoleName;
 
 pub struct CreateUser {
-    user_attributes: UserAttributes
+    pub user_attributes: UserAttributes
 }
 
 pub struct CreateUserDetails {
