@@ -15,6 +15,7 @@ use crate::handlers::v1::teams::users::add_member::add_member;
 use crate::handlers::v1::teams::users::get_team_members::get_team_members;
 use crate::handlers::v1::users::me::me;
 use crate::handlers::v1::health_check::health_check;
+use crate::handlers::v1::users::add_user::add_user;
 use crate::middleware::capture_trace_data::print_request_response;
 
 pub fn router(app_state: AppState) -> Router {
@@ -23,6 +24,7 @@ pub fn router(app_state: AppState) -> Router {
         .route("/v1/auth/login", post(login))
         .route("/v1/auth/refresh", post(refresh))
         .route("/v1/auth/logout", post(logout))
+        .route("/v1/user", post(add_user))
         .route("/v1/user/current", get(current_user))
         .route("/v1/users/me", get(me))
         .route("/v1/teams", post(new_team))

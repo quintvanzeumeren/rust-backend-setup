@@ -71,5 +71,5 @@ impl CreateUserContract {
 }
 
 pub struct NewUserDetails {
-    user: User
+    pub(crate) user: User
 }
