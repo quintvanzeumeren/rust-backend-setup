@@ -9,6 +9,9 @@ use lib_util::errors::errors::format_error_chain;
 pub enum PolicyAuthorizationError {
     #[error("Forbidden")]
     Forbidden,
+
+    #[error(transparent)]
+    InternalError(#[from] anyhow::Error),
 }
 
 impl Debug for PolicyAuthorizationError {
@@ -21,6 +24,10 @@ impl IntoResponse for PolicyAuthorizationError {
     fn into_response(self) -> Response {
         match self {
             PolicyAuthorizationError::Forbidden => StatusCode::FORBIDDEN.into_response(),
+            PolicyAuthorizationError::InternalError(_) => {
+                // todo log error
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            }
         }
     }
 }

@@ -12,3 +12,4 @@ mod get_user_teams;
 mod get_user_roles;
 mod get_teams;
 mod get_members_for_team;
+mod exist_user_of;

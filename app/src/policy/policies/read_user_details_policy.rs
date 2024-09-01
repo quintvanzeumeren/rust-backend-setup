@@ -50,8 +50,12 @@ pub struct ReadUserDetailsContract {
 
 impl ReadUserDetailsContract {
 
-    pub async fn get_user_details(&self) -> Result<UserAttributes, sqlx::Error> {
-        Ok(self.state.db.get_user_attributes(self.user_id).await?)
+    pub async fn get_user_details(&self) -> Result<Option<UserAttributes>, sqlx::Error> {
+        if self.state.db.exist_user_of(self.user_id).await? {
+            return Ok(Some(self.state.db.get_user_attributes(self.user_id).await?))
+        }
+
+        Ok(None)
     }
 
 }

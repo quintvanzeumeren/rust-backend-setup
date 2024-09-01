@@ -23,7 +23,7 @@ pub struct AddUserBody {
     roles: Vec<String>
 }
 
-pub async fn add_user(user: UserWithPolicy<CreateUserPolicy>, Json(new_user): Json<AddUserBody>) -> HandlerResponse<StatusCode> {
+pub async fn create_user(user: UserWithPolicy<CreateUserPolicy>, Json(new_user): Json<AddUserBody>) -> HandlerResponse<StatusCode> {
     // get roles for new user
     let new_user_roles = new_user
         .roles

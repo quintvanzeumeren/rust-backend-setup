@@ -1,6 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use sqlx::Error;
 use lib_util::errors::errors::format_error_chain;
 use crate::policy::policy_authorization_error::PolicyAuthorizationError;
 
@@ -13,7 +14,10 @@ pub enum HandlerError {
     PolicyAuthorizationError(#[from] PolicyAuthorizationError),
     
     #[error(transparent)]
-    InternalError(#[from] anyhow::Error)
+    InternalError(#[from] anyhow::Error),
+    
+    #[error("Not Found")]
+    NotFound
 }
 
 impl Debug for HandlerError {
@@ -29,7 +33,8 @@ impl IntoResponse for HandlerError {
             HandlerError::InternalError(e) => {
                 // todo log internal error prior to returning a response
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
-            }
+            },
+            HandlerError::NotFound => StatusCode::NOT_FOUND.into_response()
         }
     }
 }

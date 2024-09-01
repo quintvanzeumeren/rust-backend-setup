@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use domain::permission::user_attributes::UserAttributes;
 use crate::extractors::user::user_with_policy::UserWithPolicy;
-use crate::handlers::error::HandlerResponse;
+use crate::handlers::error::{HandlerError, HandlerResponse};
 use crate::policy::policies::read_user_details_policy::ReadUserDetailsPolicy;
 use crate::policy::policy::Policy;
 
@@ -38,5 +38,9 @@ pub async fn get_user_details(user: UserWithPolicy<ReadUserDetailsPolicy>, Path(
         .await
         .context("Failed to get user details for user")?;
     
-    Ok(Json(user_attributes.into()))
+    if let Some(attributes) = user_attributes {
+        return Ok(Json(attributes.into()))    
+    }
+    
+    Err(HandlerError::NotFound)
 }
