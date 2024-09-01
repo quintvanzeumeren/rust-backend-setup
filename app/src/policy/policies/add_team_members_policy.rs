@@ -29,10 +29,6 @@ impl Policy for AddTeamMemberPolicy {
             .await
             .context("Failed to query UserDetails")?;
 
-        if !user.is_root_or_admin() { 
-            return Err(PolicyRejectionError::Forbidden)
-        }
-
         Ok(Self {
             state,
             user

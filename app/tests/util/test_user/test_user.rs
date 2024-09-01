@@ -182,6 +182,36 @@ impl<'a> TestUser<'a, LoggedIn> {
 
         new_admin
     }
+
+    pub async fn create_root(&self) -> TestUser<'a, LoggedIn> {
+        let admin = NewUserBody {
+            id: Uuid::new_v4(),
+            username: Uuid::new_v4().to_string(),
+            password: Uuid::new_v4().to_string(),
+            roles: vec!["root".to_string()],
+        };
+        let response = self.app.create_user(&self, admin.clone()).await;
+        assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));
+        let new_admin = self.app.test_user_from(admin.id, admin.username, admin.password);
+        let new_admin = new_admin.login().await;
+
+        new_admin
+    }
+
+    pub async fn create_user(&self) -> TestUser<'a, LoggedIn> {
+        let admin = NewUserBody {
+            id: Uuid::new_v4(),
+            username: Uuid::new_v4().to_string(),
+            password: Uuid::new_v4().to_string(),
+            roles: vec![],
+        };
+        let response = self.app.create_user(&self, admin.clone()).await;
+        assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));
+        let new_admin = self.app.test_user_from(admin.id, admin.username, admin.password);
+        let new_admin = new_admin.login().await;
+
+        new_admin
+    }
 }
 
 #[derive(Deserialize)]

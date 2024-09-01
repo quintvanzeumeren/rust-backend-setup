@@ -11,9 +11,9 @@
 - [ ] Add handler to delete user
   - [ ] root can delete anyone, except himself
   - [ ] admin can delete normal users only
-- [ ] Refactor add_member permissions: 
-  - [ ] root can add anyone, 
-  - [ ] admin can only add himself or other non admin users
+- [x] Refactor add_member permissions: 
+  - [x] root can add anyone, 
+  - [x] admin can only add himself or other non admin users
 
 ### Open Telemetry 
   - [ ] Sync trace ids between handlers and axum extractors. Possible solution is generate a trace id within a middleware prior to it hitting request handlers, and extractors   

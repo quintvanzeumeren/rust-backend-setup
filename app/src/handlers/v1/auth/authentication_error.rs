@@ -4,7 +4,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use infrastructure::paseto::paseto_token_encryptor::LocalPasetoV4DecryptionError;
 use lib_util::errors::errors::format_error_chain;
-
+use crate::policy::policy_authorization_error::PolicyRejectionError;
 use crate::util::handlers::InternalErrorResponse;
 
 pub type AuthenticationResult<T> = Result<T, AuthenticationError>;
@@ -36,7 +36,10 @@ pub enum AuthenticationError {
     UnAuthorized,
     
     #[error(transparent)]
-    JsonRejection(JsonRejection)
+    JsonRejection(#[from] JsonRejection),
+    
+    #[error(transparent)]
+    PolicyError(#[from] PolicyRejectionError)
 }
 
 impl Debug for AuthenticationError {
@@ -64,7 +67,8 @@ impl IntoResponse for AuthenticationError {
                 // todo verify if this actually works properly
                 InternalErrorResponse::from(tracing::Span::current()).into_response()
             },
-            AuthenticationError::JsonRejection(e) => e.into_response()
+            AuthenticationError::JsonRejection(e) => e.into_response(),
+            AuthenticationError::PolicyError(e) => e.into_response()
         }
     }
 }
