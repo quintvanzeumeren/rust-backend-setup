@@ -34,7 +34,7 @@ impl Policy for AddTeamMemberPolicy {
             user
         })
     }
-    
+
     type Details = AddTeamMemberDetails;
     type Contract = AddMemberContract;
 
@@ -51,24 +51,24 @@ impl Policy for AddTeamMemberPolicy {
         self.user.id.record_in_telemetry("user_of_policy");
         details.user_to_add.record_in_telemetry("user_to_add");
         details.team_to_add_to.record_in_telemetry("team_to_add_to");
-        
-        if self.user.is_root() { 
+
+        if self.user.is_root() {
             return Ok(AddMemberContract::new(self.state.clone(), details))
         }
-        
-        let not_an_admin_either = !self.user.is_admin();  
-        if not_an_admin_either { 
+
+        let not_an_admin_either = !self.user.is_admin();
+        if not_an_admin_either {
             return Err(PolicyRejectionError::Forbidden)
         }
-        
+
         if self.user.id == details.user_to_add {
             return Ok(AddMemberContract::new(self.state.clone(), details))
         }
-        
+
         let user_to_add_details = self.state.db.get_user_details(details.user_to_add)
             .await
             .context("Failed to get retrieve user_details for user_to_add")?;
-        
+
         if user_to_add_details.is_root_or_admin() {
             return Err(PolicyRejectionError::Forbidden)
         }

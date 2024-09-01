@@ -19,9 +19,13 @@
   - [ ] Sync trace ids between handlers and axum extractors. Possible solution is generate a trace id within a middleware prior to it hitting request handlers, and extractors   
   - [ ] Prior to returning any error responses to the client, we should log/trace the error to OpenTelemetry
 
-### Simplify Permission, Policy, and Contract structs
+### Simplify Permission, Policy, and Contract structs 
 - [ ] Remove to `Permission` trait by implementing the permissions logic into each corresponding `Policy` trait.
 - [ ] Refactor `Policy` trait so that the `authorize` method is async. So that it can query any information it needs to determine if it can authorize the action
+
+### TeamManager Role
+- [ ] Refactor roles into a proper enum.
+- [ ] Add a new TeamManager role where for a specific team. 
 
 ### Readme
 
