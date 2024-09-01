@@ -20,7 +20,7 @@ impl Permission for AddTeamMembers {
         "AddTeamMembers"
     }
 
-    fn is_authorized_for(&self, team_id: <Self as Permission>::Details) -> bool {
+    fn is_authorized_for(&self, _: <Self as Permission>::Details) -> bool {
         self.user.is_root_or_admin()
     }
 }
