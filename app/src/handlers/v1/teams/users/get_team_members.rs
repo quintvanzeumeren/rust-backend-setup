@@ -15,7 +15,7 @@ pub struct GetTeamMemberParams {
 }
 
 pub async fn get_team_members(user: UserWithPolicy<GetTeamMembersPolicy>, Path(params): Path<GetTeamMemberParams>) -> HandlerResponse<Json<HashSet<Uuid>>> {
-    let get_members_contract = user.policy.authorize(params.team_id.into())?;
+    let get_members_contract = user.policy.authorize(params.team_id.into()).await?;
     let members = get_members_contract.fetch_team_members()
         .await
         .context("Failed to fetch team members")?;

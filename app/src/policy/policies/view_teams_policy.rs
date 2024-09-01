@@ -1,14 +1,15 @@
 use std::collections::HashSet;
 use std::sync::Arc;
+use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permissions::view_teams::ViewTeam;
-use domain::permission::user_attributes::UserAttributes;
+use domain::permission::user_attributes::UserDetails;
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
-use crate::policy::policy_authorization_error::PolicyAuthorizationError;
+use crate::policy::policy_authorization_error::PolicyRejectionError;
 
 pub struct ViewTeamsPolicy {
     user_id: UserId,
@@ -18,11 +19,11 @@ pub struct ViewTeamsPolicy {
 
 #[async_trait]
 impl Policy for ViewTeamsPolicy {
-    type Rejection = sqlx::Error;
-
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection> {
-        let user_attributes = state.db.get_user_attributes(user_in_question).await?;
-
+    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
+        let user_attributes = state.db.get_user_details(user_in_question)
+            .await
+            .context("Failed to retrieve user details")?;
+        
         Ok(Self {
             user_id: user_in_question,
             state,
@@ -32,9 +33,8 @@ impl Policy for ViewTeamsPolicy {
 
     type Details = ();
     type Contract = ViewTeamsContract;
-    type AuthorizationRejection = PolicyAuthorizationError;
 
-    fn authorize(&self, _: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection> {
+    async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
         Ok(ViewTeamsContract {
             state: self.state.clone(),
             user_attributes: self.permission.user_attributes.clone(),
@@ -45,7 +45,7 @@ impl Policy for ViewTeamsPolicy {
 
 pub struct ViewTeamsContract {
     state: Arc<AppState>,
-    user_attributes: UserAttributes,
+    user_attributes: UserDetails,
     viewable_teams: HashSet<TeamId>,
 }
 

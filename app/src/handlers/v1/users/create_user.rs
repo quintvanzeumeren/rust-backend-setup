@@ -30,9 +30,9 @@ pub async fn create_user(user: UserWithPolicy<CreateUserPolicy>, Json(new_user):
         .iter()
         .map(|r| RoleName(Slug::from(r.clone())))
         .collect();
-    
+
     // authorize logged in user to see if it can create the user with the given roles
-    let new_user_contract = user.policy.authorize(new_user_roles)?;
+    let new_user_contract = user.policy.authorize(new_user_roles).await?;
     
     // hash password of new user
     let password = new_user.password;

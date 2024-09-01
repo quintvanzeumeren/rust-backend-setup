@@ -1,13 +1,13 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserAttributes;
+use crate::permission::user_attributes::UserDetails;
 
 /// CreateTeam checks if the user can create new team
 pub struct CreateTeam {
-    pub user: UserAttributes
+    pub user: UserDetails
 }
 
 impl CreateTeam {
-    pub fn new(user: UserAttributes) -> Self {
+    pub fn new(user: UserDetails) -> Self {
         Self { user }
     }
 }

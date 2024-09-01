@@ -9,7 +9,7 @@ use crate::policy::policies::view_teams_policy::ViewTeamsPolicy;
 use crate::policy::policy::Policy;
 
 pub async fn get_teams(user: UserWithPolicy<ViewTeamsPolicy>) -> HandlerResponse<Json<HashSet<Uuid>>> {
-    let teams_contract = user.policy.authorize(())?;
+    let teams_contract = user.policy.authorize(()).await?;
     
     let teams = teams_contract.get_teams()
         .await
@@ -17,7 +17,7 @@ pub async fn get_teams(user: UserWithPolicy<ViewTeamsPolicy>) -> HandlerResponse
         .iter()
         .map(|t| t.0)
         .collect();
-    
+
     Ok(Json(teams))
 }
 

@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::sync::Arc;
+use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::read_team_members::ReadTeamMembers;
@@ -7,7 +8,7 @@ use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
-use crate::policy::policy_authorization_error::PolicyAuthorizationError;
+use crate::policy::policy_authorization_error::PolicyRejectionError;
 
 pub struct GetTeamMembersPolicy {
     state: Arc<AppState>,
@@ -17,10 +18,10 @@ pub struct GetTeamMembersPolicy {
 
 #[async_trait]
 impl Policy for GetTeamMembersPolicy {
-    type Rejection = sqlx::Error;
-
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection> {
-        let user = state.db.get_user_attributes(user_in_question).await?;
+    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
+        let user = state.db.get_user_details(user_in_question)
+            .await
+            .context("Failed to retrieve user details")?;
         
         Ok(Self {
             state,
@@ -31,9 +32,8 @@ impl Policy for GetTeamMembersPolicy {
 
     type Details = TeamId;
     type Contract = GetTeamMembersContract;
-    type AuthorizationRejection = PolicyAuthorizationError;
 
-    fn authorize(&self, team_id: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection> {
+    async fn authorize(&self, team_id: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
         if self.permission.is_authorized_for(team_id) {
             return Ok(GetTeamMembersContract {
                 team_id,
@@ -41,7 +41,7 @@ impl Policy for GetTeamMembersPolicy {
             })
         }
 
-        Err(PolicyAuthorizationError::Forbidden)
+        Err(PolicyRejectionError::Forbidden)
     }
 }
 

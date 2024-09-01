@@ -1,13 +1,13 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserAttributes;
+use crate::permission::user_attributes::UserDetails;
 use crate::user::user_id::UserId;
 
 pub struct ReadUserDetailsPermission {
-    user_attributes: UserAttributes
+    user_attributes: UserDetails
 }
 
 impl ReadUserDetailsPermission {
-    pub fn new(user_attributes: UserAttributes) -> Self {
+    pub fn new(user_attributes: UserDetails) -> Self {
         Self { user_attributes }
     }
 }

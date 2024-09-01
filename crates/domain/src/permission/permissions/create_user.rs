@@ -1,9 +1,9 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserAttributes;
+use crate::permission::user_attributes::UserDetails;
 use crate::role::role_name::RoleName;
 
 pub struct CreateUser {
-    pub user_attributes: UserAttributes
+    pub user_attributes: UserDetails
 }
 
 pub struct CreateUserDetails {

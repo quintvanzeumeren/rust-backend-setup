@@ -1,14 +1,14 @@
 use std::collections::HashSet;
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserAttributes;
+use crate::permission::user_attributes::UserDetails;
 use crate::team::team_id::TeamId;
 
 pub struct ViewTeam {
-    pub user_attributes: UserAttributes,
+    pub user_attributes: UserDetails,
 }
 
 impl ViewTeam {
-    pub fn new(user_attributes: UserAttributes) -> Self {
+    pub fn new(user_attributes: UserDetails) -> Self {
         Self { user_attributes }
     }
 }

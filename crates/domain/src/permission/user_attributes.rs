@@ -7,13 +7,13 @@ use crate::user::user_id::UserId;
 /// UserAttributes contains attributes of the User by which a Permission can determine if the user
 /// is authorized.
 #[derive(Debug, Clone)]
-pub struct UserAttributes {
+pub struct UserDetails {
     pub id: UserId,
     pub teams: HashSet<TeamId>,
     pub roles: HashSet<Slug>
 }
 
-impl UserAttributes {
+impl UserDetails {
     pub fn is_root(&self) -> bool{
         self.has_role(&ROLE_ROOT.into())
     }
@@ -35,12 +35,12 @@ impl UserAttributes {
 pub(crate) mod tests {
     use std::collections::HashSet;
     use uuid::Uuid;
-    use crate::permission::user_attributes::UserAttributes;
+    use crate::permission::user_attributes::UserDetails;
     use crate::role::role::{ROLE_ADMIN, ROLE_ROOT};
     use crate::shared::slug::Slug;
 
-    fn user_with_roles(roles: HashSet<Slug>) -> UserAttributes {
-        UserAttributes {
+    fn user_with_roles(roles: HashSet<Slug>) -> UserDetails {
+        UserDetails {
             id: Uuid::new_v4().into(),
             teams: HashSet::default(),
             roles: roles,
@@ -77,32 +77,32 @@ pub(crate) mod tests {
         assert!(user.is_root_or_admin());
     }
     
-    pub fn random_user_attributes() -> UserAttributes {
-        UserAttributes {
+    pub fn random_user_attributes() -> UserDetails {
+        UserDetails {
             id: Uuid::new_v4().into(),
             teams: Default::default(),
             roles: Default::default(),
         }
     }
 
-    pub fn random_user_attributes_with(teams: Vec<Uuid>, roles: Vec<&str>) -> UserAttributes {
-        UserAttributes {
+    pub fn random_user_attributes_with(teams: Vec<Uuid>, roles: Vec<&str>) -> UserDetails {
+        UserDetails {
             id: Uuid::new_v4().into(),
             teams: teams.iter().map(|id| id.clone().into()).collect(),
             roles: roles.iter().map(|r| r.to_string().into()).collect(),
         }
     }
 
-    pub fn random_user_attributes_root(teams: Vec<Uuid>) -> UserAttributes {
-        UserAttributes {
+    pub fn random_user_attributes_root(teams: Vec<Uuid>) -> UserDetails {
+        UserDetails {
             id: Uuid::new_v4().into(),
             teams: teams.iter().map(|id| id.clone().into()).collect(),
             roles: vec![Slug(ROLE_ROOT.into())].into_iter().collect(),
         }
     }
 
-    pub fn random_user_attributes_admin(teams: Vec<Uuid>) -> UserAttributes {
-        UserAttributes {
+    pub fn random_user_attributes_admin(teams: Vec<Uuid>) -> UserDetails {
+        UserDetails {
             id: Uuid::new_v4().into(),
             teams: teams.iter().map(|id| id.clone().into()).collect(),
             roles: vec![Slug(ROLE_ADMIN.into())].into_iter().collect(),

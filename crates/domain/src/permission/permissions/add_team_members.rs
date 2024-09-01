@@ -1,14 +1,14 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserAttributes;
+use crate::permission::user_attributes::UserDetails;
 use crate::team::team_id::TeamId;
 
 /// AddTeamMembers checks if a user can add another user to as team
 pub struct AddTeamMembers {
-    pub user: UserAttributes,
+    pub user: UserDetails,
 }
 
 impl AddTeamMembers {
-    pub fn new(user: UserAttributes) -> Self {
+    pub fn new(user: UserDetails) -> Self {
         Self { user }
     }
 }

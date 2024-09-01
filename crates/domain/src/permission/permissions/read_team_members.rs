@@ -3,15 +3,15 @@ use std::collections::HashSet;
 use crate::team::team_id::TeamId;
 use crate::permission::permission::{Permission, PermissionName};
 use crate::permission::resource::resource::Resource;
-use crate::permission::user_attributes::UserAttributes;
+use crate::permission::user_attributes::UserDetails;
 
 /// ReadTeamMembers checks if the user can read the members of an team
 pub struct ReadTeamMembers {
-    pub user_attributes: UserAttributes,
+    pub user_attributes: UserDetails,
 }
 
 impl ReadTeamMembers {
-    pub fn new(user_attributes: UserAttributes) -> Self {
+    pub fn new(user_attributes: UserDetails) -> Self {
         Self { user_attributes }
     }
 }

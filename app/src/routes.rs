@@ -10,7 +10,7 @@ use crate::handlers::v1::auth::logout::logout::logout;
 use crate::handlers::v1::auth::refresh::refresh::refresh;
 use crate::handlers::v1::current_user::current_user;
 use crate::handlers::v1::teams::get_teams::get_teams;
-use crate::handlers::v1::teams::new_team::new_team;
+use crate::handlers::v1::teams::create_team::create_team;
 use crate::handlers::v1::teams::users::add_member::add_member;
 use crate::handlers::v1::teams::users::get_team_members::get_team_members;
 use crate::handlers::v1::users::me::me;
@@ -29,7 +29,7 @@ pub fn router(app_state: AppState) -> Router {
         .route("/v1/users", post(create_user))
         .route("/v1/user/current", get(current_user))
         .route("/v1/users/me", get(me))
-        .route("/v1/teams", post(new_team))
+        .route("/v1/teams", post(create_team))
         .route("/v1/teams", get(get_teams))
         .route("/v1/teams/:team_id/users/:user_id", post(add_member))
         .route("/v1/teams/:team_id/users", get(get_team_members))

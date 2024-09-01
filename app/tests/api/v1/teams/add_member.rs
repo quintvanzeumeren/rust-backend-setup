@@ -15,9 +15,6 @@ async fn test_add_user_to_team(db: PgPool) {
     let response= app.add_team_member(&root, team_id, root.user_id).await;
     assert_status_eq(&response, StatusCode::OK, None);
     
-    // todo verify user is added to team of users
-    // get: internal/api/v1/teams/{team_id}/users
-    
     let members = root.get_team_members(team_id).await;
     assert_eq!(members.len(), 1);
     assert!(members.contains(&root.user_id))
