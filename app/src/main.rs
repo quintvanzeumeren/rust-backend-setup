@@ -5,7 +5,7 @@ use app::app_state::AppState;
 use app::configuration::configuration::get_configuration;
 use app::database::get_connection_pool;
 use app::routes::router;
-use app::startup::{create_user_if_no_users, migrate, run};
+use app::startup::{create_root_user, migrate, run};
 use app::telemetry::{get_subscriber, init_subscriber, init_tracer};
 
 #[tokio::main]
@@ -44,7 +44,7 @@ async fn main() -> anyhow::Result<()> {
     // Migrate database & create initial admin if none exist
     migrate(db_pool).await.context("Failed to migrate db")?;
     let salt = SaltString::generate(&mut rand::thread_rng());
-    create_user_if_no_users(&app_state.db, &configuration, &salt).await.context("Failed to migrate db")?;
+    create_root_user(&app_state.db, &configuration, &salt).await.context("Failed to migrate db")?;
 
     // start app
     info!("Starting app on {}", listener.local_addr().context("Failed to get local address")?.to_string());

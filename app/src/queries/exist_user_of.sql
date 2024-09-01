@@ -1,0 +1,1 @@
+SELECT EXISTS(SELECT 1 from users where user_id = $1) AS "exists";

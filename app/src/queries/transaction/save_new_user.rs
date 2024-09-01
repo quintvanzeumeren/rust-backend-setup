@@ -1,15 +1,13 @@
 use sqlx::{Executor, query_file};
-
-use domain::user::user::{EndUser, User};
-
-use crate::queries::models::user_record::UserRecord;
+use domain::user::user::User;
+use crate::queries::records::user_record::UserRecord;
 use crate::queries::transaction::_transaction::Transaction;
 
 
 impl Transaction {
     pub async fn save_new_user(
         &mut self,
-        user: &User<EndUser>,
+        user: &User,
     ) -> sqlx::Result<()> {
         let user_record = UserRecord::from(user);
         self.0.execute(query_file!(
@@ -31,7 +29,7 @@ mod tests {
     use test_utility::random::user::random_user;
     use crate::queries::database::Database;
 
-    use crate::queries::models::user_record::UserRecord;
+    use crate::queries::records::user_record::UserRecord;
 
     #[sqlx::test]
     async fn test_save_user(db: PgPool) {

@@ -4,12 +4,13 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/app/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/app/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/libs/lib-util/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/libs/infrastructure/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/libs/domain/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/libs/security/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/libs/test-utility/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/domain/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/infrastructure/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/lib-util/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/security/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/test-utility/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/domain/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/volumes" />
     </content>

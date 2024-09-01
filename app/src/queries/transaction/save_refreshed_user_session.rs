@@ -27,7 +27,7 @@ mod tests {
     use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::database::Database;
-    use crate::queries::models::refresh_token_record::RefreshTokenRecord;
+    use crate::queries::records::refresh_token_record::RefreshTokenRecord;
 
     #[sqlx::test]
     async fn test_save_refreshed_session(db: PgPool) {

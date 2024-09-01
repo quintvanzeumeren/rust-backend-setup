@@ -5,7 +5,7 @@ use axum::extract::{FromRef, FromRequestParts};
 use axum::http::request::Parts;
 use crate::app_state::AppState;
 use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
+use crate::handlers::v1::auth::authentication_error::AuthenticationError;
 
 pub struct Admin {
     pub authenticated_user: AuthenticatedUser
@@ -35,7 +35,7 @@ impl<S> FromRequestParts<S> for Admin where
         
         // let is_admin = authenticated_user.state.db.is_admin(&authenticated_user.user_id)
         //     .await
-        //     .context("An error occurred while checking authenticated user is an admin")?;
+        //     .Context("An error occurred while checking authenticated user is an admin")?;
         // if is_admin {
         //     return Ok(Self {
         //         authenticated_user

@@ -1,4 +1,4 @@
-use crate::queries::models::refresh_token_record::RefreshTokenRecord;
+use crate::queries::records::refresh_token_record::RefreshTokenRecord;
 use domain::sessions::tokens::RefreshToken;
 use domain::sessions::user_session_token::UserSessionToken;
 use sqlx::{Executor};

@@ -1,7 +1,5 @@
-use crate::queries::transaction::_transaction::Transaction;
 use sqlx::{Error, PgPool};
-use domain::user::user_id::UserId;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
+use crate::queries::transaction::_transaction::Transaction;
 
 #[derive(Clone, Debug)]
 pub struct Database(pub PgPool);
@@ -15,3 +13,9 @@ impl Database {
         &self.0
     }
 }
+
+// impl Database {
+//     pub fn get_permission_querier<P: Permission>(&self) -> Querier<P> {
+//         Querier::new(self.0.clone())
+//     }
+// }

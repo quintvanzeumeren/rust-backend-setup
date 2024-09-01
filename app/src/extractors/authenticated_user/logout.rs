@@ -1,6 +1,6 @@
 use anyhow::Context;
 use crate::extractors::authenticated_user::authenticated_user::AuthenticatedUser;
-use crate::handlers::internal::v1::auth::authentication_error::AuthenticationError;
+use crate::handlers::v1::auth::authentication_error::AuthenticationError;
 
 impl AuthenticatedUser {
     pub async fn logout(self) -> Result<(), AuthenticationError> {

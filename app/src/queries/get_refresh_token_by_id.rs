@@ -3,7 +3,7 @@ use uuid::Uuid;
 use domain::sessions::user_session_token::UserSessionToken;
 use domain::sessions::tokens::RefreshToken;
 use crate::queries::database::Database;
-use crate::queries::models::refresh_token_record::RefreshTokenRecord;
+use crate::queries::records::refresh_token_record::RefreshTokenRecord;
 
 
 impl Database {

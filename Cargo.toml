@@ -7,11 +7,11 @@ members = [
     "app",
 
     # -- Libraries
-    "libs/infrastructure",
-    "libs/security",
-    "libs/domain",
-    "libs/test-utility",
-    "libs/lib-util",
+    "crates/infrastructure",
+    "crates/security",
+    "crates/domain",
+    "crates/test-utility",
+    "crates/lib-util",
 ]
 
 #[package]
@@ -32,3 +32,4 @@ rand = { version = "0.8.5" }
 serde_json = { version = "1.0.114" }
 password-hash = { version = "0.5.0" }
 pasetors = { version = "0.6.8" }
+enum_dispatch = { version = "0.3.12" }

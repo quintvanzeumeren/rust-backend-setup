@@ -3,7 +3,7 @@ use sqlx::{Executor, query_file};
 use domain::sessions::state::just_ended::JustEnded;
 use domain::sessions::user_session::UserSession;
 
-use crate::queries::models::user_session_record::UserSessionRecord;
+use crate::queries::records::user_session_record::UserSessionRecord;
 use crate::queries::transaction::_transaction::Transaction;
 
 impl Transaction {
