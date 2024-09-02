@@ -1,10 +1,122 @@
-use crate::role::role_id::RoleId;
-use crate::role::role_name::RoleName;
+use std::collections::HashSet;
+use crate::team::team_id::TeamId;
+use std::fmt::Display;
+use serde::{Deserialize, Serialize};
 
-pub const ROLE_ROOT: &'static str = "root";
-pub const ROLE_ADMIN: &'static str = "admin";
+pub type NameOfRole = &'static str;
+pub const ROLE_ROOT: NameOfRole = "Root";
+pub const ROLE_ADMIN: NameOfRole = "Admin";
+pub const ROLE_TEAM_MANAGER: NameOfRole = "TeamManager";
 
-pub struct Role {
-    pub id: RoleId,
-    pub name: RoleName,
+pub type UserRoles = HashSet<Role>;
+
+#[derive(Serialize, Deserialize, Hash, Eq, PartialEq)]
+pub enum Role {
+    Root,
+    Admin,
+    TeamManager {
+        teams: Vec<TeamId>
+    },
+    Member {
+        teams: Vec<TeamId>
+    }
+}
+
+impl Role {
+
+    pub fn is_root(&self) -> bool {
+        match self {
+            Role::Root => true,
+            _ => false
+        }
+    }
+
+    pub fn is_admin(&self) -> bool {
+        match self {
+            Role::Admin => true,
+            _ => false
+        }
+    }
+
+    pub fn is_team_manager_of(&self, team_id: TeamId) -> bool {
+        match self {
+            Role::TeamManager { teams } => teams.contains(&team_id),
+            _ => false
+        }
+    }
+    
+    pub fn name(&self) -> NameOfRole {
+        match self {
+            Role::Root => ROLE_ROOT,
+            Role::Admin => ROLE_ADMIN,
+            Role::TeamManager { .. } => ROLE_TEAM_MANAGER
+        }
+    }
+}
+
+impl Display for Role {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name().to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::role::role::{Role, ROLE_ADMIN, ROLE_ROOT, ROLE_TEAM_MANAGER};
+    use uuid::Uuid;
+
+    #[test]
+    fn test_display() {
+        let role = Role::Root;
+        assert_eq!(role.to_string(), "Root");
+        assert_eq!(role.to_string(), ROLE_ROOT);
+
+        let role = Role::Admin;
+        assert_eq!(role.to_string(), "Admin");
+        assert_eq!(role.to_string(), ROLE_ADMIN);
+
+        let role = Role::TeamManager { teams: vec![] };
+        assert_eq!(role.to_string(), "TeamManager");
+        assert_eq!(role.to_string(), ROLE_TEAM_MANAGER);
+    }
+
+    #[test]
+    fn test_is_root() {
+        let role = Role::Root;
+        assert!(role.is_root());
+
+        let role = Role::Admin;
+        assert!(!role.is_root());
+
+        let role = Role::TeamManager { teams: vec![] };
+        assert!(!role.is_root());
+    }
+
+    #[test]
+    fn test_is_admin() {
+        let role = Role::Root;
+        assert!(!role.is_admin());
+
+        let role = Role::Admin;
+        assert!(role.is_admin());
+
+        let role = Role::TeamManager { teams: vec![] };
+        assert!(!role.is_admin());
+    }
+
+    #[test]
+    fn test_is_team_manager() {
+        let team_id = Uuid::new_v4().into();
+        let role = Role::Root;
+        assert!(!role.is_team_manager_of(team_id));
+
+        let role = Role::Admin;
+        assert!(!role.is_team_manager_of(team_id));
+
+        let role = Role::TeamManager { teams: vec![] };
+        assert!(!role.is_team_manager_of(team_id));
+
+        let role = Role::TeamManager { teams: vec![team_id] };
+        assert!(role.is_team_manager_of(team_id));
+    }
 }

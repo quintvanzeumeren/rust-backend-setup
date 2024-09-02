@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::sync::Arc;
 use anyhow::Context;
 use axum::async_trait;
@@ -5,6 +6,8 @@ use fake::faker::internet::raw::Username;
 use password_hash::PasswordHash;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::create_user::CreateUser;
+use domain::permission::user_attributes::UserDetails;
+use domain::role::role::Role;
 use domain::role::role_name::RoleName;
 use domain::user::password::Password;
 use domain::user::user::User;
@@ -15,35 +18,35 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 
 pub struct CreateUserPolicy {
     state: Arc<AppState>,
-    permission: CreateUser
+    user_details: UserDetails
 }
 
 #[async_trait]
 impl Policy for CreateUserPolicy {
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
-        let user_attributes = state.db.get_user_details(user_in_question)
+        let user_details = state.db.get_user_details(user_in_question)
             .await
             .context("Failed to retrieve user details")?;
-        
+
         Ok(Self {
             state,
-            permission: CreateUser {
-                user_attributes
-            }
+            user_details
         })
     }
 
-    type Details = Vec<RoleName>;
+    type Details = HashSet<Role>;
     type Contract = CreateUserContract;
 
     async fn authorize(&self, details: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+
+
         if self.permission.is_authorized_for(details.clone()) {
            return Ok(CreateUserContract {
                state: self.state.clone(),
                user_roles: details,
-           }) 
+           })
         }
-        
+
         Err(PolicyRejectionError::Forbidden)
     }
 }

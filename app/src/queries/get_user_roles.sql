@@ -1,3 +1,2 @@
-SELECT roles.id, roles.name FROM user_roles
-JOIN roles ON
-    user_roles.user_id = $1 AND user_roles.role_id = roles.id;
+SELECT user_id, team_id, role AS "role!: RoleName" FROM user_roles
+WHERE user_id = $1;

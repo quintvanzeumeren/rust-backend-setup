@@ -6,7 +6,7 @@ use sqlx::migrate::MigrateError;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use uuid::Uuid;
-use domain::role::role::ROLE_ROOT;
+use domain::role::role::{Role, ROLE_ROOT};
 use domain::user::password::Password;
 use domain::user::user::User;
 use crate::configuration::configuration::Configuration;
@@ -37,7 +37,7 @@ pub async fn create_root_user(db: &Database, config: &Configuration, salt_string
     transaction.save_new_user(&new_root).await
         .context("Failed to insert initial user")?;
 
-    transaction.add_role_to_user(new_root.id, ROLE_ROOT.into()).await
+    transaction.add_role_to_user(new_root.id, Role::Root).await
         .context("Failed to add role of root to the new root user")?;
 
     transaction.commit().await.context("Failed to commit transaction")?;

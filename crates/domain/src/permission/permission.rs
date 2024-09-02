@@ -9,7 +9,7 @@ pub trait Permission: Send + Sync + Sized {
     /// for which it's determining authorization.
     type Details;
 
-    /// Name returns the name of the permission as a 'static str
+    /// name returns the name of the permission as a 'static str
     fn name() -> PermissionName;
 
     /// is_authorized determines whenever the user is authorized for the Permission.

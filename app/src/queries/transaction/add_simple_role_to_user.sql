@@ -4,4 +4,5 @@ WITH role_id_cte AS (
     WHERE name = $1
 )
 INSERT INTO user_roles (user_id, role_id)
-VALUES ($2, (SELECT id from role_id_cte));
+VALUES ($2, (SELECT id from role_id_cte))
+ON CONFLICT DO NOTHING;

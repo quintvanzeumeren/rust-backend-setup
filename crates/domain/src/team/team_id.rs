@@ -1,8 +1,8 @@
 use std::fmt::{Display, Formatter};
-
+use serde::{Deserialize, Deserializer, Serialize};
 use uuid::Uuid;
 
-#[derive(Clone, Copy, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Hash, Eq, Deserialize, Serialize)]
 pub struct TeamId(pub Uuid);
 
 impl From<Uuid> for TeamId {

@@ -23,7 +23,7 @@ impl Policy for CreateTeamPolicy {
         let user = state.db.get_user_details(user_in_question)
             .await
             .context("Failed to retrieve user details")?;
-        
+
         let permission = CreateTeam::new(user);
 
         Ok(Self {

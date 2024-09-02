@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use anyhow::Context;
 use axum::http::StatusCode;
 use crate::extractors::user::user_with_policy::UserWithPolicy;
@@ -12,27 +13,22 @@ use domain::user::user::User;
 use secrecy::Secret;
 use serde::Deserialize;
 use uuid::Uuid;
+use domain::role::role::{Role, UserRoles};
 use domain::user::password::Password;
+use domain::user::user_id::UserId;
 use crate::telemetry::spawn_blocking_with_tracing;
 
 #[derive(Deserialize)]
-pub struct AddUserBody {
-    id: Uuid,
+pub struct CreateUserRequestBody {
+    id: UserId,
     username: String,
     password: Secret<String>,
-    roles: Vec<String>
+    roles: HashSet<Role>
 }
 
-pub async fn create_user(user: UserWithPolicy<CreateUserPolicy>, Json(new_user): Json<AddUserBody>) -> HandlerResponse<StatusCode> {
-    // get roles for new user
-    let new_user_roles = new_user
-        .roles
-        .iter()
-        .map(|r| RoleName(Slug::from(r.clone())))
-        .collect();
-
+pub async fn create_user(user: UserWithPolicy<CreateUserPolicy>, Json(new_user): Json<CreateUserRequestBody>) -> HandlerResponse<StatusCode> {
     // authorize logged in user to see if it can create the user with the given roles
-    let new_user_contract = user.policy.authorize(new_user_roles).await?;
+    let new_user_contract = user.policy.authorize(new_user.roles).await?;
     
     // hash password of new user
     let password = new_user.password;
