@@ -97,7 +97,7 @@ pub(crate) mod tests {
         UserDetails {
             id: Uuid::new_v4().into(),
             teams: teams.iter().map(|id| id.clone().into()).collect(),
-            roles: vec![Slug(ROLE_ROOT.into())].into_iter().collect(),
+            roles: vec![ROLE_ROOT.into()].into_iter().collect(),
         }
     }
 
@@ -105,7 +105,7 @@ pub(crate) mod tests {
         UserDetails {
             id: Uuid::new_v4().into(),
             teams: teams.iter().map(|id| id.clone().into()).collect(),
-            roles: vec![Slug(ROLE_ADMIN.into())].into_iter().collect(),
+            roles: vec![ROLE_ADMIN.into()].into_iter().collect(),
         }
     }
 }
