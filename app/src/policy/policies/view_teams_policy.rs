@@ -1,33 +1,30 @@
-use std::collections::HashSet;
-use std::sync::Arc;
 use anyhow::Context;
 use axum::async_trait;
-use domain::permission::permissions::view_teams::ViewTeam;
-use domain::permission::user_attributes::UserDetails;
+use domain::role::role::{Role, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
+use std::collections::HashSet;
+use std::sync::Arc;
 
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
 
 pub struct ViewTeamsPolicy {
-    user_id: UserId,
     state: Arc<AppState>,
-    permission: ViewTeam
+    principle_roles: UserRoles
 }
 
 #[async_trait]
 impl Policy for ViewTeamsPolicy {
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
-        let user_attributes = state.db.get_user_details(user_in_question)
+        let principle_roles = state.db.get_user_roles(user_in_question)
             .await
             .context("Failed to retrieve user details")?;
         
         Ok(Self {
-            user_id: user_in_question,
             state,
-            permission: ViewTeam::new(user_attributes),
+            principle_roles
         })
     }
 
@@ -35,32 +32,47 @@ impl Policy for ViewTeamsPolicy {
     type Contract = ViewTeamsContract;
 
     async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-        Ok(ViewTeamsContract {
-            state: self.state.clone(),
-            user_attributes: self.permission.user_attributes.clone(),
-            viewable_teams: Default::default(),
-        })
+        for principle_role in &self.principle_roles {
+            return match principle_role {
+                Role::Root | Role::Admin => Ok(ViewTeamsContract {
+                    state: self.state.clone(),
+                    viewable_teams: ViewableTeams::Every
+                }),
+                Role::TeamManager { teams } => Ok(ViewTeamsContract {
+                    state: self.state.clone(),
+                    viewable_teams: ViewableTeams::SelectedOnly(teams.clone())
+                }),
+                Role::Member { teams } => Ok(ViewTeamsContract {
+                    state: self.state.clone(),
+                    viewable_teams: ViewableTeams::SelectedOnly(teams.clone())
+                }),
+            }
+        }
+
+        Err(PolicyRejectionError::Forbidden)
     }
 }
 
 pub struct ViewTeamsContract {
     state: Arc<AppState>,
-    user_attributes: UserDetails,
-    viewable_teams: HashSet<TeamId>,
+    viewable_teams: ViewableTeams
+}
+
+pub enum ViewableTeams {
+    /// Can see every team
+    Every,
+
+    /// Can see selected teams only
+    SelectedOnly(HashSet<TeamId>)
 }
 
 impl ViewTeamsContract {
 
     pub async fn get_teams(&self) -> sqlx::Result<HashSet<TeamId>> {
-        if self.user_attributes.is_root() {
-            return Ok(self.state.db.get_teams().await?);
+        match &self.viewable_teams {
+            ViewableTeams::Every => Ok(self.state.db.get_teams().await?),
+            ViewableTeams::SelectedOnly(teams) => Ok(teams.clone())
         }
-
-        let mut teams = HashSet::new();
-        teams.extend(self.user_attributes.teams.clone());
-        teams.extend(self.viewable_teams.clone());
-
-        Ok(teams)
     }
 
 }
