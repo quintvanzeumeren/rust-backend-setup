@@ -1,51 +1,78 @@
-use std::collections::HashSet;
-use std::sync::Arc;
-use anyhow::Context;
-use axum::async_trait;
-use fake::faker::internet::raw::Username;
-use password_hash::PasswordHash;
-use domain::permission::permission::Permission;
-use domain::permission::permissions::create_user::CreateUser;
-use domain::permission::user_attributes::UserDetails;
-use domain::role::role::{Role, UserRoles};
-use domain::role::role_name::RoleName;
-use domain::user::password::Password;
-use domain::user::user::User;
-use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
+use anyhow::Context;
+use axum::async_trait;
+use domain::permission::permission::Permission;
+use domain::role::role::{Role, UserRoles};
+use domain::user::user::User;
+use domain::user::user_id::UserId;
+use std::sync::Arc;
 
 pub struct CreateUserPolicy {
     state: Arc<AppState>,
-    user_details: UserDetails
+    
+    /// roles_of_principle refers to the entity performing an action  
+    roles_of_principle: UserRoles,
 }
 
 #[async_trait]
 impl Policy for CreateUserPolicy {
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
-        let user_details = state.db.get_user_details(user_in_question)
-            .await
-            .context("Failed to retrieve user details")?;
-
+        let user_roles = state.db.get_user_roles(user_in_question).await
+            .context("Failed to user roles")?;
+         
         Ok(Self {
             state,
-            user_details
+            roles_of_principle: user_roles
         })
     }
 
     type Details = UserRoles;
     type Contract = CreateUserContract;
 
-    async fn authorize(&self, details: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+    async fn authorize(&self, roles_for_new_users: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+        for role in self.roles_of_principle.iter() {
+            return match role {
+                Role::Root => Ok(CreateUserContract {
+                    state: self.state.clone(),
+                    roles_for_new_users,
+                }),
+                Role::Admin => {
+                    let creatable_roles_for_admin = roles_for_new_users.iter().all(|r| match r {
+                        Role::TeamManager { .. } | Role::Member { .. } => true,
+                        _ => false,
+                    });
+                    
+                    if creatable_roles_for_admin { 
+                        return Ok(CreateUserContract {
+                            state: self.state.clone(),
+                            roles_for_new_users,
+                        });     
+                    }
+                     
+                    Err(PolicyRejectionError::Forbidden)
+                }
+                Role::TeamManager { teams } => {
+                    let teams_where_manager = teams;
+                    let creatable_roles_for_team_manager = roles_for_new_users.iter().all(|r| match r {
+                        Role::TeamManager { teams } => teams.iter().all(|t| teams_where_manager.contains(t)),
+                        Role::Member { teams } => teams.iter().all(|t| teams_where_manager.contains(t)),
+                        _ => false,
+                    });
+                    
+                    if creatable_roles_for_team_manager {
+                        return Ok(CreateUserContract {
+                            state: self.state.clone(),
+                            roles_for_new_users,
+                        });
+                    }
 
-        todo!("Fix commented code");
-        // if self.permission.is_authorized_for(details.clone()) {
-        //    return Ok(CreateUserContract {
-        //        state: self.state.clone(),
-        //        user_roles: details,
-        //    })
-        // }
+                    Err(PolicyRejectionError::Forbidden)
+                }
+                _ => Err(PolicyRejectionError::Forbidden)
+            }
+        }
 
         Err(PolicyRejectionError::Forbidden)
     }
@@ -53,7 +80,7 @@ impl Policy for CreateUserPolicy {
 
 pub struct CreateUserContract {
     state: Arc<AppState>,
-    user_roles: Vec<RoleName>
+    roles_for_new_users: UserRoles
 }
 
 impl CreateUserContract {
@@ -63,9 +90,8 @@ impl CreateUserContract {
         transaction.save_new_user(&new_user.user).await?;
         
         let user_id = new_user.user.id;
-        for user_role in &self.user_roles {
-            todo!("Fix commented code");
-            // transaction.add_role_to_user(user_id, user_role.clone()).await?;
+        for user_role in &self.roles_for_new_users {
+            transaction.add_role_to_user(user_id, user_role).await?;
         }
         
         transaction.commit().await?;

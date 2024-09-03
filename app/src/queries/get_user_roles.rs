@@ -4,7 +4,7 @@ use domain::role::role::{Role, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use sqlx::query_as;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use tracing::warn;
 
 impl Database {
@@ -47,7 +47,9 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
                     Some(uuid) => uuid.into()
                 };
 
-                let mut new_teams = vec![team_id];
+                let mut new_teams = HashSet::new();
+                new_teams.insert(team_id);
+                
                 if let Some(role) = roles.get(&record.role) {
                     if let Role::TeamManager { teams } = role {
                         new_teams.extend(teams);
@@ -137,23 +139,30 @@ mod tests {
         let member2 = new_member_record();
         let member3 = new_member_record();
 
-        let mut expected = HashSet::new();
-        expected.insert(Role::Root);
-        expected.insert(Role::Admin);
-        expected.insert(Role::TeamManager {
-            teams: vec![
-                team_manager3.team_id.expect("Expected team id").into(),
-                team_manager2.team_id.expect("Expected team id").into(),
-                team_manager.team_id.expect("Expected team id").into(),
-            ]
-        });
-        expected.insert(Role::Member {
-            teams: vec![
-                member3.team_id.expect("Expected team id").into(),
-                member2.team_id.expect("Expected team id").into(),
-                member.team_id.expect("Expected team id").into(),
-            ]
-        });
+        let expected = vec![
+            Role::Root,
+            Role::Admin,
+            Role::TeamManager {
+                teams: {
+                    let mut teams = HashSet::new();
+                    teams.insert(team_manager3.team_id.expect("Expected team id").into());
+                    teams.insert(team_manager2.team_id.expect("Expected team id").into());
+                    teams.insert(team_manager.team_id.expect("Expected team id").into());
+                    
+                    teams
+                }
+            },
+            Role::Member {
+                teams: {
+                    let mut teams = HashSet::new();
+                    teams.insert(member3.team_id.expect("Expected team id").into());
+                    teams.insert(member2.team_id.expect("Expected team id").into());
+                    teams.insert(member.team_id.expect("Expected team id").into());
+                    
+                    teams
+                }
+            },
+        ];
 
         let roles = vec![
             root,

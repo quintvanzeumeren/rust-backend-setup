@@ -9,17 +9,17 @@ pub const ROLE_ADMIN: NameOfRole = "Admin";
 pub const ROLE_TEAM_MANAGER: NameOfRole = "TeamManager";
 pub const ROLE_MEMBER: NameOfRole = "Member";
 
-pub type UserRoles = HashSet<Role>;
+pub type UserRoles = Vec<Role>;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum Role {
     Root,
     Admin,
     TeamManager {
-        teams: Vec<TeamId>
+        teams: HashSet<TeamId>
     },
     Member {
-        teams: Vec<TeamId>
+        teams: HashSet<TeamId>
     }
 }
 
@@ -64,6 +64,7 @@ impl Display for Role {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
     use crate::role::role::{Role, ROLE_ADMIN, ROLE_ROOT, ROLE_TEAM_MANAGER};
     use uuid::Uuid;
 
@@ -77,7 +78,7 @@ mod tests {
         assert_eq!(role.to_string(), "Admin");
         assert_eq!(role.to_string(), ROLE_ADMIN);
 
-        let role = Role::TeamManager { teams: vec![] };
+        let role = Role::TeamManager { teams: HashSet::new() };
         assert_eq!(role.to_string(), "TeamManager");
         assert_eq!(role.to_string(), ROLE_TEAM_MANAGER);
     }
@@ -90,7 +91,7 @@ mod tests {
         let role = Role::Admin;
         assert!(!role.is_root());
 
-        let role = Role::TeamManager { teams: vec![] };
+        let role = Role::TeamManager { teams: HashSet::new() };
         assert!(!role.is_root());
     }
 
@@ -102,7 +103,7 @@ mod tests {
         let role = Role::Admin;
         assert!(role.is_admin());
 
-        let role = Role::TeamManager { teams: vec![] };
+        let role = Role::TeamManager { teams: HashSet::new() };
         assert!(!role.is_admin());
     }
 
@@ -115,10 +116,16 @@ mod tests {
         let role = Role::Admin;
         assert!(!role.is_team_manager_of(team_id));
 
-        let role = Role::TeamManager { teams: vec![] };
+        let role = Role::TeamManager { teams: HashSet::new() };
         assert!(!role.is_team_manager_of(team_id));
 
-        let role = Role::TeamManager { teams: vec![team_id] };
+        let role = Role::TeamManager { 
+            teams: {
+                let mut set = HashSet::new();
+                set.insert(team_id);
+                set
+            } 
+        };
         assert!(role.is_team_manager_of(team_id));
     }
 }
