@@ -10,8 +10,7 @@ pub struct UserRoleRecord {
 }
 
 #[derive(Serialize, Deserialize, sqlx::Type, Debug, Hash, PartialEq, Eq, Clone)]
-#[sqlx(type_name = "role")]
-#[sqlx(rename_all = "PascalCase")]
+#[sqlx(type_name = "user_role")]
 pub enum RoleName {
     Root,
     Admin,
