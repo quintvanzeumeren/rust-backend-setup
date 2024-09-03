@@ -20,15 +20,15 @@
   - [ ] Prior to returning any error responses to the client, we should log/trace the error to OpenTelemetry
 
 ### Simplify Permission, Policy, and Contract structs 
-- [ ] Remove to `Permission` trait by implementing the permissions logic into each corresponding `Policy` trait.
-- [ ] Refactor `Policy` trait so that the `authorize` method is async. So that it can query any information it needs to determine if it can authorize the action
+- [ ] Remove to `Permission` trait by refactoring the permissions logic into each corresponding `Policy` trait.
+- [x] Refactor `Policy` trait so that the `authorize` method is async. So that it can query any information it needs to determine if it can authorize the action
 
 ### TeamManager Role
-- [ ] Refactor roles into a proper enum.
-- [ ] Add a new TeamManager role where for a specific team. 
+- [x] Refactor roles into a proper enum.
+- [x] Add a new TeamManager role for a specific team.
+- [ ] Remove `team_members` table as members of a team can now be identified by having either the role a TeamManager of Member for a associated team.
 
 ### Readme
-
 - [ ] Introduction project
 - [ ] Installation
 - [ ] Design
