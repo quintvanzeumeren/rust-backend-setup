@@ -11,7 +11,7 @@ pub const ROLE_MEMBER: NameOfRole = "Member";
 
 pub type UserRoles = HashSet<Role>;
 
-#[derive(Serialize, Deserialize, Hash, Eq, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash)]
 pub enum Role {
     Root,
     Admin,

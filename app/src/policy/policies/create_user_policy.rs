@@ -7,7 +7,7 @@ use password_hash::PasswordHash;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::create_user::CreateUser;
 use domain::permission::user_attributes::UserDetails;
-use domain::role::role::Role;
+use domain::role::role::{Role, UserRoles};
 use domain::role::role_name::RoleName;
 use domain::user::password::Password;
 use domain::user::user::User;
@@ -34,7 +34,7 @@ impl Policy for CreateUserPolicy {
         })
     }
 
-    type Details = HashSet<Role>;
+    type Details = UserRoles;
     type Contract = CreateUserContract;
 
     async fn authorize(&self, details: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {

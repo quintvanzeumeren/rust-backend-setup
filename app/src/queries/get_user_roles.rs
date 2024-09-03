@@ -1,12 +1,11 @@
-use std::collections::HashMap;
-use domain::role::role::{Role, UserRoles};
-use domain::user::user_id::UserId;
-use sqlx::{query, query_as, query_file, query_file_as};
-use tracing::warn;
-use uuid::Uuid;
-use domain::team::team_id::TeamId;
 use crate::queries::database::Database;
 use crate::queries::records::user_role_record::{RoleName, UserRoleRecord};
+use domain::role::role::{Role, UserRoles};
+use domain::team::team_id::TeamId;
+use domain::user::user_id::UserId;
+use sqlx::query_as;
+use std::collections::HashMap;
+use tracing::warn;
 
 impl Database {
     
@@ -48,15 +47,27 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
                     Some(uuid) => uuid.into()
                 };
 
+                let mut new_teams = vec![team_id];
                 if let Some(role) = roles.get(&record.role) {
-                    let mut updated_teams = vec![team_id];
                     if let Role::TeamManager { teams } = role {
-                        updated_teams.extend(teams);
-                        roles.insert(record.role, Role::TeamManager { teams: updated_teams });
+                        new_teams.extend(teams);
+                        roles.insert(record.role, Role::TeamManager { teams: new_teams });
                     } else if let Role::Member { teams } = role {
-                        updated_teams.extend(teams);
-                        roles.insert(record.role, Role::Member { teams: updated_teams });
+                        new_teams.extend(teams);
+                        roles.insert(record.role, Role::Member { teams: new_teams });
                     }
+                    
+                    continue
+                }
+                
+                match record.role {
+                    RoleName::TeamManager => {
+                        roles.insert(record.role, Role::TeamManager { teams: new_teams });
+                    }
+                    RoleName::Member => {
+                        roles.insert(record.role, Role::Member { teams: new_teams });
+                    }
+                    _ => {}
                 }
             }
         }
@@ -67,11 +78,11 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
-    use uuid::Uuid;
-    use domain::role::role::{Role, UserRoles};
     use crate::queries::get_user_roles::parse_into_user_roles;
     use crate::queries::records::user_role_record::{RoleName, UserRoleRecord};
+    use domain::role::role::Role;
+    use std::collections::HashSet;
+    use uuid::Uuid;
 
     fn new_root_record() -> UserRoleRecord {
         UserRoleRecord {
@@ -126,21 +137,21 @@ mod tests {
         let member2 = new_member_record();
         let member3 = new_member_record();
 
-        let mut expected: UserRoles = HashSet::new();
+        let mut expected = HashSet::new();
         expected.insert(Role::Root);
         expected.insert(Role::Admin);
         expected.insert(Role::TeamManager {
             teams: vec![
-                team_manager.team_id.expect("Expected team id").into(),
-                team_manager2.team_id.expect("Expected team id").into(),
                 team_manager3.team_id.expect("Expected team id").into(),
+                team_manager2.team_id.expect("Expected team id").into(),
+                team_manager.team_id.expect("Expected team id").into(),
             ]
         });
         expected.insert(Role::Member {
             teams: vec![
-                member.team_id.expect("Expected team id").into(),
-                member2.team_id.expect("Expected team id").into(),
                 member3.team_id.expect("Expected team id").into(),
+                member2.team_id.expect("Expected team id").into(),
+                member.team_id.expect("Expected team id").into(),
             ]
         });
 

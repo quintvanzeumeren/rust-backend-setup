@@ -1,29 +1,25 @@
-use std::collections::HashSet;
-use anyhow::Context;
-use axum::http::StatusCode;
 use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::handlers::error::HandlerResponse;
 use crate::policy::policies::create_user_policy::{CreateUserPolicy, NewUserDetails};
 use crate::policy::policy::Policy;
+use crate::telemetry::spawn_blocking_with_tracing;
+use anyhow::Context;
+use axum::http::StatusCode;
 use axum::Json;
-use password_hash::SaltString;
-use domain::role::role_name::RoleName;
-use domain::shared::slug::Slug;
+use domain::role::role::UserRoles;
+use domain::user::password::Password;
 use domain::user::user::User;
+use domain::user::user_id::UserId;
+use password_hash::SaltString;
 use secrecy::Secret;
 use serde::Deserialize;
-use uuid::Uuid;
-use domain::role::role::{Role, UserRoles};
-use domain::user::password::Password;
-use domain::user::user_id::UserId;
-use crate::telemetry::spawn_blocking_with_tracing;
 
 #[derive(Deserialize)]
 pub struct CreateUserRequestBody {
     id: UserId,
     username: String,
     password: Secret<String>,
-    roles: HashSet<Role>
+    roles: UserRoles
 }
 
 pub async fn create_user(user: UserWithPolicy<CreateUserPolicy>, Json(new_user): Json<CreateUserRequestBody>) -> HandlerResponse<StatusCode> {
