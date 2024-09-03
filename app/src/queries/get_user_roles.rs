@@ -6,6 +6,7 @@ use domain::user::user_id::UserId;
 use sqlx::query_as;
 use std::collections::{HashMap, HashSet};
 use tracing::warn;
+use tracing_subscriber::fmt::format;
 
 impl Database {
     
@@ -32,50 +33,32 @@ impl Database {
 }
 
 fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
-    let mut roles = HashMap::new();
+    let mut roles = HashSet::new();
     for record in records {
-        match record.role {
-            RoleName::Root => { roles.entry(record.role).or_insert(Role::Root); },
-            RoleName::Admin => { roles.entry(record.role).or_insert(Role::Admin); },
-            RoleName::TeamManager
-            | RoleName::Member => {
+        let role = match record.role {
+            RoleName::Root => Role::Root,
+            RoleName::Admin => Role::Admin,
+            RoleName::TeamManager | RoleName::Member => {
                 let team_id: TeamId = match record.team_id {
                     None => {
-                        warn!("Expected a team id for team_manager role");
+                        warn!("Expected a team id with role: {}", record.role);
                         continue
                     },
                     Some(uuid) => uuid.into()
                 };
-
-                let mut new_teams = HashSet::new();
-                new_teams.insert(team_id);
-                
-                if let Some(role) = roles.get(&record.role) {
-                    if let Role::TeamManager { teams } = role {
-                        new_teams.extend(teams);
-                        roles.insert(record.role, Role::TeamManager { teams: new_teams });
-                    } else if let Role::Member { teams } = role {
-                        new_teams.extend(teams);
-                        roles.insert(record.role, Role::Member { teams: new_teams });
-                    }
-                    
-                    continue
-                }
                 
                 match record.role {
-                    RoleName::TeamManager => {
-                        roles.insert(record.role, Role::TeamManager { teams: new_teams });
-                    }
-                    RoleName::Member => {
-                        roles.insert(record.role, Role::Member { teams: new_teams });
-                    }
-                    _ => {}
+                    RoleName::TeamManager => Role::TeamManager(team_id),
+                    RoleName::Member => Role::Member(team_id),
+                    _ => continue
                 }
             }
-        }
+        };
+
+        roles.insert(role);
     }
 
-    roles.into_iter().map(|(_, v)| v).collect()
+    roles
 }
 
 #[cfg(test)]
@@ -139,30 +122,15 @@ mod tests {
         let member2 = new_member_record();
         let member3 = new_member_record();
 
-        let expected = vec![
-            Role::Root,
-            Role::Admin,
-            Role::TeamManager {
-                teams: {
-                    let mut teams = HashSet::new();
-                    teams.insert(team_manager3.team_id.expect("Expected team id").into());
-                    teams.insert(team_manager2.team_id.expect("Expected team id").into());
-                    teams.insert(team_manager.team_id.expect("Expected team id").into());
-                    
-                    teams
-                }
-            },
-            Role::Member {
-                teams: {
-                    let mut teams = HashSet::new();
-                    teams.insert(member3.team_id.expect("Expected team id").into());
-                    teams.insert(member2.team_id.expect("Expected team id").into());
-                    teams.insert(member.team_id.expect("Expected team id").into());
-                    
-                    teams
-                }
-            },
-        ];
+        let mut expected = HashSet::new();
+        expected.insert(Role::Root);
+        expected.insert(Role::Admin);
+        expected.insert(Role::TeamManager(team_manager.team_id.expect("Expected team id").into()));
+        expected.insert(Role::TeamManager(team_manager2.team_id.expect("Expected team id").into()));
+        expected.insert(Role::TeamManager(team_manager3.team_id.expect("Expected team id").into()));
+        expected.insert(Role::Member(member.team_id.expect("Expected team id").into()));
+        expected.insert(Role::Member(member2.team_id.expect("Expected team id").into()));
+        expected.insert(Role::Member(member3.team_id.expect("Expected team id").into()));
 
         let roles = vec![
             root,

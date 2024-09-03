@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashSet;
 use crate::team::team_id::TeamId;
 use std::fmt::Display;
@@ -9,18 +10,14 @@ pub const ROLE_ADMIN: NameOfRole = "Admin";
 pub const ROLE_TEAM_MANAGER: NameOfRole = "TeamManager";
 pub const ROLE_MEMBER: NameOfRole = "Member";
 
-pub type UserRoles = Vec<Role>;
+pub type UserRoles = HashSet<Role>;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Role {
     Root,
     Admin,
-    TeamManager {
-        teams: HashSet<TeamId>
-    },
-    Member {
-        teams: HashSet<TeamId>
-    }
+    TeamManager(TeamId),
+    Member(TeamId)
 }
 
 impl Role {
@@ -41,7 +38,7 @@ impl Role {
 
     pub fn is_team_manager_of(&self, team_id: TeamId) -> bool {
         match self {
-            Role::TeamManager { teams } => teams.contains(&team_id),
+            Role::TeamManager(ti) => ti.clone() == team_id,
             _ => false
         }
     }
@@ -59,6 +56,31 @@ impl Role {
 impl Display for Role {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.name().to_string())
+    }
+}
+
+impl PartialOrd<Self> for Role {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        todo!()
+    }
+}
+
+impl Ord for Role {
+    fn cmp(&self, other: &Self) -> Ordering {
+        
+        todo!()
+        
+        // match (self, other) {
+        //     (Role::Root, Role::Root) => Ordering::Equal,
+        //     (Role::Root, _) => Ordering::Greater,
+        //     (_, Role::Root) => Ordering::Less,
+        //     
+        //     (Role::Admin, _) => Ordering::Greater,
+        //     (_, Role::Admin) => Ordering::Less,
+        // 
+        //     (Role::TeamManager { .. }, Role::Member { .. }) => Ordering::Greater
+        //     // (Role::TeamManager { .. }, Role::Member { .. }) => Ordering::Greater
+        // }
     }
 }
 

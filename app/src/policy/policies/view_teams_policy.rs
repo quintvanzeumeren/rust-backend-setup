@@ -38,7 +38,7 @@ impl Policy for ViewTeamsPolicy {
                     state: self.state.clone(),
                     viewable_teams: ViewableTeams::Every
                 }),
-                Role::TeamManager { teams } => Ok(ViewTeamsContract {
+                Role::TeamManager { team s } => Ok(ViewTeamsContract {
                     state: self.state.clone(),
                     viewable_teams: ViewableTeams::SelectedOnly(teams.clone())
                 }),

@@ -91,7 +91,7 @@ impl CreateUserContract {
         
         let user_id = new_user.user.id;
         for user_role in &self.roles_for_new_users {
-            transaction.add_role_to_user(user_id, user_role).await?;
+            transaction.save_new_user_role(user_id, user_role).await?;
         }
         
         transaction.commit().await?;
