@@ -27,6 +27,8 @@
 - [x] Refactor roles into a proper enum.
 - [x] Add a new TeamManager role for a specific team.
 - [ ] Remove `team_members` table as members of a team can now be identified by having either the role a TeamManager of Member for a associated team.
+- [ ] Implement a custom Ord/Sort for the Role enum, so that highest ranking roles are evaluated first. Currently, roles can be in any order inside of the UserRoles. This creates the issue where lower ranking roles will be used instead of the highest one. Say someone being a root, but being evaluated as a TeamManager, thereby denying functionality that should be allowed.
+- [ ] Fix issue on startup preventing the creation of root: Failed to create root user: Failed to add role of root to the new root user
 
 ### Readme
 - [ ] Introduction project
