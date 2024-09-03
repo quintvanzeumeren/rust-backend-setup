@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use sqlx::{Error, query_file, query_file_as};
 use tokio::try_join;
 use domain::permission::user_attributes::UserDetails;
@@ -13,10 +14,12 @@ impl Database {
             self.get_user_teams(user_id)
         )?;
         
+        todo!("Fix user role mapping");
         Ok(UserDetails {
             id: user_id,
             teams: user_teams.teams,
-            roles: user_roles.roles.iter().map(|t| t.name.clone().into()).collect(),
+            // roles: user_roles.roles.iter().map(|t| t.name.clone().into()).collect(),
+            roles: HashSet::new()
         })
     }
 }

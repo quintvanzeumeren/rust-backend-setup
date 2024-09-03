@@ -39,13 +39,13 @@ impl Policy for CreateUserPolicy {
 
     async fn authorize(&self, details: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
 
-
-        if self.permission.is_authorized_for(details.clone()) {
-           return Ok(CreateUserContract {
-               state: self.state.clone(),
-               user_roles: details,
-           })
-        }
+        todo!("Fix commented code");
+        // if self.permission.is_authorized_for(details.clone()) {
+        //    return Ok(CreateUserContract {
+        //        state: self.state.clone(),
+        //        user_roles: details,
+        //    })
+        // }
 
         Err(PolicyRejectionError::Forbidden)
     }
@@ -64,7 +64,8 @@ impl CreateUserContract {
         
         let user_id = new_user.user.id;
         for user_role in &self.user_roles {
-            transaction.add_role_to_user(user_id, user_role.clone()).await?;
+            todo!("Fix commented code");
+            // transaction.add_role_to_user(user_id, user_role.clone()).await?;
         }
         
         transaction.commit().await?;
