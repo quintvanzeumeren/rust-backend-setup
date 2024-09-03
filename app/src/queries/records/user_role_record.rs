@@ -9,7 +9,7 @@ pub struct UserRoleRecord {
     pub role: RoleName,
 }
 
-#[derive(Serialize, Deserialize, sqlx::Type, Debug)]
+#[derive(Serialize, Deserialize, sqlx::Type, Debug, Hash, PartialEq, Eq)]
 #[sqlx(type_name = "role")]
 #[sqlx(rename_all = "PascalCase")]
 pub enum RoleName {

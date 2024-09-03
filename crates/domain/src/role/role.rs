@@ -7,10 +7,11 @@ pub type NameOfRole = &'static str;
 pub const ROLE_ROOT: NameOfRole = "Root";
 pub const ROLE_ADMIN: NameOfRole = "Admin";
 pub const ROLE_TEAM_MANAGER: NameOfRole = "TeamManager";
+pub const ROLE_MEMBER: NameOfRole = "Member";
 
 pub type UserRoles = HashSet<Role>;
 
-#[derive(Serialize, Deserialize, Hash, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Hash, Eq, PartialEq, Debug)]
 pub enum Role {
     Root,
     Admin,
@@ -49,7 +50,8 @@ impl Role {
         match self {
             Role::Root => ROLE_ROOT,
             Role::Admin => ROLE_ADMIN,
-            Role::TeamManager { .. } => ROLE_TEAM_MANAGER
+            Role::TeamManager { .. } => ROLE_TEAM_MANAGER,
+            Role::Member { .. } => ROLE_MEMBER
         }
     }
 }
