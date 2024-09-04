@@ -9,25 +9,27 @@ use domain::team::team::Team;
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
+use domain::role::role::{Role, UserRoles};
 
 pub struct CreateTeamPolicy {
     state: Arc<AppState>,
-    permission: CreateTeam
+    // permission: CreateTeam
+    principle_roles: UserRoles,
+    principle_id: UserId
 }
 
 #[async_trait]
 impl Policy for CreateTeamPolicy {
 
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
-        let user = state.db.get_user_details(user_in_question)
+    async fn new(state: Arc<AppState>, user_id: UserId) -> Result<Self, PolicyRejectionError> {
+        let roles = state.db.get_user_roles(user_id)
             .await
             .context("Failed to retrieve user details")?;
 
-        let permission = CreateTeam::new(user);
-
         Ok(Self {
             state,
-            permission,
+            principle_roles: roles,
+            principle_id: user_id
         })
     }
 
@@ -35,13 +37,18 @@ impl Policy for CreateTeamPolicy {
     type Contract = CreateTeamContract;
 
     async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-        if self.permission.is_authorized_for(()) {
-            return Ok(CreateTeamContract {
-                state: self.state.clone(),
-            })
+        for principle_role in &self.principle_roles {
+            match principle_role {
+                Role::Root | Role::Admin => {
+                    return Ok(CreateTeamContract {
+                        state: self.state.clone()
+                    })
+                }
+                _ => continue
+            }
         }
 
-        return Err(PolicyRejectionError::Forbidden)
+        Err(PolicyRejectionError::Forbidden)
     }
 }
 
