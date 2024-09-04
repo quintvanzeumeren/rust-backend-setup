@@ -1,15 +1,14 @@
-use std::sync::Arc;
+use crate::app_state::AppState;
+use crate::policy::policy::Policy;
+use crate::policy::policy_authorization_error::PolicyRejectionError;
 use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::create_team::CreateTeam;
-use domain::sessions::state::state::State;
 use domain::team::team::Team;
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
-use crate::app_state::AppState;
-use crate::policy::policy::Policy;
-use crate::policy::policy_authorization_error::PolicyRejectionError;
+use std::sync::Arc;
 
 pub struct CreateTeamPolicy {
     state: Arc<AppState>,
