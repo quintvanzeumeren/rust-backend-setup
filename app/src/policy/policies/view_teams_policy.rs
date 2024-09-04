@@ -32,24 +32,30 @@ impl Policy for ViewTeamsPolicy {
     type Contract = ViewTeamsContract;
 
     async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+        let mut viewable_teams = HashSet::new();
         for principle_role in &self.principle_roles {
-            return match principle_role {
-                Role::Root | Role::Admin => Ok(ViewTeamsContract {
-                    state: self.state.clone(),
-                    viewable_teams: ViewableTeams::Every
-                }),
-                Role::TeamManager { team s } => Ok(ViewTeamsContract {
-                    state: self.state.clone(),
-                    viewable_teams: ViewableTeams::SelectedOnly(teams.clone())
-                }),
-                Role::Member { teams } => Ok(ViewTeamsContract {
-                    state: self.state.clone(),
-                    viewable_teams: ViewableTeams::SelectedOnly(teams.clone())
-                }),
-            }
+            let viewable_team = match principle_role {
+                Role::Root | Role::Admin => {
+                    return Ok(ViewTeamsContract {
+                        state: self.state.clone(),
+                        viewable_teams: ViewableTeams::Every
+                    })
+                },
+                Role::TeamManager(team_id) => *team_id,
+                Role::Member(team_id) => *team_id,
+            };
+            
+            viewable_teams.insert(viewable_team);
+        }
+        
+        if viewable_teams.is_empty() { 
+            return Err(PolicyRejectionError::Forbidden)
         }
 
-        Err(PolicyRejectionError::Forbidden)
+        Ok(ViewTeamsContract {
+            state: self.state.clone(),
+            viewable_teams: ViewableTeams::SelectedOnly(viewable_teams)
+        })
     }
 }
 
