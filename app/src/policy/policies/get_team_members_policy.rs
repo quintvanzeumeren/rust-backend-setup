@@ -1,32 +1,30 @@
-use std::collections::HashSet;
-use std::sync::Arc;
-use anyhow::Context;
-use axum::async_trait;
-use domain::permission::permission::Permission;
-use domain::permission::permissions::read_team_members::ReadTeamMembers;
-use domain::team::team_id::TeamId;
-use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
+use anyhow::Context;
+use axum::async_trait;
+use domain::permission::permission::Permission;
+use domain::role::role::{Role, UserRoles};
+use domain::team::team_id::TeamId;
+use domain::user::user_id::UserId;
+use std::collections::HashSet;
+use std::sync::Arc;
 
 pub struct GetTeamMembersPolicy {
     state: Arc<AppState>,
-    permission: ReadTeamMembers,
-    user_id: UserId
+    principle_roles: UserRoles
 }
 
 #[async_trait]
 impl Policy for GetTeamMembersPolicy {
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
-        let user = state.db.get_user_details(user_in_question)
+    async fn new(state: Arc<AppState>, principle_id: UserId) -> Result<Self, PolicyRejectionError> {
+        let principle_roles = state.db.get_user_roles(principle_id)
             .await
             .context("Failed to retrieve user details")?;
         
         Ok(Self {
             state,
-            permission: ReadTeamMembers::new(user),
-            user_id: user_in_question,
+            principle_roles
         })
     }
 
@@ -34,11 +32,31 @@ impl Policy for GetTeamMembersPolicy {
     type Contract = GetTeamMembersContract;
 
     async fn authorize(&self, team_id: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-        if self.permission.is_authorized_for(team_id) {
-            return Ok(GetTeamMembersContract {
-                team_id,
-                state: self.state.clone(),
-            })
+        for principle_role in &self.principle_roles {
+            match principle_role {
+                Role::Root | Role::Admin => {
+                    return Ok(GetTeamMembersContract {
+                        team_id,
+                        state: self.state.clone(),
+                    })
+                }
+                Role::TeamManager(tm_id) => {
+                    if team_id == *tm_id {
+                        return Ok(GetTeamMembersContract {
+                            team_id,
+                            state: self.state.clone(),
+                        })
+                    }
+                }
+                Role::Member(tm_id) => {
+                    if team_id == *tm_id {
+                        return Ok(GetTeamMembersContract {
+                            team_id,
+                            state: self.state.clone(),
+                        })
+                    }
+                }
+            }
         }
 
         Err(PolicyRejectionError::Forbidden)
