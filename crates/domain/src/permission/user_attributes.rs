@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use crate::role::role::{ROLE_ADMIN, ROLE_ROOT};
+use crate::role::role::{UserRoles, ROLE_ADMIN, ROLE_ROOT};
 use crate::shared::slug::Slug;
 use crate::team::team_id::TeamId;
 use crate::user::user_id::UserId;
@@ -10,7 +10,7 @@ use crate::user::user_id::UserId;
 pub struct UserDetails {
     pub id: UserId,
     pub teams: HashSet<TeamId>,
-    pub roles: HashSet<Slug>
+    pub roles: UserRoles
 }
 
 impl UserDetails {
