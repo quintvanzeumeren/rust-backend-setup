@@ -7,18 +7,14 @@ use sqlx::{query_file, Executor};
 
 impl Transaction {
 
-    pub async fn save_new_user_role(&mut self, user_id: UserId, role: &Role) -> sqlx::Result<()> {
-
-        let mut query = String::from("INSERT INTO user_roles (user_id, role, team_id) VALUES ");
-
+    pub async fn save_new_role_to_user(&mut self, user_id: UserId, role: &Role) -> sqlx::Result<()> {
+        
         match role {
             Role::Root => self.save_root_or_admin_role(user_id, RoleName::Root).await?,
             Role::Admin => self.save_root_or_admin_role(user_id, RoleName::Admin).await?,
             Role::TeamManager(team_id) => self.save_role_with_team_id(user_id, RoleName::TeamManager, *team_id).await?,
             Role::Member(team_id) => self.save_role_with_team_id(user_id, RoleName::Member, *team_id).await?
         }
-
-        query.push_str(" ON CONFLICT (id) DO NOTHING;");
 
         Ok(())
     }

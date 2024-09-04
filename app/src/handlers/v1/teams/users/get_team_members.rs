@@ -20,5 +20,5 @@ pub async fn get_team_members(user: UserWithPolicy<GetTeamMembersPolicy>, Path(p
         .await
         .context("Failed to fetch team members")?;
     
-    Ok(Json(members.iter().map(|id| id.0).collect()))
+    Ok(Json(members.iter().map(|member| member.user_id.0).collect()))
 }

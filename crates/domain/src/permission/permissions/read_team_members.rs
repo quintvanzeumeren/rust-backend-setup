@@ -1,9 +1,6 @@
-use std::collections::HashSet;
-
-use crate::team::team_id::TeamId;
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::resource::resource::Resource;
 use crate::permission::user_attributes::UserDetails;
+use crate::team::team_id::TeamId;
 
 /// ReadTeamMembers checks if the user can read the members of an team
 pub struct ReadTeamMembers {
@@ -34,11 +31,11 @@ impl Permission for ReadTeamMembers {
 
 #[cfg(test)]
 mod tests {
-    use uuid::Uuid;
     use crate::permission::permission::Permission;
     use crate::permission::permissions::read_team_members::ReadTeamMembers;
     use crate::permission::user_attributes::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
-    
+    use uuid::Uuid;
+
     #[test]
     fn test_read_members_name() {
         assert_eq!(ReadTeamMembers::name(), "ReadTeamMembers");

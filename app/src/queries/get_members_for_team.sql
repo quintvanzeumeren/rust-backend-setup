@@ -1,2 +1,3 @@
-select user_id from team_members
-where team_id = $1;
+select user_id, role AS "role!: RoleName"
+from user_roles
+where team_id = $1 and (role = 'TeamManager'::user_role or role = 'Member'::user_role);

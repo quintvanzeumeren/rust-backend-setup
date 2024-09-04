@@ -9,6 +9,7 @@ use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::collections::HashSet;
 use std::sync::Arc;
+use crate::queries::get_members_for_team::TeamMember;
 
 pub struct GetTeamMembersPolicy {
     state: Arc<AppState>,
@@ -70,7 +71,7 @@ pub struct GetTeamMembersContract {
 
 impl GetTeamMembersContract {
     
-    pub async fn fetch_team_members(&self) -> Result<HashSet<UserId>, sqlx::Error> {
+    pub async fn fetch_team_members(&self) -> Result<HashSet<TeamMember>, sqlx::Error> {
         Ok(self.state.db.get_team_members(self.team_id).await?)
     }
 }

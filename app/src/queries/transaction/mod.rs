@@ -5,6 +5,6 @@ pub mod save_refresh_token;
 pub mod save_refreshed_user_session;
 pub mod update_user_password;
 pub mod save_new_user;
-pub mod add_role_to_user;
+pub mod save_new_role_to_user;
 pub mod save_team;
 mod add_member_to_team;
