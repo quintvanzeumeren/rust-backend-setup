@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::handlers::error::HandlerResponse;
-use crate::policy::policies::add_team_members_policy::{AddTeamMemberDetails, AddTeamMemberPolicy};
+use crate::policy::policies::add_team_members_policy::AddTeamMemberPolicy;
 use crate::policy::policy::Policy;
 use crate::telemetry::TelemetryRecord;
 
@@ -27,11 +27,6 @@ pub struct AddMemberParams {
 pub async fn add_member(user: UserWithPolicy<AddTeamMemberPolicy>, Path(params): Path<AddMemberParams>) -> HandlerResponse<StatusCode> {
     params.user_id.record_in_telemetry("new_member_id");
     params.team_id.record_in_telemetry("team_id");
-    
-    // let details = AddTeamMemberDetails {
-    //     user_to_add: params.user_id.into(),
-    //     team_to_add_to: params.team_id.into(),
-    // };
     
     let add_members_contract = user.policy.authorize(params.team_id.into()).await?;
     add_members_contract.add_member(params.user_id.into())
