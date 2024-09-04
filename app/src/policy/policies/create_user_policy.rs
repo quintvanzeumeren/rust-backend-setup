@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
@@ -11,8 +12,8 @@ use std::sync::Arc;
 
 pub struct CreateUserPolicy {
     state: Arc<AppState>,
-    
-    /// roles_of_principle refers to the entity performing an action  
+
+    /// roles_of_principle refers to the entity performing an action
     roles_of_principle: UserRoles,
 }
 
@@ -21,7 +22,7 @@ impl Policy for CreateUserPolicy {
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
         let user_roles = state.db.get_user_roles(user_in_question).await
             .context("Failed to user roles")?;
-         
+
         Ok(Self {
             state,
             roles_of_principle: user_roles
@@ -32,46 +33,49 @@ impl Policy for CreateUserPolicy {
     type Contract = CreateUserContract;
 
     async fn authorize(&self, roles_for_new_users: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+
+        let mut possible_roles: UserRoles = HashSet::new();
         for role in self.roles_of_principle.iter() {
-            return match role {
-                Role::Root => Ok(CreateUserContract {
-                    state: self.state.clone(),
-                    roles_for_new_users,
-                }),
+            match role {
+                Role::Root => {
+                    return Ok(CreateUserContract {
+                        state: self.state.clone(),
+                        roles_for_new_users,
+                    })
+                },
                 Role::Admin => {
                     let creatable_roles_for_admin = roles_for_new_users.iter().all(|r| match r {
                         Role::TeamManager { .. } | Role::Member { .. } => true,
                         _ => false,
                     });
-                    
-                    if creatable_roles_for_admin { 
-                        return Ok(CreateUserContract {
-                            state: self.state.clone(),
-                            roles_for_new_users,
-                        });     
-                    }
-                     
-                    Err(PolicyRejectionError::Forbidden)
-                }
-                Role::TeamManager { teams } => {
-                    let teams_where_manager = teams;
-                    let creatable_roles_for_team_manager = roles_for_new_users.iter().all(|r| match r {
-                        Role::TeamManager { teams } => teams.iter().all(|t| teams_where_manager.contains(t)),
-                        Role::Member { teams } => teams.iter().all(|t| teams_where_manager.contains(t)),
-                        _ => false,
-                    });
-                    
-                    if creatable_roles_for_team_manager {
+
+                    if creatable_roles_for_admin {
                         return Ok(CreateUserContract {
                             state: self.state.clone(),
                             roles_for_new_users,
                         });
                     }
-
-                    Err(PolicyRejectionError::Forbidden)
                 }
-                _ => Err(PolicyRejectionError::Forbidden)
+                Role::TeamManager(team_id) => {
+                    let roles: Vec<&Role> = roles_for_new_users.iter().filter(|r | match r {
+                        Role::TeamManager(id) => *id == *team_id,
+                        Role::Member(id) => *id == *team_id,
+                        _ => false,
+                    }).collect();
+
+                    for role in roles {
+                        possible_roles.insert(role.clone());
+                    }
+                }
+                _ => continue
             }
+        }
+        
+        if possible_roles.eq(&roles_for_new_users) {
+            return Ok(CreateUserContract {
+                state: self.state.clone(),
+                roles_for_new_users,
+            });
         }
 
         Err(PolicyRejectionError::Forbidden)

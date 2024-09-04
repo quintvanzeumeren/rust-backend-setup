@@ -61,26 +61,28 @@ impl Display for Role {
 
 impl PartialOrd<Self> for Role {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        todo!()
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Role {
     fn cmp(&self, other: &Self) -> Ordering {
-        
-        todo!()
-        
-        // match (self, other) {
-        //     (Role::Root, Role::Root) => Ordering::Equal,
-        //     (Role::Root, _) => Ordering::Greater,
-        //     (_, Role::Root) => Ordering::Less,
-        //     
-        //     (Role::Admin, _) => Ordering::Greater,
-        //     (_, Role::Admin) => Ordering::Less,
-        // 
-        //     (Role::TeamManager { .. }, Role::Member { .. }) => Ordering::Greater
-        //     // (Role::TeamManager { .. }, Role::Member { .. }) => Ordering::Greater
-        // }
+
+        match (self, other) {
+            (Role::Root, Role::Root) => Ordering::Equal,
+            (Role::Root, _) => Ordering::Greater,
+            (_, Role::Root) => Ordering::Less,
+
+            (Role::Admin, Role::Admin) => Ordering::Equal,
+            (Role::Admin, _) => Ordering::Greater,
+            (_, Role::Admin) => Ordering::Less,
+
+            (Role::TeamManager(..), Role::TeamManager(..)) => Ordering::Equal,
+            (Role::TeamManager(..), Role::Member(..)) => Ordering::Greater,
+
+            (Role::Member(..), Role::Member(..)) => Ordering::Equal,
+            (Role::Member(..), _) => Ordering::Less,
+        }
     }
 }
 
@@ -100,7 +102,7 @@ mod tests {
         assert_eq!(role.to_string(), "Admin");
         assert_eq!(role.to_string(), ROLE_ADMIN);
 
-        let role = Role::TeamManager { teams: HashSet::new() };
+        let role = Role::TeamManager(Uuid::new_v4().into());
         assert_eq!(role.to_string(), "TeamManager");
         assert_eq!(role.to_string(), ROLE_TEAM_MANAGER);
     }
@@ -113,7 +115,7 @@ mod tests {
         let role = Role::Admin;
         assert!(!role.is_root());
 
-        let role = Role::TeamManager { teams: HashSet::new() };
+        let role = Role::TeamManager(Uuid::new_v4().into());
         assert!(!role.is_root());
     }
 
@@ -125,7 +127,7 @@ mod tests {
         let role = Role::Admin;
         assert!(role.is_admin());
 
-        let role = Role::TeamManager { teams: HashSet::new() };
+        let role = Role::TeamManager(Uuid::new_v4().into());
         assert!(!role.is_admin());
     }
 
@@ -138,16 +140,10 @@ mod tests {
         let role = Role::Admin;
         assert!(!role.is_team_manager_of(team_id));
 
-        let role = Role::TeamManager { teams: HashSet::new() };
+        let role = Role::TeamManager(Uuid::new_v4().into());
         assert!(!role.is_team_manager_of(team_id));
 
-        let role = Role::TeamManager { 
-            teams: {
-                let mut set = HashSet::new();
-                set.insert(team_id);
-                set
-            } 
-        };
+        let role = Role::TeamManager(team_id);
         assert!(role.is_team_manager_of(team_id));
     }
 }
