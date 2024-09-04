@@ -26,12 +26,18 @@
 ### TeamManager Role
 - [x] Refactor roles into a proper enum.
 - [x] Add a new TeamManager role for a specific team.
-- [ ] Remove `team_members` table as members of a team can now be identified by having either the role a TeamManager of Member for a associated team.
+- [ ] ~~Remove `team_members` table as members of a team can now be identified by having either the role a TeamManager of Member for a associated team.~~
 - [x] Fix issue on startup preventing the creation of root: Failed to create root user: Failed to add role of root to the new root user
-
-To continue with tomorrow:
 - [x] Refactor create_user_policy and view_teams_policy with new role. Probably won't need below anymore afterwards...
-- [ ] Implement a custom Ord/Sort for the Role enum, so that highest ranking roles are evaluated first. Currently, roles can be in any order inside of the UserRoles. This creates the issue where lower ranking roles will be used instead of the highest one. Say someone being a root, but being evaluated as a TeamManager, thereby denying functionality that should be allowed.
+- [ ] ~~Implement a custom Ord/Sort for the Role enum, so that highest ranking roles are evaluated first. Currently, roles can be in any order inside of the UserRoles. This creates the issue where lower ranking roles will be used instead of the highest one. Say someone being a root, but being evaluated as a TeamManager, thereby denying functionality that should be allowed.~~
+
+### Todo after current role refactor
+- [ ] Remove the `TeamManager` and `Member` role from Role. (Don't forget user_role type in db)
+- [ ] Add a boolean column to the `team_members` column signifying if a member is a team manager
+- [ ] refactor `Role` enum to `SystemRole` for only users are running the application.
+- [ ] Update all policies again.. 
+ 
+
 
 ### Readme
 - [ ] Introduction project
