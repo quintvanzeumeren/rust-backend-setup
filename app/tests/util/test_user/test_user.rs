@@ -173,7 +173,7 @@ impl<'a> TestUser<'a, LoggedIn> {
             id: Uuid::new_v4(),
             username: Uuid::new_v4().to_string(),
             password: Uuid::new_v4().to_string(),
-            roles: vec!["admin".to_string()],
+            roles: vec!["Admin".to_string()],
         };
         let response = self.app.create_user(&self, admin.clone()).await;
         assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));
@@ -188,7 +188,7 @@ impl<'a> TestUser<'a, LoggedIn> {
             id: Uuid::new_v4(),
             username: Uuid::new_v4().to_string(),
             password: Uuid::new_v4().to_string(),
-            roles: vec!["root".to_string()],
+            roles: vec!["Root".to_string()],
         };
         let response = self.app.create_user(&self, admin.clone()).await;
         assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));

@@ -14,11 +14,11 @@ fn create_new_user_body(roles: Vec<String>) -> NewUserBody {
 }
 
 fn create_new_user_body_root() -> NewUserBody {
-    create_new_user_body(vec!["root".to_string()])
+    create_new_user_body(vec!["Root".to_string()])
 }
 
 fn create_new_user_body_admin() -> NewUserBody {
-    create_new_user_body(vec!["admin".to_string()])
+    create_new_user_body(vec!["Admin".to_string()])
 }
 
 #[sqlx::test]
@@ -33,7 +33,7 @@ async fn test_root_can_create_root_user(db: PgPool) {
     let new_root = app.test_user_from(new_root.id, new_root.username, new_root.password);
     let new_root = new_root.login().await;
     let details = new_root.get_user_details().await;
-    assert!(details.roles.contains(&"root".to_string()));
+    assert!(details.roles.contains(&"Root".to_string()));
 }
 
 #[sqlx::test]
@@ -48,7 +48,7 @@ async fn test_root_can_create_admin_user(db: PgPool) {
     let new_admin = app.test_user_from(new_admin.id, new_admin.username, new_admin.password);
     let new_admin = new_admin.login().await;
     let details = new_admin.get_user_details().await;
-    assert!(details.roles.contains(&"admin".to_string()));
+    assert!(details.roles.contains(&"Admin".to_string()));
 }
 
 #[sqlx::test]
