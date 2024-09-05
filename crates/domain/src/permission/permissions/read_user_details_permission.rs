@@ -1,5 +1,5 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserDetails;
+use crate::permission::user_details::UserDetails;
 use crate::user::user_id::UserId;
 
 pub struct ReadUserDetailsPermission {
@@ -29,7 +29,7 @@ mod tests {
     use uuid::Uuid;
     use crate::permission::permission::Permission;
     use crate::permission::permissions::read_user_details_permission::ReadUserDetailsPermission;
-    use crate::permission::user_attributes::tests::{random_user_attributes, random_user_attributes_admin, random_user_attributes_root};
+    use crate::permission::user_details::tests::{random_user_attributes, random_user_attributes_admin, random_user_attributes_root};
 
     #[test]
     fn test_read_user_details_permission_name() {

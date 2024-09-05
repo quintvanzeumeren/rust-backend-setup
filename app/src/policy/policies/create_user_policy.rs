@@ -1,12 +1,15 @@
-use std::collections::HashSet;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
+use crate::queries::transaction::save_new_user::NewUser;
 use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
-use domain::role::role::{SystemRole, UserRoles};
-use domain::user::user::User;
+use domain::permission::user_details::UserDetails;
+use domain::role::role::SystemRole;
+use domain::team::member::Member;
+use domain::team::team_id::TeamId;
+use domain::user::user::UserCredentials;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
 
@@ -14,96 +17,91 @@ pub struct CreateUserPolicy {
     state: Arc<AppState>,
 
     /// roles_of_principle refers to the entity performing an action
-    roles_of_principle: UserRoles,
+    principle: UserDetails
 }
 
 #[async_trait]
 impl Policy for CreateUserPolicy {
     async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
-        let user_roles = state.db.get_user_roles(user_in_question).await
-            .context("Failed to user roles")?;
+        let principle = state.db.get_user_details(user_in_question).await
+            .context("Failed to user details for principle")?;
 
-        Ok(Self {
-            state,
-            roles_of_principle: user_roles
-        })
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
-    type Details = UserRoles;
+    type Details = CreateUserDetails;
     type Contract = CreateUserContract;
 
-    async fn authorize(&self, roles_for_new_users: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+    async fn authorize(&self, new_user_details: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
 
-        let mut possible_roles: UserRoles = HashSet::new();
-        for role in self.roles_of_principle.iter() {
-            match role {
-                SystemRole::Root => {
-                    return Ok(CreateUserContract {
+        if let Some(role) = &new_user_details.role {
+            if let Some(principle_role) = &self.principle.system_role {
+                return match (principle_role, role) {
+                    (SystemRole::Root, _) |
+                    (SystemRole::Admin, SystemRole::Admin) => Ok(CreateUserContract {
                         state: self.state.clone(),
-                        roles_for_new_users,
-                    })
-                },
-                SystemRole::Admin => {
-                    let creatable_roles_for_admin = roles_for_new_users.iter().all(|r| match r {
-                        SystemRole::TeamManager { .. } | SystemRole::Member { .. } => true,
-                        _ => false,
-                    });
-
-                    if creatable_roles_for_admin {
-                        return Ok(CreateUserContract {
-                            state: self.state.clone(),
-                            roles_for_new_users,
-                        });
-                    }
+                        details: new_user_details,
+                    }),
+                    (_, _) => Err(PolicyRejectionError::Forbidden)
                 }
-                SystemRole::TeamManager(team_id) => {
-                    let roles: Vec<&SystemRole> = roles_for_new_users.iter().filter(|r | match r {
-                        SystemRole::TeamManager(id) => *id == *team_id,
-                        SystemRole::Member(id) => *id == *team_id,
-                        _ => false,
-                    }).collect();
-
-                    for role in roles {
-                        possible_roles.insert(role.clone());
-                    }
-                }
-                _ => continue
             }
+
+            return Err(PolicyRejectionError::Forbidden)
         }
-        
-        if possible_roles.eq(&roles_for_new_users) {
-            return Ok(CreateUserContract {
-                state: self.state.clone(),
-                roles_for_new_users,
-            });
+
+        if let Some(new_user_team) = new_user_details.team_to_part_of {
+            let principle_is_manager_of_new_user_team = self.principle.teams.iter()
+                .any(|m| m.team_id == new_user_team && m.manager);
+
+            if principle_is_manager_of_new_user_team {
+                return Ok(CreateUserContract {
+                    state: self.state.clone(),
+                    details: new_user_details,
+                })
+            }
         }
 
         Err(PolicyRejectionError::Forbidden)
     }
 }
 
+pub struct CreateUserDetails {
+    pub role: Option<SystemRole>,
+    pub team_to_part_of: Option<TeamId>
+}
+
 pub struct CreateUserContract {
     state: Arc<AppState>,
-    roles_for_new_users: UserRoles
+    details: CreateUserDetails
 }
 
 impl CreateUserContract {
     
-    pub async fn create_user(&self, new_user: NewUserDetails) -> sqlx::Result<()> {
+    pub async fn create_user(&self, new_user: UserCredentials) -> sqlx::Result<()> {
         let mut transaction = self.state.db.new_transaction().await?;
-        transaction.save_new_user(&new_user.user).await?;
-        
-        let user_id = new_user.user.id;
-        for user_role in &self.roles_for_new_users {
-            transaction.save_new_role_to_user(user_id, user_role).await?;
+
+        transaction.save_new_user(&NewUser {
+            id: new_user.id,
+            username: new_user.username,
+            password: new_user.password,
+            system_role: self.details.role,
+        }).await?;
+
+        if let Some(team_id) = self.details.team_to_part_of {
+            transaction.save_team_member(Member {
+                user_id: new_user.id,
+                team_id,
+                manager: false,
+            }).await?;
         }
         
         transaction.commit().await?;
         Ok(())
     }
-    
-}
-
-pub struct NewUserDetails {
-    pub(crate) user: User
 }

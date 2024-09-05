@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
-use sqlx::{query_file, query_file_as};
+use crate::queries::database::Database;
 use domain::role::role::SystemRole;
 use domain::user::user_id::UserId;
-use crate::queries::database::Database;
+use serde::{Deserialize, Serialize};
+use sqlx::query_file_as;
 
 impl Database {
     pub async fn get_system_role_of_user(&self, user_id: UserId) -> sqlx::Result<Option<UserSystemRole>> {
@@ -22,9 +22,3 @@ pub struct UserSystemRole {
     pub system_role: Option<SystemRole>
 }
 
-#[derive(Serialize, Deserialize, sqlx::Type, Debug)]
-#[sqlx(type_name = "system_role")]
-pub enum SystemRoleType {
-    Root,
-    Admin
-}

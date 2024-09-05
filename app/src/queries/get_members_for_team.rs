@@ -5,11 +5,11 @@ use domain::role::role::SystemRole;
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use crate::queries::database::Database;
-use crate::queries::records::user_role_record::RoleName;
+use crate::queries::records::user_role_record::SystemRoleType;
 
 pub struct TeamMemberRecord {
     user_id: Uuid,
-    role: RoleName
+    role: SystemRoleType
 }
 
 #[derive(Hash, Eq, PartialEq)]
@@ -32,10 +32,10 @@ impl Database {
             .map(|r| TeamMember {
                     user_id: r.user_id.into(),
                     role: match r.role {
-                        RoleName::Root => SystemRole::Root,
-                        RoleName::Admin => SystemRole::Admin,
-                        RoleName::TeamManager => SystemRole::TeamManager(team_id),
-                        RoleName::Member => SystemRole::Member(team_id)
+                        SystemRoleType::Root => SystemRole::Root,
+                        SystemRoleType::Admin => SystemRole::Admin,
+                        SystemRoleType::TeamManager => SystemRole::TeamManager(team_id),
+                        SystemRoleType::Member => SystemRole::Member(team_id)
                     }
                 }
             )

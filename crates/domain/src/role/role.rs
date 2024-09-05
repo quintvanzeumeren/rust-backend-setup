@@ -1,13 +1,11 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 use std::fmt::Display;
 
 pub type NameOfRole = &'static str;
 pub const ROLE_ROOT: NameOfRole = "Root";
 pub const ROLE_ADMIN: NameOfRole = "Admin";
-pub type UserRoles = HashSet<SystemRole>;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum SystemRole {
     Root,
     Admin,

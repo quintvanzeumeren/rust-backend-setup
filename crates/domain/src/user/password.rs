@@ -14,7 +14,7 @@ impl Password {
     pub fn new(password: Secret<String>, salt: &SaltString) -> password_hash::Result<Self> {
         let latest_scheme = get_latest_scheme();
         let hash = latest_scheme.hash(password, salt)?;
-        return Ok(Password {
+        Ok(Password {
             hash: Secret::new(hash.to_string())
         })
     }
@@ -32,7 +32,7 @@ impl Password {
         let scheme = get_scheme(&password_algorithm)
             .ok_or(MatchError::NoHashSchemeForPassword(password_algorithm.to_string()))?;
 
-        return match scheme.validate(&submitted_password, &password_hash) {
+        match scheme.validate(&submitted_password, &password_hash) {
             Ok(_) => match is_latest_schema(&password_hash.algorithm) {
                 true => Ok(MatchResult::Matches),
                 false => Ok(MatchResult::MatchesButSchemeOutdated),
@@ -46,6 +46,10 @@ impl Password {
 
     fn get_password_hash(&self) -> PasswordHash {
         PasswordHash::new(self.hash.expose_secret().as_str()).unwrap()
+    }
+
+    pub fn hash(&self) -> &Secret<String> {
+        &self.hash
     }
 }
 

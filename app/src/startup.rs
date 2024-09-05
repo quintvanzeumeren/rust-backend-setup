@@ -8,7 +8,7 @@ use tokio::net::TcpListener;
 use uuid::Uuid;
 use domain::role::role::{SystemRole, ROLE_ROOT};
 use domain::user::password::Password;
-use domain::user::user::User;
+use domain::user::user::UserCredentials;
 use crate::configuration::configuration::Configuration;
 use crate::queries::database::Database;
 
@@ -26,7 +26,7 @@ pub async fn create_root_user(db: &Database, config: &Configuration, salt_string
         return Ok(())
     }
 
-    let new_root = User {
+    let new_root = UserCredentials {
         id: Uuid::new_v4().into(),
         username: config.admin.username.expose_secret().to_string(),
         password: Password::new(config.admin.password.clone(), salt_string)
@@ -37,7 +37,7 @@ pub async fn create_root_user(db: &Database, config: &Configuration, salt_string
     transaction.save_new_user(&new_root).await
         .context("Failed to insert initial user")?;
 
-    transaction.save_new_role_to_user(new_root.id, &SystemRole::Root).await
+    transaction.save_user_system_role(new_root.id, &SystemRole::Root).await
         .context("Failed to add role of root to the new root user")?;
 
     transaction.commit().await.context("Failed to commit transaction")?;

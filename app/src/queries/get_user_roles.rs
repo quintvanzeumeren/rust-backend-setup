@@ -1,5 +1,5 @@
 use crate::queries::database::Database;
-use crate::queries::records::user_role_record::{RoleName, UserRoleRecord};
+use crate::queries::records::user_role_record::{SystemRoleType, UserRoleRecord};
 use domain::role::role::{SystemRole, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
@@ -36,9 +36,9 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
     let mut roles = HashSet::new();
     for record in records {
         let role = match record.role {
-            RoleName::Root => SystemRole::Root,
-            RoleName::Admin => SystemRole::Admin,
-            RoleName::TeamManager | RoleName::Member => {
+            SystemRoleType::Root => SystemRole::Root,
+            SystemRoleType::Admin => SystemRole::Admin,
+            SystemRoleType::TeamManager | SystemRoleType::Member => {
                 let team_id: TeamId = match record.team_id {
                     None => {
                         warn!("Expected a team id with role: {}", record.role);
@@ -48,8 +48,8 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
                 };
                 
                 match record.role {
-                    RoleName::TeamManager => SystemRole::TeamManager(team_id),
-                    RoleName::Member => SystemRole::Member(team_id),
+                    SystemRoleType::TeamManager => SystemRole::TeamManager(team_id),
+                    SystemRoleType::Member => SystemRole::Member(team_id),
                     _ => continue
                 }
             }
@@ -64,7 +64,7 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
 #[cfg(test)]
 mod tests {
     use crate::queries::get_user_roles::parse_into_user_roles;
-    use crate::queries::records::user_role_record::{RoleName, UserRoleRecord};
+    use crate::queries::records::user_role_record::{SystemRoleType, UserRoleRecord};
     use domain::role::role::SystemRole;
     use std::collections::HashSet;
     use uuid::Uuid;
@@ -73,7 +73,7 @@ mod tests {
         UserRoleRecord {
             user_id: Uuid::default(),
             team_id: None,
-            role: RoleName::Root,
+            role: SystemRoleType::Root,
         }
     }
 
@@ -81,7 +81,7 @@ mod tests {
         UserRoleRecord {
             user_id: Uuid::default(),
             team_id: None,
-            role: RoleName::Admin,
+            role: SystemRoleType::Admin,
         }
     }
 
@@ -89,7 +89,7 @@ mod tests {
         UserRoleRecord {
             user_id: Uuid::default(),
             team_id: Some(Uuid::new_v4()),
-            role: RoleName::TeamManager,
+            role: SystemRoleType::TeamManager,
         }
     }
 
@@ -97,16 +97,16 @@ mod tests {
         UserRoleRecord {
             user_id: Uuid::default(),
             team_id: Some(Uuid::new_v4()),
-            role: RoleName::Member,
+            role: SystemRoleType::Member,
         }
     }
 
     #[test]
     fn new_methods() {
-        assert_eq!(new_root_record().role, RoleName::Root);
-        assert_eq!(new_admin_record().role, RoleName::Admin);
-        assert_eq!(new_team_manager_record().role, RoleName::TeamManager);
-        assert_eq!(new_member_record().role, RoleName::Member);
+        assert_eq!(new_root_record().role, SystemRoleType::Root);
+        assert_eq!(new_admin_record().role, SystemRoleType::Admin);
+        assert_eq!(new_team_manager_record().role, SystemRoleType::TeamManager);
+        assert_eq!(new_member_record().role, SystemRoleType::Member);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserDetails;
+use crate::permission::user_details::UserDetails;
 use crate::team::team_id::TeamId;
 
 /// DeleteTeam is a permission that checks if whenever the user can delete an team.
@@ -29,7 +29,7 @@ impl Permission for DeleteTeam {
 mod tests {
     use crate::permission::permission::Permission;
     use crate::permission::permissions::delete_team::DeleteTeam;
-    use crate::permission::user_attributes::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
+    use crate::permission::user_details::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
     use uuid::Uuid;
 
     #[test]

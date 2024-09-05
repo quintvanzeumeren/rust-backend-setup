@@ -1,9 +1,7 @@
-use std::collections::HashSet;
-use crate::role::role::{SystemRole, UserRoles, ROLE_ADMIN, ROLE_ROOT};
-use crate::shared::slug::Slug;
+use crate::role::role::{SystemRole};
 use crate::team::membership::Membership;
-use crate::team::team_id::TeamId;
 use crate::user::user_id::UserId;
+use std::collections::HashSet;
 
 /// UserAttributes contains attributes of the User by which a Permission can determine if the user
 /// is authorized.

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use domain::user::password::Password;
-use domain::user::user::User;
+use domain::user::user::UserCredentials;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserRecord {
@@ -12,8 +12,8 @@ pub struct UserRecord {
     pub password_hash: String,
 }
 
-impl From<&User> for UserRecord {
-    fn from(user: &User) -> Self {
+impl From<&UserCredentials> for UserRecord {
+    fn from(user: &UserCredentials) -> Self {
         UserRecord {
             user_id: user.id.0,
             username: user.username.clone(),
@@ -22,11 +22,11 @@ impl From<&User> for UserRecord {
     }
 }
 
-impl TryInto<User> for UserRecord {
+impl TryInto<UserCredentials> for UserRecord {
     type Error = password_hash::Error;
 
-    fn try_into(self) -> Result<User, Self::Error> {
-        Ok(User {
+    fn try_into(self) -> Result<UserCredentials, Self::Error> {
+        Ok(UserCredentials {
             id: self.user_id.into(),
             username: self.username,
             password: Password::try_from(self.password_hash)?,
@@ -38,7 +38,7 @@ impl TryInto<User> for UserRecord {
 mod tests {
     use secrecy::ExposeSecret;
 
-    use domain::user::user::User;
+    use domain::user::user::UserCredentials;
     use test_utility::random::_common::{random_salt, random_secret};
     use test_utility::random::user::random_user;
 
@@ -64,7 +64,7 @@ mod tests {
         let user1 = random_user(random_secret(), &salt);
 
         let record = UserRecord::from(&user1);
-        let into_user: User = record.try_into().expect("Failed to transform UserRecord into User");
+        let into_user: UserCredentials = record.try_into().expect("Failed to transform UserRecord into User");
         assert_eq!(user1.id, into_user.id);
         assert_eq!(user1.username, into_user.username);
         assert_eq!(user1.password.hash_string().expose_secret().clone(), into_user.password.hash_string().expose_secret().clone());

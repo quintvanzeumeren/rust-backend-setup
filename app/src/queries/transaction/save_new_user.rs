@@ -1,33 +1,49 @@
-use sqlx::{Executor, query_file};
-use domain::user::user::User;
-use crate::queries::records::user_record::UserRecord;
+use crate::queries::records::user_role_record::SystemRoleType;
 use crate::queries::transaction::_transaction::Transaction;
+use domain::role::role::SystemRole;
+use domain::user::password::Password;
+use domain::user::user_id::UserId;
+use secrecy::ExposeSecret;
+use sqlx::{query_file, Executor};
 
 
 impl Transaction {
     pub async fn save_new_user(
         &mut self,
-        user: &User,
+        user: &NewUser,
     ) -> sqlx::Result<()> {
-        let user_record = UserRecord::from(user);
+        
+        let role = match user.system_role {
+            None => None,
+            Some(r) => Some(SystemRoleType::from(r))  
+        };
+        
         self.0.execute(query_file!(
             "src/queries/transaction/save_new_user.sql",
-            user_record.user_id,
-            user_record.username,
-            user_record.password_hash
+            user.id.0,
+            user.username,
+            user.password.hash().expose_secret(),
+            role as Option<SystemRoleType>
         )).await?;
 
         Ok(())
     }
-
 }
+
+pub struct NewUser {
+    pub id: UserId,
+    pub username: String,
+    pub password: Password,
+    pub system_role: Option<SystemRole>
+}
+
 #[cfg(test)]
 mod tests {
     use sqlx::{query_as, PgPool};
 
+    use crate::queries::database::Database;
     use test_utility::random::_common::{random_salt, random_secret};
     use test_utility::random::user::random_user;
-    use crate::queries::database::Database;
 
     use crate::queries::records::user_record::UserRecord;
 

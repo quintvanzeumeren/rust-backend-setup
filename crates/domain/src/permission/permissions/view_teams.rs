@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_attributes::UserDetails;
+use crate::permission::user_details::UserDetails;
 use crate::team::team_id::TeamId;
 
 pub struct ViewTeam {
@@ -33,7 +33,7 @@ mod tests {
     use uuid::Uuid;
     use crate::permission::permission::Permission;
     use crate::permission::permissions::view_teams::ViewTeam;
-    use crate::permission::user_attributes::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
+    use crate::permission::user_details::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
     use crate::team::team_id::TeamId;
 
     #[test]
