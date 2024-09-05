@@ -1,7 +1,7 @@
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
-use crate::queries::transaction::save_new_user::NewUser;
+use domain::user::new_user::NewUser;
 use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;

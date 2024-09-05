@@ -12,7 +12,7 @@ impl Database {
             "src/queries/get_user_memberships.sql",
             user_id.0,
         ).fetch_all(self.db()).await?;
-         
-        Ok(memberships.into())
+
+        Ok(HashSet::from_iter(memberships))
     }
 }

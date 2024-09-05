@@ -3,11 +3,9 @@ use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
 use anyhow::Context;
 use axum::async_trait;
-use domain::permission::permission::Permission;
 use domain::role::role::SystemRole;
 use domain::user::user_details::UserDetails;
 use domain::user::user_id::UserId;
-use opentelemetry::trace::FutureExt;
 use std::sync::Arc;
 
 pub struct ReadUserDetailsPolicy {
@@ -63,7 +61,7 @@ impl Policy for ReadUserDetailsPolicy {
             let principle_is_manager_of_user = self.principle
                 .get_teams_where_manager()
                 .iter()
-                .any(|t| details.teams.contains(t));
+                .any(|t| details.teams.iter().any(|m| m.team_id == *t));
             
             if principle_is_manager_of_user {
                 return Ok(ReadUserDetailsContract {

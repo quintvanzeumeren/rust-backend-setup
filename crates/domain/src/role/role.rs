@@ -37,7 +37,7 @@ impl Display for SystemRole {
 
 #[cfg(test)]
 mod tests {
-    use crate::role::role::{SystemRole, ROLE_ADMIN, ROLE_ROOT, ROLE_TEAM_MANAGER};
+    use crate::role::role::{SystemRole, ROLE_ADMIN, ROLE_ROOT};
 
     #[test]
     fn test_display() {

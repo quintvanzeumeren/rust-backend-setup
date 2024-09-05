@@ -21,7 +21,10 @@ impl Database {
         Ok(Some(UserDetails {
             id: user_id,
             teams: memberships,
-            system_role: user.system_role,
+            system_role: match user.system_role {
+                None => None,
+                Some(r) => Some(r.into())
+            },
         }))
     }
 }

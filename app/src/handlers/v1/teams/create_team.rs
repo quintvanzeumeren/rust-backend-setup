@@ -3,9 +3,6 @@ use axum::Json;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use domain::permission::permission::Permission;
-use domain::permission::permissions::create_team::CreateTeam;
-
 use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::policy::policies::create_team_policy::CreateTeamPolicy;
 use crate::policy::policy::Policy;
@@ -27,10 +24,4 @@ pub async fn create_team(user: UserWithPolicy<CreateTeamPolicy>, new_team_reques
 #[derive(Deserialize, Clone)]
 pub struct NewTeamRequestBody {
     pub team_id: Uuid
-}
-
-impl Into<()> for NewTeamRequestBody {
-    fn into(self) -> <CreateTeam as Permission>::Details {
-        ()
-    }
 }

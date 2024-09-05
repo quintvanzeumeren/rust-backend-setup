@@ -8,7 +8,6 @@ pub mod is_admin;
 pub mod get_user_credentials;
 pub mod get_user_details;
 pub mod get_user_memberships;
-pub mod get_user_roles;
 pub mod get_teams;
 pub mod get_members_by_team_id;
 pub mod exist_user_of;

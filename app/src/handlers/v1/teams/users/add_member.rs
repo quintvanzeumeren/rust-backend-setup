@@ -29,7 +29,7 @@ pub async fn add_member(user: UserWithPolicy<AddTeamMemberPolicy>, Path(params):
     params.team_id.record_in_telemetry("team_id");
     
     let add_members_contract = user.policy.authorize(params.team_id.into()).await?;
-    add_members_contract.add_member(params.user_id.into())
+    add_members_contract.add_member(params.user_id.into(), false)
         .await
         .context("Failed to add member to team")?;
     

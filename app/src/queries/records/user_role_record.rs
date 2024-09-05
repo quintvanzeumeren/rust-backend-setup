@@ -10,7 +10,7 @@ pub struct UserRoleRecord {
     pub role: SystemRoleType,
 }
 
-#[derive(Serialize, Deserialize, sqlx::Type, Debug)]
+#[derive(Serialize, Deserialize, sqlx::Type, Debug, Eq, PartialEq)]
 #[sqlx(type_name = "system_role")]
 pub enum SystemRoleType {
     Root,
@@ -22,6 +22,15 @@ impl From<SystemRole> for SystemRoleType {
         match value {
             SystemRole::Root => SystemRoleType::Root,
             SystemRole::Admin => SystemRoleType::Admin
+        }
+    }
+}
+
+impl Into<SystemRole> for SystemRoleType {
+    fn into(self) -> SystemRole {
+        match self {
+            SystemRoleType::Root => SystemRole::Root,
+            SystemRoleType::Admin => SystemRole::Admin
         }
     }
 }

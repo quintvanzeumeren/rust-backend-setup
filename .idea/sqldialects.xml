@@ -9,9 +9,7 @@
     <file url="file://$PROJECT_DIR$/app/src/queries/get_latest_token_for_session.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_members_by_team_id.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_refresh_token_by_id.sql" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/app/src/queries/get_user_roles.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_just_ended_user_session.sql" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_new_user_role.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_newly_created_user_session.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_refresh_token.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_team_member.sql" dialect="PostgreSQL" />

@@ -1,5 +1,5 @@
 use crate::queries::database::Database;
-use domain::role::role::SystemRole;
+use crate::queries::records::user_role_record::SystemRoleType;
 use domain::user::user_id::UserId;
 use serde::{Deserialize, Serialize};
 use sqlx::query_file_as;
@@ -19,6 +19,6 @@ impl Database {
 #[derive(Serialize, Deserialize)]
 pub struct UserSystemRole {
     pub user_id: UserId,
-    pub system_role: Option<SystemRole>
+    pub system_role: Option<SystemRoleType>
 }
 
