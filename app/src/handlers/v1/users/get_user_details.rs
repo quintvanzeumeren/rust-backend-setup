@@ -4,7 +4,7 @@ use axum::extract::Path;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use domain::permission::user_details::UserDetails;
+use domain::user::user_details::UserDetails;
 use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::handlers::error::{HandlerError, HandlerResponse};
 use crate::policy::policies::read_user_details_policy::ReadUserDetailsPolicy;

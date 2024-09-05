@@ -4,50 +4,48 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
-use domain::permission::permissions::create_team::CreateTeam;
+use domain::role::role::SystemRole;
 use domain::team::team::Team;
 use domain::team::team_id::TeamId;
+use domain::user::user_details::UserDetails;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
-use domain::role::role::{SystemRole, UserRoles};
 
 pub struct CreateTeamPolicy {
     state: Arc<AppState>,
-    // permission: CreateTeam
-    principle_roles: UserRoles,
-    principle_id: UserId
+    principle: UserDetails
 }
 
 #[async_trait]
 impl Policy for CreateTeamPolicy {
 
-    async fn new(state: Arc<AppState>, user_id: UserId) -> Result<Self, PolicyRejectionError> {
-        let roles = state.db.get_user_roles(user_id)
-            .await
-            .context("Failed to retrieve user details")?;
+    async fn new(state: Arc<AppState>, principle_id: UserId) -> Result<Self, PolicyRejectionError> {
+        let principle = state.db.get_user_details(principle_id).await
+            .context("Failed to user details for principle")?;
 
-        Ok(Self {
-            state,
-            principle_roles: roles,
-            principle_id: user_id
-        })
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
     type Details = ();
     type Contract = CreateTeamContract;
 
     async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-        for principle_role in &self.principle_roles {
-            match principle_role {
+        if let Some(role) = self.principle.system_role {
+            return match role {
                 SystemRole::Root | SystemRole::Admin => {
-                    return Ok(CreateTeamContract {
-                        state: self.state.clone()
+                    Ok(CreateTeamContract {
+                        state: self.state.clone(),
                     })
                 }
-                _ => continue
             }
         }
-
+        
         Err(PolicyRejectionError::Forbidden)
     }
 }

@@ -1,5 +1,5 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_details::UserDetails;
+use crate::user::user_details::UserDetails;
 use crate::team::team_id::TeamId;
 
 /// ReadTeamMembers checks if the user can read the members of an team
@@ -33,7 +33,7 @@ impl Permission for ReadTeamMembers {
 mod tests {
     use crate::permission::permission::Permission;
     use crate::permission::permissions::read_team_members::ReadTeamMembers;
-    use crate::permission::user_details::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
+    use crate::user::user_details::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
     use uuid::Uuid;
 
     #[test]

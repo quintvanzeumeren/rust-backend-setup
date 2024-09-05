@@ -1,5 +1,5 @@
 use crate::permission::permission::{Permission, PermissionName};
-use crate::permission::user_details::UserDetails;
+use crate::user::user_details::UserDetails;
 use crate::role::role_name::RoleName;
 
 pub struct CreateUser {
@@ -35,7 +35,7 @@ impl Permission for CreateUser {
 mod tests {
     use crate::permission::permission::Permission;
     use crate::permission::permissions::create_user::CreateUser;
-    use crate::permission::user_details::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
+    use crate::user::user_details::tests::{random_user_attributes_admin, random_user_attributes_root, random_user_attributes_with};
     use crate::role::role::{ROLE_ADMIN, ROLE_ROOT};
 
     #[test]

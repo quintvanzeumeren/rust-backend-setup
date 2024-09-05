@@ -4,7 +4,7 @@ use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::read_user_details_permission::ReadUserDetailsPermission;
-use domain::permission::user_details::UserDetails;
+use domain::user::user_details::UserDetails;
 use domain::role::role::{SystemRole, UserRoles};
 use domain::user::user_id::UserId;
 use crate::app_state::AppState;

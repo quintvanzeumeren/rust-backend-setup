@@ -5,11 +5,11 @@ use crate::queries::transaction::save_new_user::NewUser;
 use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
-use domain::permission::user_details::UserDetails;
+use domain::user::user_details::UserDetails;
 use domain::role::role::SystemRole;
 use domain::team::member::Member;
 use domain::team::team_id::TeamId;
-use domain::user::user::UserCredentials;
+use domain::user::user_credentials::UserCredentials;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
 

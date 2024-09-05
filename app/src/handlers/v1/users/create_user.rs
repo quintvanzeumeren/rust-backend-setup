@@ -8,7 +8,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use domain::role::role::{SystemRole};
 use domain::user::password::Password;
-use domain::user::user::UserCredentials;
+use domain::user::user_credentials::UserCredentials;
 use domain::user::user_id::UserId;
 use password_hash::SaltString;
 use secrecy::Secret;

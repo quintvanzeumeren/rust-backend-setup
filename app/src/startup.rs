@@ -8,7 +8,7 @@ use tokio::net::TcpListener;
 use uuid::Uuid;
 use domain::role::role::{SystemRole, ROLE_ROOT};
 use domain::user::password::Password;
-use domain::user::user::UserCredentials;
+use domain::user::user_credentials::UserCredentials;
 use crate::configuration::configuration::Configuration;
 use crate::queries::database::Database;
 

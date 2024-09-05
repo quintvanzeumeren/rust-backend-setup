@@ -1,4 +1,4 @@
-use domain::permission::user_details::UserDetails;
+use domain::user::user_details::UserDetails;
 use domain::role::role::{ROLE_ADMIN, ROLE_ROOT};
 use domain::shared::slug::Slug;
 use uuid::Uuid;

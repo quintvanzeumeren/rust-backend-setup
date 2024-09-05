@@ -1,4 +1,4 @@
-use domain::permission::user_details::UserDetails;
+use domain::user::user_details::UserDetails;
 use domain::user::user_id::UserId;
 use tokio::try_join;
 

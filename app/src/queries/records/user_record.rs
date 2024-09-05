@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use domain::user::password::Password;
-use domain::user::user::UserCredentials;
+use domain::user::user_credentials::UserCredentials;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct UserRecord {
@@ -38,7 +38,7 @@ impl TryInto<UserCredentials> for UserRecord {
 mod tests {
     use secrecy::ExposeSecret;
 
-    use domain::user::user::UserCredentials;
+    use domain::user::user_credentials::UserCredentials;
     use test_utility::random::_common::{random_salt, random_secret};
     use test_utility::random::user::random_user;
 
