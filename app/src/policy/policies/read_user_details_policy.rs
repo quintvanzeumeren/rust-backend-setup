@@ -97,7 +97,7 @@ impl ReadUserDetailsContract {
 
     pub async fn get_user_details(&self) -> Result<Option<UserDetails>, sqlx::Error> {
         if self.state.db.exist_user_of(self.user_id).await? {
-            return Ok(Some(self.state.db.get_user_details(self.user_id).await?))
+            return Ok(self.state.db.get_user_details(self.user_id).await?)
         }
 
         Ok(None)
