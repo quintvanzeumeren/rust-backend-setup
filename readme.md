@@ -32,12 +32,11 @@
 - [ ] ~~Implement a custom Ord/Sort for the Role enum, so that highest ranking roles are evaluated first. Currently, roles can be in any order inside of the UserRoles. This creates the issue where lower ranking roles will be used instead of the highest one. Say someone being a root, but being evaluated as a TeamManager, thereby denying functionality that should be allowed.~~
 
 ### Todo after current role refactor
-- [ ] Remove the `TeamManager` and `Member` role from Role. (Don't forget user_role type in db)
-- [ ] Add a boolean column to the `team_members` column signifying if a member is a team manager
-- [ ] refactor `Role` enum to `SystemRole` for only users are running the application.
-- [ ] Update all policies again.. 
- 
-
+- [x] Remove the `TeamManager` and `Member` role from Role. (Don't forget user_role type in db)
+- [x] Add a boolean column to the `team_members` column signifying if a member is a team manager
+- [x] refactor `Role` enum to `SystemRole` for only users are running the application.
+- [x] Update all policies again..
+- [ ] resolve failing unit tests
 
 ### Readme
 - [ ] Introduction project
