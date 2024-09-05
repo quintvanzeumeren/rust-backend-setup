@@ -11,7 +11,6 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use domain::team::member::Member;
 use domain::user::user_details::UserDetails;
-use crate::queries::get_members_by_team_id::TeamMember;
 
 pub struct GetTeamMembersPolicy {
     state: Arc<AppState>,
