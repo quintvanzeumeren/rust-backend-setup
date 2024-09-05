@@ -5,56 +5,56 @@ use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::collections::HashSet;
 use std::sync::Arc;
-
+use domain::user::user_details::UserDetails;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
 
-pub struct ViewTeamsPolicy {
+pub struct GetTeamsPolicy {
     state: Arc<AppState>,
-    principle_roles: UserRoles
+    principle: UserDetails
 }
 
 #[async_trait]
-impl Policy for ViewTeamsPolicy {
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, PolicyRejectionError> {
-        let principle_roles = state.db.get_user_roles(user_in_question)
-            .await
-            .context("Failed to retrieve user details")?;
-        
-        Ok(Self {
-            state,
-            principle_roles
-        })
+impl Policy for GetTeamsPolicy {
+    async fn new(state: Arc<AppState>, principle_id: UserId) -> Result<Self, PolicyRejectionError> {
+        let principle = state.db.get_user_details(principle_id).await
+            .context("Failed to user details for principle")?;
+
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
     type Details = ();
     type Contract = ViewTeamsContract;
 
     async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-        let mut viewable_teams = HashSet::new();
-        for principle_role in &self.principle_roles {
-            let viewable_team = match principle_role {
+
+        if let Some(role) = self.principle.system_role {
+            return match role {
                 SystemRole::Root | SystemRole::Admin => {
-                    return Ok(ViewTeamsContract {
+                    Ok(ViewTeamsContract {
                         state: self.state.clone(),
                         viewable_teams: ViewableTeams::Every
                     })
-                },
-                SystemRole::TeamManager(team_id) => *team_id,
-                SystemRole::Member(team_id) => *team_id,
-            };
-
-            viewable_teams.insert(viewable_team);
+                }
+            }
         }
 
-        if viewable_teams.is_empty() {
+        if self.principle.teams.is_empty() {
             return Err(PolicyRejectionError::Forbidden)
         }
 
         Ok(ViewTeamsContract {
             state: self.state.clone(),
-            viewable_teams: ViewableTeams::SelectedOnly(viewable_teams)
+            viewable_teams: ViewableTeams::SelectedOnly(
+                self.principle.teams.iter().map(|m| m.team_id).collect()
+            )
         })
     }
 }

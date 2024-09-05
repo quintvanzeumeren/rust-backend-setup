@@ -5,10 +5,10 @@ use uuid::Uuid;
 use domain::team::team_id::TeamId;
 use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::handlers::error::{HandlerError, HandlerResponse};
-use crate::policy::policies::view_teams_policy::ViewTeamsPolicy;
+use crate::policy::policies::get_teams_policy::GetTeamsPolicy;
 use crate::policy::policy::Policy;
 
-pub async fn get_teams(user: UserWithPolicy<ViewTeamsPolicy>) -> HandlerResponse<Json<HashSet<Uuid>>> {
+pub async fn get_teams(user: UserWithPolicy<GetTeamsPolicy>) -> HandlerResponse<Json<HashSet<Uuid>>> {
     let teams_contract = user.policy.authorize(()).await?;
     
     let teams = teams_contract.get_teams()

@@ -36,7 +36,7 @@ impl From<UserDetails> for UserDetailsResponse {
 }
 
 pub async fn get_user_details(user: UserWithPolicy<ReadUserDetailsPolicy>, Path(params): Path<UserParams>) -> HandlerResponse<Json<UserDetailsResponse>> {
-    let contract = user.policy.authorize(params.user_id.into()).await?;
+    let contract = user.policy.authorize(params.user_id).await?;
     let user_attributes = contract.get_user_details()
         .await
         .context("Failed to get user details for user")?;
