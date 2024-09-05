@@ -1,7 +1,6 @@
-use sqlx::{Executor, query_file};
-use domain::team::team_id::TeamId;
-use domain::user::user_id::UserId;
 use crate::queries::transaction::_transaction::Transaction;
+use domain::team::member::Member;
+use sqlx::{query_file, Executor};
 
 impl Transaction {
     
@@ -13,11 +12,12 @@ impl Transaction {
             new_member = %new_member_id
         )
     )]
-    pub async fn add_member_to_team(&mut self, team_id: TeamId, new_member_id: UserId) -> sqlx::Result<()> {
+    pub async fn save_team_member(&mut self, member: Member) -> sqlx::Result<()> {
         let query = query_file!(
-            "src/queries/transaction/add_member_to_team.sql",
-            team_id.0,
-            new_member_id.0,
+            "src/queries/transaction/save_team_member.sql",
+            member.user_id.0,
+            member.team_id.0,
+            member.manager,
         );
         
         self.0.execute(query).await?;
