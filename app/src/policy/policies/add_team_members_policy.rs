@@ -8,6 +8,7 @@ use domain::role::role::{SystemRole, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
+use domain::team::member::Member;
 
 pub struct AddTeamMemberPolicy {
     state: Arc<AppState>,
@@ -83,23 +84,13 @@ pub struct AddMemberContract {
 
 impl AddMemberContract {
 
-    pub async fn add_member(&self, new_member: UserId) -> Result<(), sqlx::Error> {
-        self.add_user_to_team(new_member, SystemRole::Member(self.team_to_add_too)).await?;
-
-        Ok(())
-    }
-
-    pub async fn add_team_manager(&self, new_team_manager: UserId) -> Result<(), sqlx::Error> {
-        self.add_user_to_team(new_team_manager, SystemRole::TeamManager(self.team_to_add_too)).await?;
-
-        Ok(())
-    }
-
-    async fn add_user_to_team(&self, user_id: UserId, role: SystemRole) -> Result<(), sqlx::Error> {
+    pub async fn add_member(&self, new_member_id: UserId, should_become_team_manager: bool) -> Result<(), sqlx::Error> {
         let mut transaction = self.state.db.new_transaction().await?;
-
-        transaction.save_new_role_to_user(user_id, &role).await?;
-        transaction.commit().await?;
+        transaction.save_team_member(Member {
+            user_id: new_member_id,
+            team_id: self.team_to_add_too,
+            manager: should_become_team_manager,
+        }).await?;
 
         Ok(())
     }
