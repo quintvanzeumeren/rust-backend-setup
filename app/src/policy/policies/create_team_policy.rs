@@ -45,7 +45,7 @@ impl Policy for CreateTeamPolicy {
                 }
             }
         }
-        
+
         Err(PolicyRejectionError::Forbidden)
     }
 }

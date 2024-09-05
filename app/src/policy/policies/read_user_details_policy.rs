@@ -5,7 +5,7 @@ use axum::async_trait;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::read_user_details_permission::ReadUserDetailsPermission;
 use domain::user::user_details::UserDetails;
-use domain::role::role::{SystemRole, UserRoles};
+use domain::role::role::{SystemRole};
 use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;

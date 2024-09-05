@@ -100,7 +100,7 @@ impl CreateUserContract {
                 manager: false,
             }).await?;
         }
-        
+
         transaction.commit().await?;
         Ok(())
     }

@@ -1,6 +1,6 @@
 use anyhow::Context;
 use axum::async_trait;
-use domain::role::role::{SystemRole, UserRoles};
+use domain::role::role::{SystemRole};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::collections::HashSet;
@@ -44,11 +44,11 @@ impl Policy for ViewTeamsPolicy {
                 SystemRole::TeamManager(team_id) => *team_id,
                 SystemRole::Member(team_id) => *team_id,
             };
-            
+
             viewable_teams.insert(viewable_team);
         }
-        
-        if viewable_teams.is_empty() { 
+
+        if viewable_teams.is_empty() {
             return Err(PolicyRejectionError::Forbidden)
         }
 

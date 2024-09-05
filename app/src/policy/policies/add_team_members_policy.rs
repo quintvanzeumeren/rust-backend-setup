@@ -4,16 +4,16 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 use crate::telemetry::TelemetryRecord;
 use anyhow::Context;
 use axum::async_trait;
-use domain::role::role::{SystemRole, UserRoles};
+use domain::role::role::{SystemRole};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
 use domain::team::member::Member;
+use domain::user::user_details::UserDetails;
 
 pub struct AddTeamMemberPolicy {
     state: Arc<AppState>,
-    principle_roles: UserRoles,
-    principle_id: UserId
+    principle: UserDetails
 }
 
 #[async_trait]
@@ -25,16 +25,16 @@ impl Policy for AddTeamMemberPolicy {
         fields(user_id = %user_id)
     )]
     async fn new(state: Arc<AppState>, user_id: UserId) -> Result<Self, PolicyRejectionError> {
-        let roles = state.db
-            .get_user_roles(user_id)
-            .await
-            .context("Failed to query UserDetails")?;
+        let principle = state.db.get_user_details(user_id).await
+            .context("Failed to user details for principle")?;
 
-        Ok(Self {
-            state,
-            principle_roles: roles,
-            principle_id: user_id,
-        })
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
     type Details = TeamId;
@@ -45,34 +45,32 @@ impl Policy for AddTeamMemberPolicy {
         skip_all,
         fields(
             principle_id = tracing::field::Empty,
-            user_to_add = tracing::field::Empty,
-            team_to_add_too = tracing::field::Empty,
+            team_to_add_too = %team_to_add_to,
         )
     )]
     async fn authorize(&self, team_to_add_to: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-        self.principle_id.record_in_telemetry("principle_id");
-        team_to_add_to.record_in_telemetry("team_to_add_to");
-
-        for principle_role in self.principle_roles.iter() {
-            match principle_role {
-                SystemRole::Root | SystemRole::Admin => {
-                    return Ok(AddMemberContract {
-                        state: self.state.clone(),
-                        team_to_add_too: team_to_add_to,
-                    })
-                },
-                SystemRole::TeamManager(team_id) => {
-                    if *team_id == team_to_add_to {
-                        return Ok(AddMemberContract {
-                            state: self.state.clone(), 
-                            team_to_add_too: team_to_add_to,
-                        })
-                    }
-                },
-                _ => continue
+        self.principle.id.record_in_telemetry("principle_id");
+        
+        if let Some(role) = self.principle.system_role {
+            return match role {
+                SystemRole::Root | SystemRole::Admin => Ok(AddMemberContract {
+                    state: self.state.clone(),
+                    team_to_add_too: team_to_add_to,
+                })
             }
         }
-
+        
+        let can_add_user_to_team = self.principle.teams.iter()
+            .filter(|t| t.team_id == team_to_add_to)
+            .all(|t| t.manager);
+        
+        if can_add_user_to_team {
+            return Ok(AddMemberContract {
+                state: self.state.clone(),
+                team_to_add_too: team_to_add_to,
+            })
+        }
+        
         Err(PolicyRejectionError::Forbidden)
     }
 }

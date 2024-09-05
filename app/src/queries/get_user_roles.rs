@@ -1,6 +1,6 @@
 use crate::queries::database::Database;
 use crate::queries::records::user_role_record::{SystemRoleType, UserRoleRecord};
-use domain::role::role::{SystemRole, UserRoles};
+use domain::role::role::{SystemRole};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use sqlx::query_as;
@@ -46,7 +46,7 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
                     },
                     Some(uuid) => uuid.into()
                 };
-                
+
                 match record.role {
                     SystemRoleType::TeamManager => SystemRole::TeamManager(team_id),
                     SystemRoleType::Member => SystemRole::Member(team_id),
