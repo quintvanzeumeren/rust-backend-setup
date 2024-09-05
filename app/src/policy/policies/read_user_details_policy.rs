@@ -1,86 +1,75 @@
-use std::collections::HashSet;
-use std::sync::Arc;
-use anyhow::Context;
-use axum::async_trait;
-use domain::permission::permission::Permission;
-use domain::permission::permissions::read_user_details_permission::ReadUserDetailsPermission;
-use domain::user::user_details::UserDetails;
-use domain::role::role::{SystemRole};
-use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
+use anyhow::Context;
+use axum::async_trait;
+use domain::permission::permission::Permission;
+use domain::role::role::SystemRole;
+use domain::user::user_details::UserDetails;
+use domain::user::user_id::UserId;
+use opentelemetry::trace::FutureExt;
+use std::sync::Arc;
 
 pub struct ReadUserDetailsPolicy {
     state: Arc<AppState>,
-    principle_roles: UserRoles,
-    principle_id: UserId
+    principle: UserDetails
 }
 
 #[async_trait]
 impl Policy for ReadUserDetailsPolicy {
 
     async fn new(state: Arc<AppState>, principle_id: UserId) -> Result<Self, PolicyRejectionError> {
-        let principle_roles = state.db.get_user_roles(principle_id)
-            .await
-            .context("Failed to retrieve user details")?;
-        
-        Ok(Self {
-            state,
-            principle_roles,
-            principle_id
-        })
+        let principle = state.db.get_user_details(principle_id).await
+            .context("Failed to user details for principle")?;
+
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
     type Details = UserId;
     type Contract = ReadUserDetailsContract;
 
     async fn authorize(&self, user_id: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-
-        if self.principle_id == user_id {
+        
+        if self.principle.id == user_id {
             return Ok(ReadUserDetailsContract {
                 state: self.state.clone(),
                 user_id,
             })
         }
-
-        let mut roles_of_user: Option<UserRoles> = None;
-        for principle_role in &self.principle_roles {
-            match principle_role {
-                SystemRole::Root | SystemRole::Admin => {
-                    return Ok(ReadUserDetailsContract {
+        
+        if let Some(role) = self.principle.system_role {
+            return match role {
+                SystemRole::Root |
+                SystemRole::Admin => {
+                    Ok(ReadUserDetailsContract {
                         state: self.state.clone(),
                         user_id,
-                    })
+                    })          
                 }
-                SystemRole::TeamManager(team_id) => {
-
-                    if roles_of_user.is_none() {
-                        roles_of_user = Some(
-                            self.state.db.get_user_roles(user_id)
-                                .await
-                                .context("Failed to get user roles")?
-                        );
-                    }
-
-                    if let Some(roles) = &roles_of_user {
-                        for role in roles {
-                            let is_of_same_team = match role {
-                                SystemRole::TeamManager(t_id) => t_id == team_id,
-                                SystemRole::Member(t_id) => t_id == team_id,
-                                _ => continue
-                            };
-
-                            if is_of_same_team {
-                                return Ok(ReadUserDetailsContract {
-                                    state: self.state.clone(),
-                                    user_id,
-                                })
-                            }
-                        }
-                    }
-                }
-                _ => continue
+            }
+        }
+        
+        let user_details = self.state.db.get_user_details(user_id)
+            .await
+            .with_context(|| format!("Failed to get UserDetails for user: {}", user_id))?;
+        
+        if let Some(details) = user_details { 
+            let principle_is_manager_of_user = self.principle
+                .get_teams_where_manager()
+                .iter()
+                .any(|t| details.teams.contains(t));
+            
+            if principle_is_manager_of_user {
+                return Ok(ReadUserDetailsContract {
+                    state: self.state.clone(),
+                    user_id,
+                })
             }
         }
 

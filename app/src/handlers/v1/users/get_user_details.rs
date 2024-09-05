@@ -4,7 +4,10 @@ use axum::extract::Path;
 use axum::Json;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use domain::role::role::SystemRole;
+use domain::team::membership::Membership;
 use domain::user::user_details::UserDetails;
+use domain::user::user_id::UserId;
 use crate::extractors::user::user_with_policy::UserWithPolicy;
 use crate::handlers::error::{HandlerError, HandlerResponse};
 use crate::policy::policies::read_user_details_policy::ReadUserDetailsPolicy;
@@ -12,22 +15,22 @@ use crate::policy::policy::Policy;
 
 #[derive(Deserialize)]
 pub struct UserParams {
-    user_id: Uuid
+    user_id: UserId
 }
 
 #[derive(Serialize)]
 pub struct UserDetailsResponse {
-    id: Uuid,
-    teams: HashSet<Uuid>,
-    roles: HashSet<String>
+    id: UserId,
+    teams: HashSet<Membership>,
+    system_role: Option<SystemRole>
 }
 
 impl From<UserDetails> for UserDetailsResponse {
-    fn from(value: UserDetails) -> Self {
+    fn from(user: UserDetails) -> Self {
         Self {
-            id: value.id.0,
-            teams: value.teams.iter().map(|t| t.0).collect(),
-            roles: value.roles.iter().map(|t| t.0.clone()).collect(),
+            id: user.id,
+            teams: user.teams,
+            system_role: user.system_role,
         }
     }
 }
