@@ -10,6 +10,6 @@ pub mod get_user_details;
 pub mod get_user_memberships;
 pub mod get_user_roles;
 pub mod get_teams;
-pub mod get_members_for_team;
+pub mod get_members_by_team_id;
 pub mod exist_user_of;
 mod get_system_role_of_user;

@@ -9,57 +9,52 @@ use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::collections::HashSet;
 use std::sync::Arc;
-use crate::queries::get_members_for_team::TeamMember;
+use domain::team::member::Member;
+use domain::user::user_details::UserDetails;
+use crate::queries::get_members_by_team_id::TeamMember;
 
 pub struct GetTeamMembersPolicy {
     state: Arc<AppState>,
-    principle_roles: UserRoles
+    principle: UserDetails
 }
 
 #[async_trait]
 impl Policy for GetTeamMembersPolicy {
     async fn new(state: Arc<AppState>, principle_id: UserId) -> Result<Self, PolicyRejectionError> {
-        let principle_roles = state.db.get_user_roles(principle_id)
-            .await
-            .context("Failed to retrieve user details")?;
-        
-        Ok(Self {
-            state,
-            principle_roles
-        })
+        let principle = state.db.get_user_details(principle_id).await
+            .context("Failed to user details for principle")?;
+
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
     type Details = TeamId;
     type Contract = GetTeamMembersContract;
 
     async fn authorize(&self, team_id: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-        for principle_role in &self.principle_roles {
-            match principle_role {
+        if let Some(role) = self.principle.system_role {
+            return match role {
                 SystemRole::Root | SystemRole::Admin => {
-                    return Ok(GetTeamMembersContract {
+                    Ok(GetTeamMembersContract {
                         team_id,
                         state: self.state.clone(),
                     })
                 }
-                SystemRole::TeamManager(tm_id) => {
-                    if team_id == *tm_id {
-                        return Ok(GetTeamMembersContract {
-                            team_id,
-                            state: self.state.clone(),
-                        })
-                    }
-                }
-                SystemRole::Member(tm_id) => {
-                    if team_id == *tm_id {
-                        return Ok(GetTeamMembersContract {
-                            team_id,
-                            state: self.state.clone(),
-                        })
-                    }
-                }
             }
         }
-
+        
+        if self.principle.teams.iter().any(|t| t.team_id == team_id) { 
+            return Ok(GetTeamMembersContract {
+                team_id,
+                state: self.state.clone(),
+            })
+        }
+        
         Err(PolicyRejectionError::Forbidden)
     }
 }
@@ -71,7 +66,7 @@ pub struct GetTeamMembersContract {
 
 impl GetTeamMembersContract {
     
-    pub async fn fetch_team_members(&self) -> Result<HashSet<TeamMember>, sqlx::Error> {
-        Ok(self.state.db.get_team_members(self.team_id).await?)
+    pub async fn fetch_team_members(&self) -> Result<HashSet<Member>, sqlx::Error> {
+        Ok(self.state.db.get_members_by_team_id(self.team_id).await?)
     }
 }

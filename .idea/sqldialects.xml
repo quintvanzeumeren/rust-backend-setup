@@ -7,7 +7,7 @@
     <file url="file://$PROJECT_DIR$/app/migrations/20240723104657_add_root_role.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/migrations/20240902140844_delete_roles_table_and_create_role_enum.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_latest_token_for_session.sql" dialect="PostgreSQL" />
-    <file url="file://$PROJECT_DIR$/app/src/queries/get_members_for_team.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/app/src/queries/get_members_by_team_id.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_refresh_token_by_id.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/get_user_roles.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/app/src/queries/transaction/save_just_ended_user_session.sql" dialect="PostgreSQL" />
