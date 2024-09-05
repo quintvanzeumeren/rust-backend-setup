@@ -5,7 +5,7 @@ use axum::async_trait;
 use domain::permission::permission::Permission;
 use domain::permission::permissions::read_user_details_permission::ReadUserDetailsPermission;
 use domain::permission::user_attributes::UserDetails;
-use domain::role::role::{Role, UserRoles};
+use domain::role::role::{SystemRole, UserRoles};
 use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
@@ -47,13 +47,13 @@ impl Policy for ReadUserDetailsPolicy {
         let mut roles_of_user: Option<UserRoles> = None;
         for principle_role in &self.principle_roles {
             match principle_role {
-                Role::Root | Role::Admin => {
+                SystemRole::Root | SystemRole::Admin => {
                     return Ok(ReadUserDetailsContract {
                         state: self.state.clone(),
                         user_id,
                     })
                 }
-                Role::TeamManager(team_id) => {
+                SystemRole::TeamManager(team_id) => {
 
                     if roles_of_user.is_none() {
                         roles_of_user = Some(
@@ -66,8 +66,8 @@ impl Policy for ReadUserDetailsPolicy {
                     if let Some(roles) = &roles_of_user {
                         for role in roles {
                             let is_of_same_team = match role {
-                                Role::TeamManager(t_id) => t_id == team_id,
-                                Role::Member(t_id) => t_id == team_id,
+                                SystemRole::TeamManager(t_id) => t_id == team_id,
+                                SystemRole::Member(t_id) => t_id == team_id,
                                 _ => continue
                             };
 

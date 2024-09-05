@@ -4,7 +4,7 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
-use domain::role::role::{Role, UserRoles};
+use domain::role::role::{SystemRole, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::collections::HashSet;
@@ -35,13 +35,13 @@ impl Policy for GetTeamMembersPolicy {
     async fn authorize(&self, team_id: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
         for principle_role in &self.principle_roles {
             match principle_role {
-                Role::Root | Role::Admin => {
+                SystemRole::Root | SystemRole::Admin => {
                     return Ok(GetTeamMembersContract {
                         team_id,
                         state: self.state.clone(),
                     })
                 }
-                Role::TeamManager(tm_id) => {
+                SystemRole::TeamManager(tm_id) => {
                     if team_id == *tm_id {
                         return Ok(GetTeamMembersContract {
                             team_id,
@@ -49,7 +49,7 @@ impl Policy for GetTeamMembersPolicy {
                         })
                     }
                 }
-                Role::Member(tm_id) => {
+                SystemRole::Member(tm_id) => {
                     if team_id == *tm_id {
                         return Ok(GetTeamMembersContract {
                             team_id,

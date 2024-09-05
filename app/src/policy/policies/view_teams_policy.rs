@@ -1,6 +1,6 @@
 use anyhow::Context;
 use axum::async_trait;
-use domain::role::role::{Role, UserRoles};
+use domain::role::role::{SystemRole, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::collections::HashSet;
@@ -35,14 +35,14 @@ impl Policy for ViewTeamsPolicy {
         let mut viewable_teams = HashSet::new();
         for principle_role in &self.principle_roles {
             let viewable_team = match principle_role {
-                Role::Root | Role::Admin => {
+                SystemRole::Root | SystemRole::Admin => {
                     return Ok(ViewTeamsContract {
                         state: self.state.clone(),
                         viewable_teams: ViewableTeams::Every
                     })
                 },
-                Role::TeamManager(team_id) => *team_id,
-                Role::Member(team_id) => *team_id,
+                SystemRole::TeamManager(team_id) => *team_id,
+                SystemRole::Member(team_id) => *team_id,
             };
             
             viewable_teams.insert(viewable_team);

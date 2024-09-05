@@ -1,19 +1,19 @@
 use crate::queries::records::user_role_record::RoleName;
 use crate::queries::transaction::_transaction::Transaction;
-use domain::role::role::Role;
+use domain::role::role::SystemRole;
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use sqlx::{query_file, Executor};
 
 impl Transaction {
 
-    pub async fn save_new_role_to_user(&mut self, user_id: UserId, role: &Role) -> sqlx::Result<()> {
+    pub async fn save_new_role_to_user(&mut self, user_id: UserId, role: &SystemRole) -> sqlx::Result<()> {
         
         match role {
-            Role::Root => self.save_root_or_admin_role(user_id, RoleName::Root).await?,
-            Role::Admin => self.save_root_or_admin_role(user_id, RoleName::Admin).await?,
-            Role::TeamManager(team_id) => self.save_role_with_team_id(user_id, RoleName::TeamManager, *team_id).await?,
-            Role::Member(team_id) => self.save_role_with_team_id(user_id, RoleName::Member, *team_id).await?
+            SystemRole::Root => self.save_root_or_admin_role(user_id, RoleName::Root).await?,
+            SystemRole::Admin => self.save_root_or_admin_role(user_id, RoleName::Admin).await?,
+            SystemRole::TeamManager(team_id) => self.save_role_with_team_id(user_id, RoleName::TeamManager, *team_id).await?,
+            SystemRole::Member(team_id) => self.save_role_with_team_id(user_id, RoleName::Member, *team_id).await?
         }
 
         Ok(())

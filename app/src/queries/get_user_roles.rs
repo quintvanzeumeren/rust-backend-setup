@@ -1,6 +1,6 @@
 use crate::queries::database::Database;
 use crate::queries::records::user_role_record::{RoleName, UserRoleRecord};
-use domain::role::role::{Role, UserRoles};
+use domain::role::role::{SystemRole, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use sqlx::query_as;
@@ -36,8 +36,8 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
     let mut roles = HashSet::new();
     for record in records {
         let role = match record.role {
-            RoleName::Root => Role::Root,
-            RoleName::Admin => Role::Admin,
+            RoleName::Root => SystemRole::Root,
+            RoleName::Admin => SystemRole::Admin,
             RoleName::TeamManager | RoleName::Member => {
                 let team_id: TeamId = match record.team_id {
                     None => {
@@ -48,8 +48,8 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
                 };
                 
                 match record.role {
-                    RoleName::TeamManager => Role::TeamManager(team_id),
-                    RoleName::Member => Role::Member(team_id),
+                    RoleName::TeamManager => SystemRole::TeamManager(team_id),
+                    RoleName::Member => SystemRole::Member(team_id),
                     _ => continue
                 }
             }
@@ -65,7 +65,7 @@ fn parse_into_user_roles(records: Vec<UserRoleRecord>) -> UserRoles {
 mod tests {
     use crate::queries::get_user_roles::parse_into_user_roles;
     use crate::queries::records::user_role_record::{RoleName, UserRoleRecord};
-    use domain::role::role::Role;
+    use domain::role::role::SystemRole;
     use std::collections::HashSet;
     use uuid::Uuid;
 
@@ -123,14 +123,14 @@ mod tests {
         let member3 = new_member_record();
 
         let mut expected = HashSet::new();
-        expected.insert(Role::Root);
-        expected.insert(Role::Admin);
-        expected.insert(Role::TeamManager(team_manager.team_id.expect("Expected team id").into()));
-        expected.insert(Role::TeamManager(team_manager2.team_id.expect("Expected team id").into()));
-        expected.insert(Role::TeamManager(team_manager3.team_id.expect("Expected team id").into()));
-        expected.insert(Role::Member(member.team_id.expect("Expected team id").into()));
-        expected.insert(Role::Member(member2.team_id.expect("Expected team id").into()));
-        expected.insert(Role::Member(member3.team_id.expect("Expected team id").into()));
+        expected.insert(SystemRole::Root);
+        expected.insert(SystemRole::Admin);
+        expected.insert(SystemRole::TeamManager(team_manager.team_id.expect("Expected team id").into()));
+        expected.insert(SystemRole::TeamManager(team_manager2.team_id.expect("Expected team id").into()));
+        expected.insert(SystemRole::TeamManager(team_manager3.team_id.expect("Expected team id").into()));
+        expected.insert(SystemRole::Member(member.team_id.expect("Expected team id").into()));
+        expected.insert(SystemRole::Member(member2.team_id.expect("Expected team id").into()));
+        expected.insert(SystemRole::Member(member3.team_id.expect("Expected team id").into()));
 
         let roles = vec![
             root,

@@ -5,7 +5,7 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 use anyhow::Context;
 use axum::async_trait;
 use domain::permission::permission::Permission;
-use domain::role::role::{Role, UserRoles};
+use domain::role::role::{SystemRole, UserRoles};
 use domain::user::user::User;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
@@ -37,15 +37,15 @@ impl Policy for CreateUserPolicy {
         let mut possible_roles: UserRoles = HashSet::new();
         for role in self.roles_of_principle.iter() {
             match role {
-                Role::Root => {
+                SystemRole::Root => {
                     return Ok(CreateUserContract {
                         state: self.state.clone(),
                         roles_for_new_users,
                     })
                 },
-                Role::Admin => {
+                SystemRole::Admin => {
                     let creatable_roles_for_admin = roles_for_new_users.iter().all(|r| match r {
-                        Role::TeamManager { .. } | Role::Member { .. } => true,
+                        SystemRole::TeamManager { .. } | SystemRole::Member { .. } => true,
                         _ => false,
                     });
 
@@ -56,10 +56,10 @@ impl Policy for CreateUserPolicy {
                         });
                     }
                 }
-                Role::TeamManager(team_id) => {
-                    let roles: Vec<&Role> = roles_for_new_users.iter().filter(|r | match r {
-                        Role::TeamManager(id) => *id == *team_id,
-                        Role::Member(id) => *id == *team_id,
+                SystemRole::TeamManager(team_id) => {
+                    let roles: Vec<&SystemRole> = roles_for_new_users.iter().filter(|r | match r {
+                        SystemRole::TeamManager(id) => *id == *team_id,
+                        SystemRole::Member(id) => *id == *team_id,
                         _ => false,
                     }).collect();
 

@@ -9,7 +9,7 @@ use domain::team::team::Team;
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
-use domain::role::role::{Role, UserRoles};
+use domain::role::role::{SystemRole, UserRoles};
 
 pub struct CreateTeamPolicy {
     state: Arc<AppState>,
@@ -39,7 +39,7 @@ impl Policy for CreateTeamPolicy {
     async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
         for principle_role in &self.principle_roles {
             match principle_role {
-                Role::Root | Role::Admin => {
+                SystemRole::Root | SystemRole::Admin => {
                     return Ok(CreateTeamContract {
                         state: self.state.clone()
                     })

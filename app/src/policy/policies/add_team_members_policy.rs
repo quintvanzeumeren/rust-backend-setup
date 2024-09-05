@@ -4,7 +4,7 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 use crate::telemetry::TelemetryRecord;
 use anyhow::Context;
 use axum::async_trait;
-use domain::role::role::{Role, UserRoles};
+use domain::role::role::{SystemRole, UserRoles};
 use domain::team::team_id::TeamId;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
@@ -54,13 +54,13 @@ impl Policy for AddTeamMemberPolicy {
 
         for principle_role in self.principle_roles.iter() {
             match principle_role {
-                Role::Root | Role::Admin => {
+                SystemRole::Root | SystemRole::Admin => {
                     return Ok(AddMemberContract {
                         state: self.state.clone(),
                         team_to_add_too: team_to_add_to,
                     })
                 },
-                Role::TeamManager(team_id) => {
+                SystemRole::TeamManager(team_id) => {
                     if *team_id == team_to_add_to {
                         return Ok(AddMemberContract {
                             state: self.state.clone(), 
@@ -84,18 +84,18 @@ pub struct AddMemberContract {
 impl AddMemberContract {
 
     pub async fn add_member(&self, new_member: UserId) -> Result<(), sqlx::Error> {
-        self.add_user_to_team(new_member, Role::Member(self.team_to_add_too)).await?;
+        self.add_user_to_team(new_member, SystemRole::Member(self.team_to_add_too)).await?;
 
         Ok(())
     }
 
     pub async fn add_team_manager(&self, new_team_manager: UserId) -> Result<(), sqlx::Error> {
-        self.add_user_to_team(new_team_manager, Role::TeamManager(self.team_to_add_too)).await?;
+        self.add_user_to_team(new_team_manager, SystemRole::TeamManager(self.team_to_add_too)).await?;
 
         Ok(())
     }
 
-    async fn add_user_to_team(&self, user_id: UserId, role: Role) -> Result<(), sqlx::Error> {
+    async fn add_user_to_team(&self, user_id: UserId, role: SystemRole) -> Result<(), sqlx::Error> {
         let mut transaction = self.state.db.new_transaction().await?;
 
         transaction.save_new_role_to_user(user_id, &role).await?;
