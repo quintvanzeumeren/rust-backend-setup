@@ -4,7 +4,7 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 use domain::user::new_user::NewUser;
 use anyhow::Context;
 use axum::async_trait;
-use domain::permission::permission::Permission;
+
 use domain::user::user_details::UserDetails;
 use domain::role::role::SystemRole;
 use domain::team::member::Member;

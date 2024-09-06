@@ -46,6 +46,7 @@ mod tests {
         transaction.save_new_user(&user)
             .await
             .expect("Failed to save user");
+
         transaction
             .commit()
             .await
@@ -54,7 +55,7 @@ mod tests {
         let user_record = query_as!(
             UserRecord,
             r#"
-                SELECT user_id, username, password_hash, system_role AS "system_role!: SystemRoleType" FROM users
+                SELECT user_id, username, password_hash, system_role AS "system_role!: Option<SystemRoleType>" FROM users
                 WHERE user_id = $1
             "#,
             user.id.0

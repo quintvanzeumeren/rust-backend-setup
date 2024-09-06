@@ -3,7 +3,6 @@ use crate::policy::policy::Policy;
 use crate::policy::policy_authorization_error::PolicyRejectionError;
 use anyhow::Context;
 use axum::async_trait;
-use domain::permission::permission::Permission;
 use domain::role::role::SystemRole;
 use domain::team::team::Team;
 use domain::team::team_id::TeamId;
