@@ -89,6 +89,8 @@ impl AddMemberContract {
             team_id: self.team_to_add_too,
             manager: should_become_team_manager,
         }).await?;
+        
+        transaction.commit().await?;
 
         Ok(())
     }

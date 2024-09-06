@@ -264,5 +264,5 @@ pub struct NewUserBody {
     pub id: Uuid,
     pub username: String,
     pub password: String,
-    pub roles: Vec<String>
+    pub role: Option<&'static str>
 }
