@@ -39,9 +39,9 @@ impl Policy for CreateUserPolicy {
     type Contract = CreateUserContract;
 
     async fn authorize(&self, new_user_details: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
-
-        if let Some(role) = &new_user_details.role {
-            if let Some(principle_role) = &self.principle.system_role {
+        
+        if let Some(principle_role) = &self.principle.system_role {
+            if let Some(role) = &new_user_details.role {
                 return match (principle_role, role) {
                     (SystemRole::Root, _) |
                     (SystemRole::Admin, SystemRole::Admin) => Ok(CreateUserContract {
@@ -51,8 +51,14 @@ impl Policy for CreateUserPolicy {
                     (_, _) => Err(PolicyRejectionError::Forbidden)
                 }
             }
-
-            return Err(PolicyRejectionError::Forbidden)
+            
+            return match principle_role {
+                SystemRole::Root | SystemRole::Admin => Ok(CreateUserContract {
+                    state: self.state.clone(),
+                    details: new_user_details,
+                }),
+                _ => Err(PolicyRejectionError::Forbidden)
+            }
         }
 
         if let Some(new_user_team) = new_user_details.team_to_part_of {
