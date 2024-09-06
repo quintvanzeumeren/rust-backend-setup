@@ -81,17 +81,19 @@ async fn test_admin_cannot_create_root_user(db: PgPool) {
 }
 
 #[sqlx::test]
-async fn test_admin_cannot_create_admin_user(db: PgPool) {
+async fn test_admin_can_create_admin_user(db: PgPool) {
     let app = spawn_app(db).await;
     let root = app.get_root_user().await;
     let admin = root.create_admin().await;
 
     let new_admin = create_new_user_body_admin();
     let response = app.create_user(&admin, new_admin.clone()).await;
-    assert_status_eq(&response, StatusCode::FORBIDDEN, None);
-    
-    let response = app.get_user_details(&root, new_admin.id).await;
-    assert_status_eq(&response, StatusCode::NOT_FOUND, Some("Expected to receive 404 when retrieving admin that doesn't exist".to_string()));
+    assert_status_eq(&response, StatusCode::CREATED, None);
+
+    let user = app.test_user_from(new_admin.id, new_admin.username, new_admin.password);
+    let user = user.login().await;
+    let details = user.get_user_details().await;
+    assert_eq!(details.system_role, Some("Admin".to_string()));
 }
 
 #[sqlx::test]

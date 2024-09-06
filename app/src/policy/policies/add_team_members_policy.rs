@@ -4,12 +4,12 @@ use crate::policy::policy_authorization_error::PolicyRejectionError;
 use crate::telemetry::TelemetryRecord;
 use anyhow::Context;
 use axum::async_trait;
-use domain::role::role::{SystemRole};
+use domain::role::role::SystemRole;
+use domain::team::member::Member;
 use domain::team::team_id::TeamId;
+use domain::user::user_details::UserDetails;
 use domain::user::user_id::UserId;
 use std::sync::Arc;
-use domain::team::member::Member;
-use domain::user::user_details::UserDetails;
 
 pub struct AddTeamMemberPolicy {
     state: Arc<AppState>,
@@ -60,18 +60,19 @@ impl Policy for AddTeamMemberPolicy {
             }
         }
         
-        let can_add_user_to_team = self.principle.teams.iter()
-            .filter(|t| t.team_id == team_to_add_to)
-            .all(|t| t.manager);
-        
-        if can_add_user_to_team {
-            return Ok(AddMemberContract {
-                state: self.state.clone(),
-                team_to_add_too: team_to_add_to,
-            })
+        match self.principle.teams.iter().find(|t| t.team_id == team_to_add_to) {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(membership) => {
+                if membership.manager {
+                    return Ok(AddMemberContract {
+                        state: self.state.clone(),
+                        team_to_add_too: team_to_add_to,
+                    })
+                }
+                
+                Err(PolicyRejectionError::Forbidden)
+            }
         }
-        
-        Err(PolicyRejectionError::Forbidden)
     }
 }
 

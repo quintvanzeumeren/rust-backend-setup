@@ -51,22 +51,22 @@ async fn test_admin_can_add_himself_to_a_team(db: PgPool) {
 }
 
 #[sqlx::test]
-async fn test_admin_cannot_add_another_admin(db: PgPool)  {
+async fn test_admin_can_add_user_with_system_role_admin_to_a_team(db: PgPool)  {
     let app = spawn_app(db).await;
     let root = app.get_root_user().await;
     let admin = root.create_admin().await;
     let admin_to_add = root.create_admin().await;
 
-    test_add_to_team(&app, &admin, admin_to_add.user_id, false).await;
+    test_add_to_team(&app, &admin, admin_to_add.user_id, true).await;
 }
 
 #[sqlx::test]
-async fn test_admin_cannot_root_user(db: PgPool)  {
+async fn test_admin_can_add_user_with_system_role_root_to_a_team(db: PgPool)  {
     let app = spawn_app(db).await;
     let root = app.get_root_user().await;
     let admin = root.create_admin().await;
 
-    test_add_to_team(&app, &admin, root.user_id, false).await;
+    test_add_to_team(&app, &admin, root.user_id, true).await;
 }
 
 #[sqlx::test]
