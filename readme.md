@@ -8,9 +8,9 @@
 - [x] Implement unit test for the implementations of the Permission trait
 - [x] Add admin, who can do everything as root, except for managing admins, or root.
 - [x] Add handler to create user (root can create admins only, admin can create normal users only)
-- [ ] Add handler to delete user
-  - [ ] root can delete anyone, except himself
-  - [ ] admin can delete normal users only
+- [ ] ~~Add handler to delete user~~
+  - [ ] ~~root can delete anyone, except himself~~
+  - [ ] ~~admin can delete normal users only~~
 - [x] Refactor add_member permissions: 
   - [x] root can add anyone, 
   - [x] admin can only add himself or other non admin users
@@ -20,7 +20,7 @@
   - [ ] Prior to returning any error responses to the client, we should log/trace the error to OpenTelemetry
 
 ### Simplify Permission, Policy, and Contract structs 
-- [ ] Remove to `Permission` trait by refactoring the permissions logic into each corresponding `Policy` trait.
+- [x] Remove to `Permission` trait by refactoring the permissions logic into each corresponding `Policy` trait.
 - [x] Refactor `Policy` trait so that the `authorize` method is async. So that it can query any information it needs to determine if it can authorize the action
 
 ### TeamManager Role
@@ -36,7 +36,7 @@
 - [x] Add a boolean column to the `team_members` column signifying if a member is a team manager
 - [x] refactor `Role` enum to `SystemRole` for only users are running the application.
 - [x] Update all policies again..
-- [ ] resolve failing unit tests
+- [x] resolve failing unit tests
 
 ### Readme
 - [ ] Introduction project
