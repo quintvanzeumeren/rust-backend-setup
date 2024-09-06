@@ -33,7 +33,7 @@ mod tests {
     use sqlx::{query_as, PgPool};
 
     use test_utility::random::_common::{random_salt, random_secret};
-    use test_utility::random::user::random_user;
+    use test_utility::random::user::random_new_user;
     use test_utility::random::user_session::random_newly_created_user_session;
     use crate::queries::database::Database;
 
@@ -45,7 +45,7 @@ mod tests {
         let database = Database(db);
         let mut transaction = database.new_transaction().await.expect("Failed to create transaction");
         let salt = random_salt();
-        let user = random_user(random_secret(), &salt);
+        let user = random_new_user(random_secret(), &salt);
         transaction.save_new_user(&user).await
             .expect("Failed to save user");
 

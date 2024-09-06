@@ -40,7 +40,7 @@ mod tests {
 
     use test_utility::random::_common::{random_salt, random_secret};
     use test_utility::random::refresh_token::random_refresh_token_from;
-    use test_utility::random::user::random_user;
+    use test_utility::random::user::random_new_user;
     use test_utility::random::user_session::random_newly_created_user_session;
 
     use crate::queries::database::Database;
@@ -53,7 +53,7 @@ mod tests {
 
         // create and save a user
         let salt = random_salt();
-        let user = random_user(random_secret(), &salt);
+        let user = random_new_user(random_secret(), &salt);
         transaction.save_new_user(&user)
             .await
             .expect("Failed to create user");

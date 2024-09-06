@@ -1,45 +1,77 @@
-use std::sync::Arc;
-use axum::async_trait;
-use domain::permission::permission::Permission;
-use domain::permission::permissions::read_user_details_permission::ReadUserDetailsPermission;
-use domain::permission::user_attributes::UserAttributes;
-use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
-use crate::policy::policy_authorization_error::PolicyAuthorizationError;
+use crate::policy::policy_authorization_error::PolicyRejectionError;
+use anyhow::Context;
+use axum::async_trait;
+use domain::role::role::SystemRole;
+use domain::user::user_details::UserDetails;
+use domain::user::user_id::UserId;
+use std::sync::Arc;
 
 pub struct ReadUserDetailsPolicy {
     state: Arc<AppState>,
-    permission: ReadUserDetailsPermission
+    principle: UserDetails
 }
 
 #[async_trait]
 impl Policy for ReadUserDetailsPolicy {
-    type Rejection = sqlx::Error;
 
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection> {
-        let user_attributes = state.db.get_user_attributes(user_in_question).await?;
-        let permission = ReadUserDetailsPermission::new(user_attributes);
+    async fn new(state: Arc<AppState>, principle_id: UserId) -> Result<Self, PolicyRejectionError> {
+        let principle = state.db.get_user_details(principle_id).await
+            .context("Failed to user details for principle")?;
 
-        Ok(Self {
-            state,
-            permission,
-        })
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
     type Details = UserId;
     type Contract = ReadUserDetailsContract;
-    type AuthorizationRejection = PolicyAuthorizationError;
 
-    fn authorize(&self, user: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection> {
-        if self.permission.is_authorized_for(user.clone()) {
+    async fn authorize(&self, user_id: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+        
+        if self.principle.id == user_id {
             return Ok(ReadUserDetailsContract {
                 state: self.state.clone(),
-                user_id: user,
+                user_id,
             })
         }
+        
+        if let Some(role) = self.principle.system_role {
+            return match role {
+                SystemRole::Root |
+                SystemRole::Admin => {
+                    Ok(ReadUserDetailsContract {
+                        state: self.state.clone(),
+                        user_id,
+                    })          
+                }
+            }
+        }
+        
+        let user_details = self.state.db.get_user_details(user_id)
+            .await
+            .with_context(|| format!("Failed to get UserDetails for user: {}", user_id))?;
+        
+        if let Some(details) = user_details { 
+            let principle_is_manager_of_user = self.principle
+                .get_teams_where_manager()
+                .iter()
+                .any(|t| details.teams.iter().any(|m| m.team_id == *t));
+            
+            if principle_is_manager_of_user {
+                return Ok(ReadUserDetailsContract {
+                    state: self.state.clone(),
+                    user_id,
+                })
+            }
+        }
 
-        Err(PolicyAuthorizationError::Forbidden)
+        Err(PolicyRejectionError::Forbidden)
     }
 }
 
@@ -50,9 +82,9 @@ pub struct ReadUserDetailsContract {
 
 impl ReadUserDetailsContract {
 
-    pub async fn get_user_details(&self) -> Result<Option<UserAttributes>, sqlx::Error> {
+    pub async fn get_user_details(&self) -> Result<Option<UserDetails>, sqlx::Error> {
         if self.state.db.exist_user_of(self.user_id).await? {
-            return Ok(Some(self.state.db.get_user_attributes(self.user_id).await?))
+            return Ok(self.state.db.get_user_details(self.user_id).await?)
         }
 
         Ok(None)

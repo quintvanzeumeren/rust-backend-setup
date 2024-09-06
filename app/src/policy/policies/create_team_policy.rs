@@ -1,46 +1,51 @@
-use std::sync::Arc;
-use axum::async_trait;
-use domain::permission::permission::Permission;
-use domain::permission::permissions::create_team::CreateTeam;
-use domain::sessions::state::state::State;
-use domain::team::team::Team;
-use domain::team::team_id::TeamId;
-use domain::user::user_id::UserId;
 use crate::app_state::AppState;
 use crate::policy::policy::Policy;
-use crate::policy::policy_authorization_error::PolicyAuthorizationError;
+use crate::policy::policy_authorization_error::PolicyRejectionError;
+use anyhow::Context;
+use axum::async_trait;
+use domain::role::role::SystemRole;
+use domain::team::team::Team;
+use domain::team::team_id::TeamId;
+use domain::user::user_details::UserDetails;
+use domain::user::user_id::UserId;
+use std::sync::Arc;
 
 pub struct CreateTeamPolicy {
     state: Arc<AppState>,
-    permission: CreateTeam
+    principle: UserDetails
 }
 
 #[async_trait]
 impl Policy for CreateTeamPolicy {
-    type Rejection = sqlx::Error;
 
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection> {
-        let user = state.db.get_user_attributes(user_in_question).await?;
-        let permission = CreateTeam::new(user);
+    async fn new(state: Arc<AppState>, principle_id: UserId) -> Result<Self, PolicyRejectionError> {
+        let principle = state.db.get_user_details(principle_id).await
+            .context("Failed to user details for principle")?;
 
-        Ok(Self {
-            state,
-            permission,
-        })
+        match principle {
+            None => Err(PolicyRejectionError::Forbidden),
+            Some(principle) => Ok(Self {
+                state,
+                principle
+            })
+        }
     }
 
     type Details = ();
     type Contract = CreateTeamContract;
-    type AuthorizationRejection = PolicyAuthorizationError;
 
-    fn authorize(&self, _: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection> {
-        if self.permission.is_authorized_for(()) {
-            return Ok(CreateTeamContract {
-                state: self.state.clone(),
-            })
+    async fn authorize(&self, _: Self::Details) -> Result<Self::Contract, PolicyRejectionError> {
+        if let Some(role) = self.principle.system_role {
+            return match role {
+                SystemRole::Root | SystemRole::Admin => {
+                    Ok(CreateTeamContract {
+                        state: self.state.clone(),
+                    })
+                }
+            }
         }
 
-        return Err(PolicyAuthorizationError::Forbidden)
+        Err(PolicyRejectionError::Forbidden)
     }
 }
 

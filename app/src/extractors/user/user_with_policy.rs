@@ -33,9 +33,7 @@ impl <S, P> FromRequestParts<S> for UserWithPolicy<P>
         let mut mutable_parts = parts.clone();
         let authenticated_user = AuthenticatedUser::from_request_parts(&mut mutable_parts, state).await?;
 
-        let policy = P::new(authenticated_user.state, authenticated_user.user_id)
-            .await
-            .context("Failed to initialise Policy")?;
+        let policy = P::new(authenticated_user.state, authenticated_user.user_id).await?;
 
         Ok(Self {
             policy,

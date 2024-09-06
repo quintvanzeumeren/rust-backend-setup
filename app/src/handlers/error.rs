@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use sqlx::Error;
 use lib_util::errors::errors::format_error_chain;
-use crate::policy::policy_authorization_error::PolicyAuthorizationError;
+use crate::policy::policy_authorization_error::PolicyRejectionError;
 
 pub type HandlerResponse<T: IntoResponse> = Result<T, HandlerError>;
 
@@ -11,7 +11,7 @@ pub type HandlerResponse<T: IntoResponse> = Result<T, HandlerError>;
 pub enum HandlerError {
     
     #[error(transparent)]
-    PolicyAuthorizationError(#[from] PolicyAuthorizationError),
+    PolicyAuthorizationError(#[from] PolicyRejectionError),
     
     #[error(transparent)]
     InternalError(#[from] anyhow::Error),

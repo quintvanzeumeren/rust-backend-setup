@@ -4,6 +4,7 @@ use axum::async_trait;
 use axum::response::IntoResponse;
 use domain::user::user_id::UserId;
 use crate::app_state::AppState;
+use crate::policy::policy_authorization_error::PolicyRejectionError;
 
 /// Policy represents the rules or constraints that dictate what a user can or cannot do with a
 /// specific resource. It can encapsulate logic like "Can the user add a member to this team?".
@@ -12,26 +13,20 @@ use crate::app_state::AppState;
 #[async_trait]
 pub trait Policy: Sized {
 
-    /// Rejection to be returned when the policy couldn't be created.
-    type Rejection: Error + Send + Sync + 'static;
+    /// new is a factory method for creating a new instance of the Policy for the given user.
+    async fn new(state: Arc<AppState>, user: UserId) -> Result<Self, PolicyRejectionError>;
 
-    /// new is a factory method for creating a new instance of the Policy for the user.
-    async fn new(state: Arc<AppState>, user_in_question: UserId) -> Result<Self, Self::Rejection>;
-
-    /// Details contains information for the Policy to understand the resource in question for which
-    /// Policy is to dictate if the user is authorized or not.
+    /// Details contains the necessary information for the Policy to understand the resource for 
+    /// which the Policy is to dictate if the user is authorized or not perform an action on that 
+    /// resource.
     type Details;
 
     /// Contract provides the actual operations that the user can perform after it was authorized
-    /// by the policy. The contract can only perform the operation that the user was authorized for.
+    /// by the policy. The contract can only perform the operation on the resource for which the 
+    /// user was authorized for.
     type Contract;
 
-    /// AuthenticationRejection is returned when the user either does not have authorization to
-    /// perform the given operation, or something went wrong when determining
-    /// if the user is authorized.
-    type AuthorizationRejection: IntoResponse + Error;
-
     /// Authorize dictates if the user can or cannot do an operation.
-    fn authorize(&self, details: Self::Details) -> Result<Self::Contract, Self::AuthorizationRejection>;
+    async fn authorize(&self, details: Self::Details) -> Result<Self::Contract, PolicyRejectionError>;
 
 }

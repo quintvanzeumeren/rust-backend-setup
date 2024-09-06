@@ -173,7 +173,37 @@ impl<'a> TestUser<'a, LoggedIn> {
             id: Uuid::new_v4(),
             username: Uuid::new_v4().to_string(),
             password: Uuid::new_v4().to_string(),
-            roles: vec!["admin".to_string()],
+            role: Some("Admin"),
+        };
+        let response = self.app.create_user(&self, admin.clone()).await;
+        assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));
+        let new_admin = self.app.test_user_from(admin.id, admin.username, admin.password);
+        let new_admin = new_admin.login().await;
+
+        new_admin
+    }
+
+    pub async fn create_root(&self) -> TestUser<'a, LoggedIn> {
+        let admin = NewUserBody {
+            id: Uuid::new_v4(),
+            username: Uuid::new_v4().to_string(),
+            password: Uuid::new_v4().to_string(),
+            role: Some("Root"),
+        };
+        let response = self.app.create_user(&self, admin.clone()).await;
+        assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));
+        let new_admin = self.app.test_user_from(admin.id, admin.username, admin.password);
+        let new_admin = new_admin.login().await;
+
+        new_admin
+    }
+
+    pub async fn create_user(&self) -> TestUser<'a, LoggedIn> {
+        let admin = NewUserBody {
+            id: Uuid::new_v4(),
+            username: Uuid::new_v4().to_string(),
+            password: Uuid::new_v4().to_string(),
+            role: None
         };
         let response = self.app.create_user(&self, admin.clone()).await;
         assert_status_eq(&response, StatusCode::CREATED, Some("Failed to create admin".to_string()));
@@ -188,7 +218,7 @@ impl<'a> TestUser<'a, LoggedIn> {
 pub struct GetUserDetailsResponse {
     pub id: Uuid,
     pub teams: HashSet<Uuid>,
-    pub roles: HashSet<String>
+    pub system_role: Option<String>
 }
 
 #[derive(Deserialize, Debug)]
